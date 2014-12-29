@@ -296,6 +296,7 @@ uint8_t read_scratchpad(struct sensorT* sensor, uint8_t * scratchpad)
 	return TRUE;
 }
 
+/*
 void set_precision(struct sensorT* sensor, uint8_t precision) {
 	
 }
@@ -307,6 +308,7 @@ uint8_t get_precision(struct sensorT* sensor) {
 	}
 	return RESOLUTION_UNKNOWN;
 }
+*/
 
 uint8_t getType(struct sensorT* sensor) {
 	uint8_t r=OTHER;

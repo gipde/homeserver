@@ -28,7 +28,7 @@ int uart_putc(unsigned char c){
 	return 0;
 }
 
-void uart_puts (char *s) {
+void uart_puts (char const *s) {
 	while (*s) 	{   /* so lange *s != '\0' also ungleich dem "String-Endezeichen(Terminator)" */
 		uart_putc(*s);
 		s++;
@@ -36,13 +36,13 @@ void uart_puts (char *s) {
 }
 
 void uart_puti(int i) {
-	char* s[8];
+	char s[8];
 	itoa(i,s,10);
 	uart_puts(s);
 }
 
 void uart_putd(double d) {
-	char* s[8];
+	char s[8];
 	dtostrf(d,0,2,s);
 	uart_puts(s);
 }

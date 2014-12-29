@@ -1,2 +1,9 @@
-Debug
-Release
+*.swp
+.dep/
+*.o
+*.eep
+*.elf
+*.hex
+*.lss
+*.sym
+
