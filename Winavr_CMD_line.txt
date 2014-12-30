@@ -1,0 +1,173 @@
+------ Build started: Project: cpptest, Configuration: Debug AVR ------
+Build started.
+Project "cpptest.cppproj" (default targets):
+Target "PreBuildEvent" skipped, due to false condition; ('$(PreBuildEvent)'!='') was evaluated as (''!='').
+Target "CoreBuild" in file "C:\Program Files (x86)\Atmel\Atmel Studio 6.2\Vs\Compiler.targets" from project "C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cppproj" (target "Build" depends on it):
+	Using "RunCompilerTask" task from assembly "C:\Program Files (x86)\Atmel\Atmel Studio 6.2\Extensions\Application\AvrGCC.dll".
+	Task "RunCompilerTask"
+		Shell Utils Path C:\Program Files (x86)\Atmel\Atmel Studio 6.2\shellUtils
+		C:\Program Files (x86)\Atmel\Atmel Studio 6.2\shellUtils\make.exe all 
+		Building file: .././cpptest.cpp
+		Invoking: AVR8/GNU C Compiler : 4.8.1
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-g++.exe" -funsigned-char -funsigned-bitfields -DDEBUG  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -c -MD -MP -MF "cpptest.d" -MT"cpptest.d" -MT"cpptest.o"   -o "cpptest.o" ".././cpptest.cpp" 
+		.././cpptest.cpp: In function 'void loop()':
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(510,35): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("No more addresses.\n");
+		                                   ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(525,34): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("CRC is not valid!\n");
+		                                  ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(533,31): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("  Chip = DS18S20");  // or old DS1820
+		                               ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(537,31): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("  Chip = DS18B20");
+		                               ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(541,30): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("  Chip = DS1822");
+		                              ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(545,53): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("Device is not a DS18x20 family device.");
+		                                                     ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(595,30): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		  uart_puts("  Temperature = ");
+		                              ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(597,24): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		  uart_puts(" Celsius, ");
+		                        ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(599,25): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		  uart_puts(" Fahrenheit");
+		                         ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(502,7): warning: unused variable 'i' [-Wunused-variable]
+		  byte i;
+		       ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(503,7): warning: variable 'present' set but not used [-Wunused-but-set-variable]
+		  byte present = 0;
+		       ^
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(507,17): warning: variable 'fahrenheit' set but not used [-Wunused-but-set-variable]
+		  float celsius, fahrenheit;
+		                 ^
+		.././cpptest.cpp: In function 'int main()':
+C:\Users\werner\Documents\Atmel Studio\6.2\cpptest\cpptest\cpptest.cpp(607,25): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		  uart_puts("Hello World");
+		                         ^
+		In file included from .././cpptest.cpp:14:0:
+		c:\program files (x86)\atmel\atmel toolchain\avr8 gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay.h: In function 'void delayMicroseconds(double)':
+c:\program files (x86)\atmel\atmel toolchain\avr8 gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay.h(163,40): error: __builtin_avr_delay_cycles expects a compile time integer constant
+		  __builtin_avr_delay_cycles(__ticks_dc);
+		                                        ^
+		make: *** [cpptest.o] Error 1
+	Done executing task "RunCompilerTask" -- FAILED.
+Done building target "CoreBuild" in project "cpptest.cppproj" -- FAILED.
+Done building project "cpptest.cppproj" -- FAILED.
+
+Build FAILED.
+========== Build: 0 succeeded or up-to-date, 1 failed, 0 skipped ==========
+
+
+----------------
+
+------ Build started: Project: sensor2, Configuration: Debug AVR ------
+Build started.
+Project "sensor2.cppproj" (default targets):
+Target "PreBuildEvent" skipped, due to false condition; ('$(PreBuildEvent)'!='') was evaluated as (''!='').
+Target "CoreBuild" in file "C:\Program Files (x86)\Atmel\Atmel Studio 6.2\Vs\Compiler.targets" from project "C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cppproj" (target "Build" depends on it):
+	Task "RunCompilerTask"
+		Shell Utils Path C:\Program Files (x86)\Atmel\Atmel Studio 6.2\shellUtils
+		C:\Program Files (x86)\Atmel\Atmel Studio 6.2\shellUtils\make.exe all 
+		Building file: .././uart.c
+		Invoking: AVR8/GNU C Compiler : 4.8.1
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe"  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -c -std=gnu99 -MD -MP -MF "uart.d" -MT"uart.d" -MT"uart.o"   -o "uart.o" ".././uart.c" 
+		.././uart.c: In function 'uart_puti':
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(40,2): warning: passing argument 2 of 'itoa' from incompatible pointer type [enabled by default]
+		  itoa(i,s,10);
+		  ^
+		In file included from .././uart.c:9:0:
+c:\program files (x86)\atmel\atmel toolchain\avr8 gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\stdlib.h(418,7): info: expected 'char *' but argument is of type 'char **'
+		 char *itoa (int __val, char *__s, int __radix)
+		       ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(41,2): warning: passing argument 1 of 'uart_puts' from incompatible pointer type [enabled by default]
+		  uart_puts(s);
+		  ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(31,6): info: expected 'char *' but argument is of type 'char **'
+		 void uart_puts (char *s) {
+		      ^
+		.././uart.c: In function 'uart_putd':
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(46,2): warning: passing argument 4 of 'dtostrf' from incompatible pointer type [enabled by default]
+		  dtostrf(d,0,2,s);
+		  ^
+		In file included from .././uart.c:9:0:
+c:\program files (x86)\atmel\atmel toolchain\avr8 gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\stdlib.h(655,14): info: expected 'char *' but argument is of type 'char **'
+		 extern char *dtostrf(double __val, signed char __width,
+		              ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(47,2): warning: passing argument 1 of 'uart_puts' from incompatible pointer type [enabled by default]
+		  uart_puts(s);
+		  ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\uart.c(31,6): info: expected 'char *' but argument is of type 'char **'
+		 void uart_puts (char *s) {
+		      ^
+		Finished building: .././uart.c
+		Building file: .././ds18x20lib.c
+		Invoking: AVR8/GNU C Compiler : 4.8.1
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe"  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -c -std=gnu99 -MD -MP -MF "ds18x20lib.d" -MT"ds18x20lib.d" -MT"ds18x20lib.o"   -o "ds18x20lib.o" ".././ds18x20lib.c" 
+		Finished building: .././ds18x20lib.c
+		Building file: .././sensor2.cpp
+		Invoking: AVR8/GNU C Compiler : 4.8.1
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-g++.exe" -funsigned-char -funsigned-bitfields -DDEBUG  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32 -c -MD -MP -MF "sensor2.d" -MT"sensor2.d" -MT"sensor2.o"   -o "sensor2.o" ".././sensor2.cpp" 
+		.././sensor2.cpp: In function 'int main()':
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(29,21): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		    uart_puts("ROM: ");
+		                     ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(33,18): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		     uart_puts(" ");
+		                  ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(37,23): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		     uart_puts("DS1822");
+		                       ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(40,24): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		     uart_puts("DS18B20");
+		                        ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(43,24): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		     uart_puts("DS18S20");
+		                        ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(46,29): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		     uart_puts("Other Device");
+		                             ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(48,20): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		    uart_puts("\n\r");
+		                    ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(50,32): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		    uart_puts("  Temperature = ");
+		                                ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(52,28): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		    uart_puts(" Celsius\n\r");
+		                            ^
+C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cpp(56,19): warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+		   uart_puts("\n\r");
+		                   ^
+		Finished building: .././sensor2.cpp
+		Building target: sensor2.elf
+		Invoking: AVR8/GNU Linker : 4.8.1
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-g++.exe" -o sensor2.elf  uart.o ds18x20lib.o sensor2.o   -Wl,-Map="sensor2.map" -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=atmega32  
+		Finished building target: sensor2.elf
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "sensor2.elf" "sensor2.hex"
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "sensor2.elf" "sensor2.eep" || exit 0
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "sensor2.elf" > "sensor2.lss"
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "sensor2.elf" "sensor2.srec"
+		"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-size.exe" "sensor2.elf"
+		   text	   data	    bss	    dec	    hex	filename
+		   5124	    104	     11	   5239	   1477	sensor2.elf
+	Done executing task "RunCompilerTask".
+	Using "RunOutputFileVerifyTask" task from assembly "C:\Program Files (x86)\Atmel\Atmel Studio 6.2\Extensions\Application\AvrGCC.dll".
+	Task "RunOutputFileVerifyTask"
+				Program Memory Usage 	:	5228 bytes   16,0 % Full
+				Data Memory Usage 		:	115 bytes   5,6 % Full
+	Done executing task "RunOutputFileVerifyTask".
+Done building target "CoreBuild" in project "sensor2.cppproj".
+Target "PostBuildEvent" skipped, due to false condition; ('$(PostBuildEvent)' != '') was evaluated as ('' != '').
+Target "Build" in file "C:\Program Files (x86)\Atmel\Atmel Studio 6.2\Vs\Avr.common.targets" from project "C:\Users\werner\Documents\Atmel Studio\6.2\sensor2\sensor2\sensor2.cppproj" (entry point):
+Done building target "Build" in project "sensor2.cppproj".
+Done building project "sensor2.cppproj".
+
+Build succeeded.
+========== Build: 1 succeeded or up-to-date, 0 failed, 0 skipped ==========
