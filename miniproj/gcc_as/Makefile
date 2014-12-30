@@ -1,28 +1,29 @@
 # TODO:
 # * DEBUGGING
 # * SIMULAVR
-# * ASM Code -> avra
+# * ASM Code
 # * AVRDUDE
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 # * Statical Code analysis
 # * Doxygen
 # * ctags / cscope
-# * astyle
-# astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL sensor2.cpp *.c
+
 
 # CPU Type
 MCU = atmega32
 
 # Project Name
-TARGET=sensor2
+#TARGET=sensor2
+TARGET=hello
+
 
 # expliit List sources here
-CSRC= ds18x20lib.c uart.c
-CXXSRC= ${TARGET}.cpp
-ASRC=
+CSRC=  
+CXXSRC=
+ASRC=${TARGET}.S
 
-OPTIMIZE=-Os
+OPTIMIZE=-O1
 
 # -------------- NO NEED TO TOUCH --------------
 
@@ -113,7 +114,7 @@ size: $(TARGET).elf $(OBJ)
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
 
-AVRDUDE_PROGRAMMER = avrispmkII
+AVRDUDE_PROGRAMMER = stk500
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = com1    # programmer connected to serial device

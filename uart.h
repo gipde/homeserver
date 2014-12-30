@@ -3,7 +3,7 @@
  *
  * Created: 23.12.2014 22:31:07
  *  Author: werner
- */ 
+ */
 
 
 #ifndef UART_H_

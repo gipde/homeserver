@@ -3,7 +3,7 @@
  *
  * Created: 23.12.2014 22:51:19
  *  Author: werner
- */ 
+ */
 
 
 #ifndef GLOBAL_H_

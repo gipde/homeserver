@@ -11,10 +11,10 @@
 //-----------------------------------------
 // Set Ports
 //-----------------------------------------
-#define ONEWIRE_PORTPIN	PA4                
-#define ONEWIRE_PIN		PINA                  
-#define ONEWIRE_PORT	PORTA                 
-#define ONEWIRE_DDR		DDRA                
+#define ONEWIRE_PORTPIN	PA4
+#define ONEWIRE_PIN		PINA
+#define ONEWIRE_PORT	PORTA
+#define ONEWIRE_DDR		DDRA
 
 // OneWire Transaction Commands
 #define	SEARCH_ROM		0xF0
@@ -24,7 +24,7 @@
 #define ALARM_SEARCH	0xEC
 
 // OneWire FunctionCommands
-#define CONVERT_T			0x44	
+#define CONVERT_T			0x44
 #define WRITE_SCRATCHPAD	0x4E
 #define READ_SCRATCHPAD		0xBE
 #define COPY_SCRATCHPAD		0x48
@@ -47,11 +47,17 @@
 #define DS1822				0x02
 #define OTHER				0xFF
 
+#define LOW					0x00
+#define HIGH				0x01
+#define UNCHANGED			0xFF
+
+#define INPUT				0x00
+#define OUTPUT				0x01
 
 struct sensorT {
-	uint8_t	rom[8];
-	uint8_t resolution;
-	};
+    uint8_t	rom[8];
+    uint8_t resolution;
+};
 
 uint8_t reset();
 
