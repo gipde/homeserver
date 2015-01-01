@@ -5,6 +5,9 @@
 // alle auf die beiden Schrägstriche folgenden
 // Zeichen einer Zeile sind Kommentar
  
+
+#define F_CPU 8000000
+
 #include <avr/io.h>          // (1)
 #include <util/delay.h>
  
