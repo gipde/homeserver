@@ -112,9 +112,9 @@
 
 class OneWire
 {
-  private:
+private:
     IO_REG_TYPE bitmask;
-    volatile IO_REG_TYPE *baseReg;
+    volatile IO_REG_TYPE* baseReg;
 
 #if ONEWIRE_SEARCH
     // global search state
@@ -124,7 +124,7 @@ class OneWire
     uint8_t LastDeviceFlag;
 #endif
 
-  public:
+public:
     OneWire( uint8_t pin);
 
     // Perform a 1-Wire reset cycle. Returns 1 if a device responds
@@ -144,12 +144,12 @@ class OneWire
     // another read or write.
     void write(uint8_t v, uint8_t power = 0);
 
-    void write_bytes(const uint8_t *buf, uint16_t count, bool power = 0);
+    void write_bytes(const uint8_t* buf, uint16_t count, bool power = 0);
 
     // Read a byte.
     uint8_t read(void);
 
-    void read_bytes(uint8_t *buf, uint16_t count);
+    void read_bytes(uint8_t* buf, uint16_t count);
 
     // Write a bit. The bus is always left powered at the end, see
     // note in write() about that.
@@ -179,13 +179,13 @@ class OneWire
     // might be a good idea to check the CRC to make sure you didn't
     // get garbage.  The order is deterministic. You will always get
     // the same devices in the same order.
-    uint8_t search(uint8_t *newAddr);
+    uint8_t search(uint8_t* newAddr);
 #endif
 
 #if ONEWIRE_CRC
     // Compute a Dallas Semiconductor 8 bit CRC, these are used in the
     // ROM and scratchpad registers.
-    static uint8_t crc8(const uint8_t *addr, uint8_t len);
+    static uint8_t crc8(const uint8_t* addr, uint8_t len);
 
 #if ONEWIRE_CRC16
     // Compute the 1-Wire CRC16 and compare it against the received CRC.
@@ -199,8 +199,8 @@ class OneWire
     //    ReadBytes(net, buf+3, 10);  // Read 6 data bytes, 2 0xFF, 2 CRC16
     //    if (!CheckCRC16(buf, 11, &buf[11])) {
     //        // Handle error.
-    //    }     
-    //          
+    //    }
+    //
     // @param input - Array of bytes to checksum.
     // @param len - How many bytes to use.
     // @param inverted_crc - The two CRC16 bytes in the received data.
@@ -208,7 +208,8 @@ class OneWire
     //                       *not* at a 16-bit integer.
     // @param crc - The crc starting value (optional)
     // @return True, iff the CRC matches.
-    static bool check_crc16(const uint8_t* input, uint16_t len, const uint8_t* inverted_crc, uint16_t crc = 0);
+    static bool check_crc16(const uint8_t* input, uint16_t len,
+                            const uint8_t* inverted_crc, uint16_t crc = 0);
 
     // Compute a Dallas Semiconductor 16 bit CRC.  This is required to check
     // the integrity of data received from many 1-Wire devices.  Note that the
@@ -222,7 +223,8 @@ class OneWire
     // @param len - How many bytes to use.
     // @param crc - The crc starting value (optional)
     // @return The CRC16, as defined by Dallas Semiconductor.
-    static uint16_t crc16(const uint8_t* input, uint16_t len, uint16_t crc = 0);
+    static uint16_t crc16(const uint8_t* input, uint16_t len,
+                          uint16_t crc = 0);
 #endif
 #endif
 };

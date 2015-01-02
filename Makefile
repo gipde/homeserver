@@ -2,27 +2,27 @@
 # * DEBUGGING
 # * SIMULAVR
 # * ASM Code -> avra
-# * AVRDUDE
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 # * Statical Code analysis
 # * Doxygen
 # * ctags / cscope
-# * astyle
-# astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL sensor2.cpp *.c
 
 # CPU Type
 MCU = atmega32
 
 # Project Name
-TARGET=sensor2
+TARGET=src/sensor2
 
 # expliit List sources here
-CSRC= ds18x20lib.c uart.c
+CSRC= src/ds18x20lib.c src/uart.c
 CXXSRC= ${TARGET}.cpp
 ASRC=
 
 OPTIMIZE=-Os
+
+AVRDUDE_CYCLE=4
+AVRDUDE_PROGRAMMER = avrispmkII
 
 # -------------- NO NEED TO TOUCH --------------
 
@@ -61,7 +61,7 @@ NM = avr-nm
 size: $(TARGET).elf $(OBJ)
 	@echo
 	@$(SIZE) -C $(TARGET).elf --mcu=${MCU}
-	@$(SIZE) *.o --mcu=${MCU}
+	@$(SIZE) $(OBJ) --mcu=${MCU}
 
 # Link: create ELF output file from object files.
 %.elf: $(OBJ)
@@ -113,16 +113,19 @@ size: $(TARGET).elf $(OBJ)
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
 
-AVRDUDE_PROGRAMMER = avrispmkII
-
-# com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = com1    # programmer connected to serial device
+format:
+	@echo Formatting...
+	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r "src/*.cpp" "src/*.h" "src/*.c"
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
-AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
+AVRDUDE_FLAGS = -p $(MCU) -B $(AVRDUDE_CYCLE) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS += -v -v 
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
+
+program:
+	@echo programming
+	@echo avrdude $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH)
 
 
 clean:
@@ -135,8 +138,11 @@ help:
 	@echo
 	@echo " all         - make everything"
 	@echo " clean       - clean out"
+	@echo
 	@echo " program     - Download the hex file to the devie"
+	@echo
+	@echo " format      - Format all C/C++ sources"
 	@echo
 
 .SECONDARY: # do not cleanup intermediate files
-.PHONY: clean help all sizeafter
+.PHONY: clean help all sizeafter format

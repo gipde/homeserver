@@ -16,7 +16,7 @@
 
 void usart_init();
 int uart_putc(unsigned char);
-void uart_puts(char const *s);
+void uart_puts(char const* s);
 void uart_puti(int i);
 void uart_putd(double d);
 

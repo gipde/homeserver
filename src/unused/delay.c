@@ -1,17 +1,17 @@
 //#################################################################################
 //#################################################################################
 //#################################################################################
-/*	Library to use ds18x20 with ATMEL Atmega family.
-	For short ds18x20 wires there is no need for an external pullup resistor.
-	If the wire length exceeds one meter you should use a 4.7k pullup resistor 
-	on the data line. This library does not work for parasite power. 
-	You can just use one ds18x20 per Atmega Pin.
-	
-	Copyright (C) 2010 Stefan Sicklinger
+/*  Library to use ds18x20 with ATMEL Atmega family.
+    For short ds18x20 wires there is no need for an external pullup resistor.
+    If the wire length exceeds one meter you should use a 4.7k pullup resistor
+    on the data line. This library does not work for parasite power.
+    You can just use one ds18x20 per Atmega Pin.
 
-	For support check out http://www.sicklinger.com
-    
-	This library is free software: you can redistribute it and/or modify
+    Copyright (C) 2010 Stefan Sicklinger
+
+    For support check out http://www.sicklinger.com
+
+    This library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -27,12 +27,21 @@
 //#################################################################################
 //#################################################################################
 
-#include <util/delay.h>
+#include "delay.h"
 
-#ifndef DELAY_H
-#define DELAY_H
+void delay_ms(uint16_t time)
+{
+    uint16_t i;
 
-void delay_ms(uint16_t);
-void delay_us(uint16_t);
+    for (i = 1; i <= time; i++) {
+        _delay_ms(1);
+    }
+}
+void delay_us(uint16_t time)
+{
+    uint16_t i;
 
-#endif
+    for (i = 1; i <= time; i++) {
+        _delay_us(1);
+    }
+}

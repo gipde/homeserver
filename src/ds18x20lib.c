@@ -2,6 +2,13 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 
+/*
+    TODO: * check clock-cycles - µs with avrstudio
+          * check optimal flow of power on / power off
+          * parameterize PORT/PIN
+          * convert to cpp (constructor port/pin/precision)
+*/
+
 void interrupts()
 {
     sei();
@@ -124,12 +131,12 @@ uint8_t read_byte()
 void write_byte(uint8_t wrbyte)
 {
     uint8_t i;
+
     for (i = 0; i < 8; i++) {
         write_bit((wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
 }
-
 
 
 /************************************************************************/
@@ -263,7 +270,7 @@ uint8_t search_slaves(struct sensorT* sensor)
     for (int i = 0; i < 8; i++) sensor->rom[i] = ROM_NO[i];
 
     //TODO: get config
-	power(LOW);
+    power(LOW);
     return search_result;
 }
 
@@ -413,7 +420,7 @@ float read_temp(struct sensorT* sensor)
         _delay_ms(CONV_TIME_HIGHEST);
         read_scratchpad(sensor, scratchpad);
         return calc_temp(scratchpad, temp);;
-    } 
+    }
 
     return 0;
 }
