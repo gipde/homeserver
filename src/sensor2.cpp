@@ -10,56 +10,54 @@
 
 
 extern "C" {
-#include "uart.h"
 #include "ds18x20lib.h"
+#include "debug.h"
 }
 
 
 int main(void)
 {
-    usart_init();
     sensorT sensor;
     char hex[3];
-    uart_puts("Starting Programm..");
+    debug("Starting Programm..");
 
     for (;;) {
         reset_search();
 
         while (search_slaves(&sensor) == TRUE) {
-            uart_puts("ROM: ");
+            debug("ROM: ");
 
             for (int i = 0; i < 8; i++) {
                 sprintf(hex, "%x", sensor.rom[i]);
-                uart_puts(hex);
-                uart_puts(" ");
+                debug("%s ",hex);
             }
 
             switch (getType(&sensor)) {
             case DS1822:
-                uart_puts("DS1822");
+                debug("DS1822");
                 break;
 
             case DS18B20:
-                uart_puts("DS18B20");
+                debug("DS18B20");
                 break;
 
             case DS18S20:
-                uart_puts("DS18S20");
+                debug("DS18S20");
                 break;
 
             default:
-                uart_puts("Other Device");
+                debug("Other Device");
             }
 
-            uart_puts("\n\r");
+            debug("\n\r");
             float temp = read_temp(&sensor);
-            uart_puts(" Temperature = ");
-            uart_putd(temp);
-            uart_puts(" Grad Celsius\n\r");
+            debug(" Temperature = ");
+            debug(" %f",temp);
+            debug(" Grad Celsius\n\r");
         }
 
         //_delay_ms(1000);
 
-        uart_puts("\n\r");
+        debug("\n\r");
     }
 }

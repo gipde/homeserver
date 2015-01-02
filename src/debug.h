@@ -18,24 +18,17 @@
 #ifdef DEBUG_UART
 #define BAUD 9600
 #include <util/setbaud.h>
-#include <avr/io.h>
-
-void usart_init();
-int uart_putc(unsigned char);
-void uart_puts(char const* s);
-void uart_puti(int i);
-void uart_putd(double d);
-
-#define debug() uart_puts({ARG...});
-
+void uart_printf (char const*, ...);
+#define debug(M,...) uart_printf("DEBUG %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
 #endif
 
 #ifdef DEBUG_SIMUL
 #define debug bla
 #endif
 
+// Default Rule -> disable debug
 #ifndef debug
-#define debug
+#define debug(arg)
 #endif
 
 #endif

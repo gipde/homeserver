@@ -1,7 +1,7 @@
 #include "ds18x20lib.h"
 #include <avr/interrupt.h>
 #include <stdio.h>
-
+#include "debug.h"
 /*
     TODO: * check clock-cycles - µs with avrstudio
           * check optimal flow of power on / power off
@@ -69,7 +69,7 @@ uint8_t reset()
     }
 
     if (r) { // error
-        uart_puts("No Sensor found.");
+        debug("No Sensor found.");
     }
 
     return r;
@@ -198,7 +198,7 @@ uint8_t search_slaves(struct sensorT* sensor)
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                uart_puts("error complement is not identical\n\r");
+                debug("error complement is not identical\n\r");
                 break;
             } else  {
                 // all devices coupled have 0 or 1
@@ -316,7 +316,7 @@ uint8_t read_scratchpad(struct sensorT* sensor, uint8_t* scratchpad)
         }
 
         if (crc8(scratchpad) != scratchpad[8]) {
-            uart_puts("CRC Error!\n\r ");
+            debug("CRC Error!\n\r ");
             return FALSE;
         }
     } else {
@@ -383,9 +383,9 @@ float calc_temp(uint8_t* scratchpad)
     uint8_t cfg = (scratchpad[4] & 0x60);
 
     /*
-    uart_puts("cfg: ");
+    debug("cfg: ");
     uart_puti(cfg);
-    uart_puts("\n\r");
+    debug("\n\r");
     */
     // at lower res, the low bits are undefined, so let's zero them
     if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms

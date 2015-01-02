@@ -15,7 +15,7 @@ MCU = atmega32
 TARGET=src/sensor2
 
 # expliit List sources here
-CSRC= src/ds18x20lib.c src/uart.c
+CSRC= src/ds18x20lib.c src/uart.c src/debug.c
 CXXSRC= ${TARGET}.cpp
 ASRC=
 
@@ -86,6 +86,10 @@ size: $(TARGET).elf $(OBJ)
 %.E : %.c
 	@echo Create Preprocessor output from $< ...
 	@$(CC) -E $(CFLAGS) $< -o $@
+%.E : %.cpp
+	@echo Create Preprocessor output from $< ...
+	@$(CC) -E $(CXXLAGS) $< -o $@
+
 
 # Create final output files (.hex, .eep) from ELF output file.
 %.hex: %.elf
@@ -131,7 +135,7 @@ program:
 clean:
 	@echo cleaning ...
 	-@rm -rf $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).eep \
-		$(OBJ)  $(TARGET).lss $(TARGET).sym  $(TARGET).map $(TARGET).lst *.E .dep 
+		$(OBJ)  $(TARGET).lss $(TARGET).sym  $(TARGET).map $(TARGET).lst src/*.E src/.dep 
 
 check:
 	@echo checking sources...
