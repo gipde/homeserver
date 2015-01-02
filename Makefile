@@ -41,7 +41,7 @@ CC=avr-gcc
 CFLAGS = ${GCCOPTS} -std=gnu99
 
 CXX=avr-g++
-CXXFLAGS = ${GCCOPTS} -std=gnu++99
+CXXFLAGS = ${GCCOPTS} -std=gnu++98
 
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
