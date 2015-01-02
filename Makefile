@@ -133,6 +133,10 @@ clean:
 	-@rm -rf $(TARGET).hex $(TARGET).obj $(TARGET).elf $(TARGET).eep \
 		$(OBJ)  $(TARGET).lss $(TARGET).sym  $(TARGET).map $(TARGET).lst *.E .dep 
 
+check:
+	@echo checking sources...
+	cppcheck --enable=all src
+
 help:
 	@echo "Targets"
 	@echo
@@ -143,6 +147,7 @@ help:
 	@echo
 	@echo " format      - Format all C/C++ sources"
 	@echo
+	@echo " doc         - Generate Doc"
 
 .SECONDARY: # do not cleanup intermediate files
 .PHONY: clean help all sizeafter format

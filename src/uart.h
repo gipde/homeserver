@@ -9,7 +9,6 @@
 #ifndef UART_H_
 #define UART_H_
 
-#include "global.h"
 #define BAUD 9600
 #include <util/setbaud.h>
 #include <avr/io.h>

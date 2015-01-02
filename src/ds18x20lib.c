@@ -6,7 +6,7 @@
     TODO: * check clock-cycles - µs with avrstudio
           * check optimal flow of power on / power off
           * parameterize PORT/PIN
-          * convert to cpp (constructor port/pin/precision)
+          * maybe convert to cpp (constructor port/pin/precision)
 */
 
 void interrupts()
@@ -114,11 +114,10 @@ uint8_t read_bit()
 uint8_t read_byte()
 {
     uint8_t readbyte = 0x00;
-    uint8_t readbit;
     uint8_t i;
 
     for (i = 0; i < 8; i++) {
-        readbit = read_bit();
+        uint8_t readbit = read_bit();
 
         if (readbit == 1) {
             readbyte |= (1 << i);
@@ -378,7 +377,7 @@ uint8_t is_parasite(struct sensorT* sensor)
     return parasite_mode;
 }
 
-float calc_temp(uint8_t* scratchpad, float temp)
+float calc_temp(uint8_t* scratchpad)
 {
     int16_t raw = (scratchpad[1] << 8) | scratchpad[0];
     uint8_t cfg = (scratchpad[4] & 0x60);
@@ -394,8 +393,7 @@ float calc_temp(uint8_t* scratchpad, float temp)
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
 
     //// default is 12 bit resolution, 750 ms conversion time
-    temp = (float)raw / 16.0;
-    return temp;
+    return (float)raw / 16.0;
 }
 
 
@@ -406,7 +404,6 @@ float calc_temp(uint8_t* scratchpad, float temp)
 float read_temp(struct sensorT* sensor)
 {
     uint8_t scratchpad[9] = {0};
-    float temp = 0;
     uint8_t parasite_mode = is_parasite(sensor);
 
     if (!reset()) {
@@ -419,7 +416,7 @@ float read_temp(struct sensorT* sensor)
 
         _delay_ms(CONV_TIME_HIGHEST);
         read_scratchpad(sensor, scratchpad);
-        return calc_temp(scratchpad, temp);;
+        return calc_temp(scratchpad);
     }
 
     return 0;
