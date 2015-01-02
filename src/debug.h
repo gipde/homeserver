@@ -1,6 +1,3 @@
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
-
 /*
 
 	Debugging Modul
@@ -11,11 +8,14 @@
 
 */
 
+
+#ifdef DEBUG
+
 #define DEBUG_UART
 //#define DEBUG_SIMUL
 
-
 #ifdef DEBUG_UART
+#include "global.h"
 #define BAUD 9600
 #include <util/setbaud.h>
 void uart_printf (char const*, ...);
@@ -26,9 +26,7 @@ void uart_printf (char const*, ...);
 #define debug bla
 #endif
 
-// Default Rule -> disable debug
-#ifndef debug
-#define debug(arg)
+#else
+#define debug(...)
 #endif
 
-#endif

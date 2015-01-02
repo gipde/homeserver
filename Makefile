@@ -38,10 +38,10 @@ GCCOPTS += -fdata-sections -fpack-struct -fshort-enums
 GCCOPTS += -mmcu=$(MCU) -I. $(GENDEPFLAGS) 
 
 CC=avr-gcc
-CFLAGS = ${GCCOPTS} -std=gnu11
+CFLAGS = ${GCCOPTS} -std=gnu99
 
 CXX=avr-g++
-CXXFLAGS = ${GCCOPTS} -std=gnu++11
+CXXFLAGS = ${GCCOPTS} -std=gnu++03
 
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 

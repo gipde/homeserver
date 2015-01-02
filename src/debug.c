@@ -1,6 +1,5 @@
 #include <avr/io.h>
 #include <stdlib.h>
-#include "global.h"
 #include "debug.h"
 
 #ifdef DEBUG_UART
@@ -37,4 +36,3 @@ void uart_printf (char const* s, ...)
     }
 }
 #endif
-

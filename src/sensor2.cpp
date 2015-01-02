@@ -8,6 +8,7 @@
 
 //TODO: Precision selection
 
+#define DEBUG
 
 extern "C" {
 #include "ds18x20lib.h"
