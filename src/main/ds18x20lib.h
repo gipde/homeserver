@@ -1,20 +1,6 @@
 #ifndef _DS18X20LIB_h_
 #define _DS18X20LIB_h_
 
-#include "global.h"
-#include <avr/io.h>
-#include <math.h>
-#include <util/delay.h>
-
-
-//-----------------------------------------
-// Set Ports
-//-----------------------------------------
-#define ONEWIRE_PORTPIN PA4
-#define ONEWIRE_PIN     PINA
-#define ONEWIRE_PORT    PORTA
-#define ONEWIRE_DDR     DDRA
-
 // OneWire Transaction Commands
 #define SEARCH_ROM      0xF0
 #define READ_SINGLE_ROM 0x33
@@ -52,6 +38,8 @@
 
 #define INPUT               0x00
 #define OUTPUT              0x01
+
+
 
 struct sensorT {
     uint8_t rom[8];
