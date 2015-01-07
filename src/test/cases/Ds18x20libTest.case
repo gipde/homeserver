@@ -1,0 +1,15 @@
+extern "C" {
+#include "../../main/ds18x20lib.h"
+}
+
+CASE(Ds18x20LibTest,TestBase)
+
+SETUP() {
+	debug("Setting up");
+}
+
+TEST(test1) {
+	debug("Hello from Test1");
+	reset();
+	return true;
+}

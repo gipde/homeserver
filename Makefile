@@ -10,7 +10,6 @@
 # * Unit Testing -> is schwierig, da selbst kleine Frameworks wie Unity zu gross sind, um auf der HW zu laufen
 # * Macros for assertions / Testcases
 # * Mocks
-# * organizing Test Logic in build
 # * TestDoubles only in TestMode
 # * test with asm source file
 
@@ -87,10 +86,12 @@ size: $(TARGET).elf $(OBJ)
 	@echo Compiling $< ...
 	@$(CC) -c $(CFLAGS) $< -o $@ 
 
+
 # Compile: create object files from C++ source files.
 %.o : %.cpp
 	@echo Compiling $< ...
 	@$(CC) -c $(CXXFLAGS) $< -o $@ 
+	@if [ -f $(BUILD)/m4.clean ]; then cat $(BUILD)/m4.clean; cat $(BUILD)/m4.clean | xargs -i rm {}; rm $(BUILD)/m4.clean;  fi
 
 # Compile: create assembler files from C source files.
 %.s : %.c
@@ -142,8 +143,11 @@ $(1): $$(CASEOBJ) $(TESTOBJ) $(OBJ)
 endef
 $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
-probj:
-	@echo $(TESTCLEAN)
+%.cpp : %.case
+	@echo Preprocessing $< ...
+	@m4 -DFILE=$< src/test/cases/testcases.m4 > $@
+	$(eval M4TEMP = $<)
+	@echo $@ > $(BUILD)/m4.clean
 
 format:
 	@echo Formatting...
