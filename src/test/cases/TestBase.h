@@ -4,12 +4,14 @@
 class TestBase
 {
 public:
-    void run(int, ...);
+    int run(int, ...);
     virtual void setup();
     virtual void tearDown();
     virtual void beforeClass();
     virtual void afterClass();
 
+private:
+    int state;
 };
 
 #endif

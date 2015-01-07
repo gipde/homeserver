@@ -9,7 +9,7 @@ extern "C" {
 #include "test.h"
 #include "TestBase.h"
 
-void TestBase::run(int num, ...)
+int TestBase::run(int num, ...)
 {
     debug("Running Tests");
     this->beforeClass();
@@ -18,12 +18,17 @@ void TestBase::run(int num, ...)
     bool(*f)();
     va_start(ap, num);
 
+    state=true;
+
     for (int i = 0; i < num; i++) {
         this->setup();
 
         f = va_arg(ap, bool(*)());
+        int retval=f();
+        state &= retval;
+        debug("Retval: %d State: %d",retval,state);
 
-        if (f()) {
+        if (retval) {
             debug("OK");
         } else {
             debug("FAIL");
@@ -34,6 +39,7 @@ void TestBase::run(int num, ...)
 
     va_end(ap);
     this->afterClass();
+    return state;
 }
 
 void TestBase::setup()
