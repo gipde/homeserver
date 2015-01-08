@@ -11,7 +11,7 @@ public:
     virtual void afterClass();
 
 private:
-    int state;
+    int testResult;
 };
 
 #endif

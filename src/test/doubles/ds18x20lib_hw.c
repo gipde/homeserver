@@ -4,21 +4,27 @@
 
 #define DEBUG
 #include "../../main/debug.h"
+#include "../cases/Ds18x20libTest.h"
+
+//#define event _Z5eventii 
+
+extern void event(int,int); 
 
 void interrupts()
 {
-    debug("enable Interrupt");
+	event(INTERRUPTS);
     sei();
 }
 
 void no_interrupts()
 {
-    debug("disable Interrupt");
+	event(NO_INTERRUPTS);
     cli();
 }
 
 void power(uint8_t mode)
 {
+	event(POWER,mode);
     no_interrupts();
 
     if (mode == HIGH)
@@ -31,6 +37,7 @@ void power(uint8_t mode)
 
 void direction(uint8_t dir)
 {
+	event(DIRECTION,dir);
     power(LOW);
     no_interrupts();
 
@@ -44,6 +51,7 @@ void direction(uint8_t dir)
 
 uint8_t read_pin()
 {
+	event(READ_PIN);
     no_interrupts();
     debug("reading pin");
     interrupts();

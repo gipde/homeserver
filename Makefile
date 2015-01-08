@@ -27,7 +27,7 @@ OPTIMIZE=-Os
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII
 
-SIMULAVR=$(HOME)contrib/simulavr/src/simulavr
+SIMULAVR=contrib/simulavr/src/simulavr
 BUILD=build
 
 # -------------- NO NEED TO TOUCH --------------
