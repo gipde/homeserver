@@ -1,0 +1,3 @@
+[submodule "contrib/simulavr"]
+	path = contrib/simulavr
+	url = http://git.savannah.gnu.org/r/simulavr.git
