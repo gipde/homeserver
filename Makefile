@@ -2,16 +2,12 @@
 # * ASM Code -> avra
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
-# * Statical Code analysis
 # * Doxygen
 # * ctags / cscope
-# * simulator als submodule
 
 # * Unit Testing -> is schwierig, da selbst kleine Frameworks wie Unity zu gross sind, um auf der HW zu laufen
 # * Macros for assertions / Testcases
 # * Mocks
-# * TestDoubles only in TestMode
-# * test with asm source file
 
 # CPU Type
 MCU = atmega32
@@ -20,7 +16,7 @@ MCU = atmega32
 NAME = sensor2
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o
+SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o nop.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TEST1_OBJ = cases/Ds18x20libTest.o doubles/ds18x20lib_hw.o
@@ -31,7 +27,7 @@ OPTIMIZE=-Os
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII
 
-SIMULAVR=$(HOME)/src/simulavr/src/simulavr
+SIMULAVR=$(HOME)contrib/simulavr/src/simulavr
 BUILD=build
 
 # -------------- NO NEED TO TOUCH --------------
