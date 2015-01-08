@@ -6,9 +6,6 @@
 #include "../../main/debug.h"
 #include "../cases/Ds18x20libTest.h"
 
-//#define event _Z5eventii 
-
-extern void event(int,int); 
 
 void interrupts()
 {

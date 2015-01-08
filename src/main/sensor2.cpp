@@ -15,8 +15,6 @@ extern "C" {
 }
 
 
-extern "C" void nop();
-
 int main(void)
 {
     sensorT sensor;
@@ -26,7 +24,6 @@ int main(void)
 //    for (;;) {
     reset_search();
 
-	nop();
 
     while (search_slaves(&sensor) == TRUE) {
         debug("ROM: ");

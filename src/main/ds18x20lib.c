@@ -16,11 +16,9 @@
           * extract delay_us for better testing
 */
 
-extern void nop();
 
 uint8_t reset()
 {
-	nop();
     uint8_t r;
     direction(OUTPUT);
     _delay_us(480);

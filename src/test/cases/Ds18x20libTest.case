@@ -1,25 +1,32 @@
-extern "C" {
-#include "../../main/ds18x20lib.h"
-}
+// vim: set filetype=cpp:
+
 #include "Ds18x20libTest.h"
 
+struct sha1_ctx {
+    uint32_t h0,h1,h2,h3,h4
+    uint64_t length
+} sha1_ctx_t;
+
+
 extern "C" {
-	void event(uint8_t,uint32_t);
+    #include "../../main/ds18x20lib.h"
+    void sha1_init(sha1_ctx_t); 
 }
+
 
 CASE(Ds18x20LibTest,TestBase)
 
 uint32_t state;
-
 void event(uint8_t type,uint32_t value) {
 	// Hier muss eine CRC Funktion rein, die das Ergebnis berechnet
 	state += type;
-	if (value != UNDEF) {
+	if (value != UNDEFINED) {
 		state += value;
 	}
 }
 
 SETUP() {
+    sha1_init(sha1_ctx_t *state);
 	debug("Setting up");
 	state=0;
 }
@@ -35,4 +42,6 @@ TEST(test1) {
 TEST(test2) {
 	reset();
 	debug("state %d",state);
+    return true;
 }
+

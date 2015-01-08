@@ -16,10 +16,10 @@ MCU = atmega32
 NAME = sensor2
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o nop.o
+SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
-TEST1_OBJ = cases/Ds18x20libTest.o doubles/ds18x20lib_hw.o
+TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o doubles/ds18x20lib_hw.o
 ALLTESTS = TEST1 
 
 OPTIMIZE=-Os
@@ -135,6 +135,8 @@ CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
 TESTCLEAN += $$(CASEOBJ)
 $(1): $$(CASEOBJ) $(TESTOBJ) $(OBJ)
 	@$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
+	@echo 
+	@echo Running Test $(1) ...
 	@$(SIMULAVR) --file $(BUILD)/$(1).elf --device $(MCU) --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic
 endef
 $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
