@@ -18,16 +18,16 @@ int TestBase::run(int num, ...)
     bool(*f)();
     va_start(ap, num);
 
-    testResult=true;
+    testResult = true;
 
     for (int i = 0; i < num; i++) {
         this->setup();
 
-		// call test
+        // call test
         f = va_arg(ap, bool(*)());
-        int retval=f();
+        int retval = f();
         testResult &= retval;
-        debug("Retval: %d State: %d",retval,testResult);
+        debug("Retval: %d State: %d", retval, testResult);
 
         if (retval) {
             debug("OK");

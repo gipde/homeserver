@@ -2,15 +2,13 @@ extern "C" {
 #include "../../main/ds18x20lib.h"
 }
 
-CLASS(Ds18x20LibTest,TestBase)
+CLASS(Ds18x20LibTest, TestBase)
 
-BEFORECLASS
-{
+BEFORECLASS {
     debug("Test BeforeClass");
 }
 
-AFTERCLASS
-{
+AFTERCLASS {
     debug("Test AfterClass");
 }
 /*
@@ -20,9 +18,8 @@ S ETUP
 }
 */
 
-TEARDOWN
-{
-        debug("Test Teardown");
+TEARDOWN {
+    debug("Test Teardown");
 }
 
 TEST(test1)

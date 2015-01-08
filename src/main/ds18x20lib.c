@@ -1,7 +1,7 @@
 #include "global.h"
 #include <stdio.h>
 #include <math.h>
-#include <util/delay.h>
+#include "delay.h"
 #include "ds18x20lib.h"
 #include "ds18x20lib_hw.h"
 
@@ -21,12 +21,12 @@ uint8_t reset()
 {
     uint8_t r;
     direction(OUTPUT);
-    _delay_us(480);
+    delay_us(480);
     direction(INPUT);
     power(HIGH);
-    _delay_us(60);
+    delay_us(60);
     r = read_pin(); // no presence detect --> err=1 otherwise err=0
-    _delay_us(240);
+    delay_us(240);
     power(LOW);
 
     if ( read_pin() == 0 ) {            // short circuit --> err=2
@@ -38,12 +38,6 @@ uint8_t reset()
     }
 
     return r;
-}
-
-void delay_us(uint8_t const us)
-{
-    for (int i = 0; i < us; i++)
-        _delay_us(1);
 }
 
 void write_bit_intern(uint8_t const fst, uint8_t const snd)
@@ -66,12 +60,12 @@ uint8_t read_bit()
 {
     uint8_t bit;
     direction(OUTPUT);
-    _delay_us(3);
+    delay_us(3);
     direction(INPUT);
     power(HIGH);
-    _delay_us(10);
+    delay_us(10);
     bit = read_pin();
-    _delay_us(53);
+    delay_us(53);
     power(LOW);
     return bit;
 }
@@ -376,7 +370,7 @@ float read_temp(struct sensorT* sensor)
             power(LOW);
         }
 
-        _delay_ms(CONV_TIME_HIGHEST);
+        delay_ms(CONV_TIME_HIGHEST);
         read_scratchpad(sensor, scratchpad);
         return calc_temp(scratchpad);
     }

@@ -3,16 +3,23 @@
 
 #define __STDC_LIMIT_MACROS
 
+typedef struct {
+    uint8_t type;
+    uint32_t value;
+} event_t;
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void event(uint8_t,uint32_t);
+void event(event_t*);
 
 #ifdef __cplusplus
 }
 #endif
 
+#define EVENT(...) event_t e= {__VA_ARGS__}; event(&e)
 
 #define UNDEFINED UINT32_MAX
 

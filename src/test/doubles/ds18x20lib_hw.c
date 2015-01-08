@@ -9,19 +9,19 @@
 
 void interrupts()
 {
-	event(INTERRUPTS);
+    EVENT(INTERRUPTS);
     sei();
 }
 
 void no_interrupts()
 {
-	event(NO_INTERRUPTS);
+    EVENT(NO_INTERRUPTS);
     cli();
 }
 
 void power(uint8_t mode)
 {
-	event(POWER,mode);
+    EVENT(POWER, mode);
     no_interrupts();
 
     if (mode == HIGH)
@@ -34,7 +34,7 @@ void power(uint8_t mode)
 
 void direction(uint8_t dir)
 {
-	event(DIRECTION,dir);
+    EVENT(DIRECTION, dir);
     power(LOW);
     no_interrupts();
 
@@ -48,7 +48,7 @@ void direction(uint8_t dir)
 
 uint8_t read_pin()
 {
-	event(READ_PIN);
+    EVENT(READ_PIN);
     no_interrupts();
     debug("reading pin");
     interrupts();

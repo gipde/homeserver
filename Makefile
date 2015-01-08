@@ -8,6 +8,8 @@
 # * Unit Testing -> is schwierig, da selbst kleine Frameworks wie Unity zu gross sind, um auf der HW zu laufen
 # * Macros for assertions / Testcases
 # * Mocks
+# Wie werden test in CryptoAvr gemacht?
+
 
 # CPU Type
 MCU = atmega32
@@ -16,18 +18,21 @@ MCU = atmega32
 NAME = sensor2
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o
+SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o ../test/doubles/delay.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
-TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o doubles/ds18x20lib_hw.o
+TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o doubles/ds18x20lib_hw.o doubles/delay.o
 ALLTESTS = TEST1 
 
-OPTIMIZE=-Os
+# If you do Debugging its better to run with -O0
+OPTIMIZE=-O0
 
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII
 
 SIMULAVR=contrib/simulavr/src/simulavr
+SIMULAVR_OPTS=--writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic
+
 BUILD=build
 
 # -------------- NO NEED TO TOUCH --------------
@@ -133,11 +138,22 @@ TESTOBJ = src/test/cases/TestBase.o
 define TEST_template 
 CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
 TESTCLEAN += $$(CASEOBJ)
-$(1): $$(CASEOBJ) $(TESTOBJ) $(OBJ)
+$(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) $(OBJ)
+	@echo Building for Test: $(1).elf ... 
 	@$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
+
+$(1): $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
 	@echo 
+	@$(SIZE) -C $(BUILD)/$(1).elf --mcu=${MCU}
+	@echo
 	@echo Running Test $(1) ...
-	@$(SIMULAVR) --file $(BUILD)/$(1).elf --device $(MCU) --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic
+	@$(SIMULAVR) --file $(BUILD)/$(1).elf --device $(MCU) $(SIMULAVR_OPTS)
+
+$(1)DEBUG: $(BUILD)/$(1).elf debug_help
+	@echo
+	@echo Debugging Test $(1) ...
+	@$(SIMULAVR) -g --file $(BUILD)/$(1).elf --device $(MCU) $(SIMULAVR_OPTS)
+
 endef
 $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
@@ -149,7 +165,7 @@ $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
 format:
 	@echo Formatting...
-	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r "src/*.cpp" "src/*.h" "src/*.c"
+	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r "src/*.cpp" "src/*.h" "src/*.c" "src/*.case"
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 AVRDUDE_FLAGS = -p $(MCU) -B $(AVRDUDE_CYCLE) -c $(AVRDUDE_PROGRAMMER)
@@ -173,24 +189,27 @@ test: $(ALLTESTS)
 
 testprog: $(TARGET).elf 
 	@echo starting all tests in Simulator
-	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) --writetopipe 0x20,- --terminate exit --cpufrequency=8000000 --irqstatistic
+	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS)
 
-debug: $(TARGET).elf
+
+debug_help:
 	@echo --------------------------------
 	@echo starting Simulator to debug code ...
 	@echo Now connect with a debugger
-	@echo  avr-gdb
+	@echo  avr-gdb --tui
 	@echo  cgdb -d avr-gdb
 	@echo  ddd --debugger avr-gdb
 	@echo 
 	@echo after that do this:
-	@echo  file src/$(TARGET).elf
+	@echo  file src/[name].elf
 	@echo  target remote localhost:1212
 	@echo  load
 	@echo  b main
 	@echo  c
 	@echo 
-	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) --writetopipe 0x20,- --terminate exit --cpufrequency=8000000 --irqstatistic -g
+
+debug: $(TARGET).elf debug_help 
+	@$(SIMULAVR) -g --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS)
 
 help:
 	@echo "Targets"
