@@ -14,7 +14,7 @@
 MCU = atmega32
 
 # Project Name
-NAME = sensor2
+NAME = homeserver
 
 # expliit List objects here
 SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o delay.o
@@ -39,12 +39,26 @@ SIMULAVR_OPTS=--writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufreq
 
 .DEFAULT_GOAL := all
 
+ifdef SystemRoot
+   MD = md 2>NUL
+   FixPath = $(subst /,\,$1)
+else
+   ifeq ($(shell uname), Linux)
+      MD = mkdir -p
+      FixPath = $1
+   endif
+endif
+
 BUILD=build
+ifdef SystemRoot
+TARGET=$(NAME)
+else
 TARGET=$(BUILD)/$(NAME)
+endif
 
 # Dependency Files, if changed something, it needs a compile
 GENDEPFLAGS = -MD -MP -MF $(BUILD)/.dep/$(@F).d
--include $(shell mkdir -p $(BUILD)/.dep) $(wildcard $(BUILD)/.dep/*)
+include $(wildcard $(BUILD)/.dep/*)
 
 GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE}
 GCCOPTS += -funsigned-char -funsigned-bitfields -ffunction-sections 
@@ -64,7 +78,11 @@ OBJ = $(addprefix src/main/,$(SRC))
 LDFLAGS = -Wl,-Map="$(TARGET).map" -Wl,--start-group -Wl,-lm -Wl,--allow-multiple-definition
 LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU)
 
-all: $(addprefix $(TARGET)., elf hex eep sym lss) size
+all: deps-dir all2
+all2: $(addprefix $(TARGET)., elf hex eep sym lss) size
+
+deps-dir:
+	$(MD) $(call FixPath,$(BUILD)/.dep)
 
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
@@ -73,14 +91,13 @@ NM = avr-nm
 
 # show size
 size: $(TARGET).elf $(OBJ)
-	@echo
+	@echo .
 	@$(SIZE) -C $(TARGET).elf --mcu=${MCU}
 	@$(SIZE) $(OBJ) --mcu=${MCU}
 
 # Link: create ELF output file from object files.
 %.elf: $(OBJ)
 	@echo Linking $@ ...
-	@-mkdir -p build 
 	@$(CC) -o $@  $(OBJ) $(LDFLAGS)
 
 # Compile: create object files from C source files.
@@ -88,12 +105,14 @@ size: $(TARGET).elf $(OBJ)
 	@echo Compiling $< ...
 	@$(CC) -c $(CFLAGS) $< -o $@ 
 
-
 # Compile: create object files from C++ source files.
 %.o : %.cpp
 	@echo Compiling $< ...
-	@$(CC) -c $(CXXFLAGS) $< -o $@ 
+	@$(CXX) -c $(CXXFLAGS) $< -o $@ 
+ifndef SystemRoot
 	@if [ -f $(BUILD)/m4.clean ]; then cat $(BUILD)/m4.clean; cat $(BUILD)/m4.clean | xargs -i rm {}; rm $(BUILD)/m4.clean;  fi
+endif
+
 
 # Compile: create assembler files from C source files.
 %.s : %.c
@@ -105,7 +124,7 @@ size: $(TARGET).elf $(OBJ)
 	@$(CC) -E $(CFLAGS) $< -o $@
 %.E : %.cpp
 	@echo Create Preprocessor output from $< ...
-	@$(CC) -E $(CXXLAGS) $< -o $@
+	@$(CXX) -E $(CXXLAGS) $< -o $@
 
 
 # Create final output files (.hex, .eep) from ELF output file.
@@ -139,19 +158,19 @@ TESTOBJ = src/test/cases/TestBase.o
 define TEST_template 
 CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
 TESTCLEAN += $$(CASEOBJ)
-$(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) $(OBJ)
+$(BUILD)/$(1).elf: deps-dir $$(CASEOBJ) $(TESTOBJ) $(OBJ)
 	@echo Building for Test: $(1).elf ... 
 	@$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
 
 $(1): $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
-	@echo 
+	@echo .
 	@$(SIZE) -C $(BUILD)/$(1).elf --mcu=${MCU}
-	@echo
+	@echo .
 	@echo Running Test $(1) ...
 	@$(SIMULAVR) --file $(BUILD)/$(1).elf --device $(MCU) $(SIMULAVR_OPTS)
 
 $(1)DEBUG: $(BUILD)/$(1).elf debug_help
-	@echo
+	@echo .
 	@echo Debugging Test $(1) ...
 	@$(SIMULAVR) -g --file $(BUILD)/$(1).elf --device $(MCU) $(SIMULAVR_OPTS)
 
@@ -200,37 +219,37 @@ debug_help:
 	@echo  avr-gdb --tui
 	@echo  cgdb -d avr-gdb
 	@echo  ddd --debugger avr-gdb
-	@echo 
+	@echo .
 	@echo after that do this:
 	@echo  file src/[name].elf
 	@echo  target remote localhost:1212
 	@echo  load
 	@echo  b main
 	@echo  c
-	@echo 
+	@echo .
 
 debug: $(TARGET).elf debug_help 
 	@$(SIMULAVR) -g --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS)
 
 help:
-	@echo "Targets"
-	@echo
-	@echo " all             - make programm"
-	@echo " clean           - clean out"
-	@echo
-	@echo " testprog        - start program in simulator"
-	@echo " debug           - start program in debug mode"
-	@echo
-	@echo " test            - execute all tests in the simulator"
-	@echo " <TESTNAME>      - execute this test"
-	@echo " <TESTNAME>DEBUG - starts test in debug mode"
-	@echo
-	@echo " program         - download the hex file to the devic"
-	@echo
-	@echo " format          - format all C/C++ sources"
-	@echo " check           - static code analysis with cppcheck"
-	@echo
-	@echo " doc             - Generate Doc"
-
+	@echo Targets
+	@echo .
+	@echo  all             - make programm
+	@echo  clean           - clean out
+	@echo .
+	@echo  testprog        - start program in simulator
+	@echo  debug           - start program in debug mode
+	@echo .
+	@echo  test            - execute all tests in the simulator
+	@echo  TESTNAME        - execute this test
+	@echo  TESTNAME DEBUG - starts test in debug mode
+	@echo .
+	@echo  program         - download the hex file to the devic
+	@echo .
+	@echo  format          - format all C/C++ sources
+	@echo  check           - static code analysis with cppcheck
+	@echo .
+	@echo  doc             - Generate Doc
+	
 .SECONDARY: # do not cleanup intermediate files
-.PHONY: clean help all sizeafter format test debug_help check
+.PHONY: clean help all sizeafter format test debug_help check deps_dir
