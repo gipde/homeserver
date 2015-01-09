@@ -21,7 +21,7 @@ NAME = sensor2
 SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o ../test/doubles/delay.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
-TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o doubles/ds18x20lib_hw.o doubles/delay.o
+TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o cases/mock.o doubles/ds18x20lib_hw.o doubles/delay.o
 ALLTESTS = TEST1 
 
 # If you do Debugging its better to run with -O0

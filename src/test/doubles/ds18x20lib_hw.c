@@ -5,6 +5,7 @@
 #define DEBUG
 #include "../../main/debug.h"
 #include "../cases/Ds18x20libTest.h"
+#include "../cases/mock.h"
 
 
 void interrupts()

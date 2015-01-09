@@ -14,6 +14,7 @@ include(FILE)
 divert(1)dnl
 ifdef(`CLASSNAME',
 #include "test.h" 
+#include "mock.h"
 `#'include "BASE.h"
 
 class CLASSNAME : public BASE

@@ -19,6 +19,9 @@
 
 int debug_printf (char const*, ...);
 #define debug(M,...) debug_printf("DEBUG %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
+#define debugn(M,...) debug_printf("DEBUG %s:%d: " M,__FILE__,__LINE__,##__VA_ARGS__)
+#define debugc(M,...) debug_printf(M,##__VA_ARGS__)
+#define debugnl(M,...) debug_printf("\n\r")
 
 #else
 #ifndef debug

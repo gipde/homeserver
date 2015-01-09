@@ -2,82 +2,32 @@
 
 #include "Ds18x20libTest.h"
 
-typedef struct  {
-    uint32_t h0, h1, h2, h3, h4;
-    uint64_t length;
-} sha1_ctx_t;
-
-#define MAXBYTES 64
-
 extern "C" {
 #include "../../main/ds18x20lib.h"
 #include "../../main/delay.h"
-#include <stdio.h>
-    void sha1_init(sha1_ctx_t*);
-    void sha1_nextBlock(sha1_ctx_t*, char*);
-    void sha1_lastBlock(sha1_ctx_t*, char*, uint16_t);
-
-    void sha1_ctx2hash(char*, sha1_ctx_t*);
 }
-
 
 CASE(Ds18x20LibTest, TestBase)
-
-static sha1_ctx_t state;
-static char block[MAXBYTES];
-static uint8_t usage;
-char sha[20];
-
-static void copy_bytes(event_t* event, int from, int to)
-{
-    for (int i = from; i <= to; i++) {
-        char c = *((char*)event + i);
-        block[usage++] = c;
-    }
-}
-
-void finishSha()
-{
-    sha1_lastBlock(&state, block, usage * 8);
-    debug("result: { %d,%d,%d,%d,%d }", state.h0, state.h1, state.h2,
-          state.h3, state.h4);
-}
-
-void event(event_t* event)
-{
-    int n_usage = usage + 5;
-
-    if (n_usage > MAXBYTES) {
-        int tx = (MAXBYTES - usage) - 1;
-        copy_bytes(event, 0, tx);
-        sha1_nextBlock(&state, block);
-        usage = 0;
-        copy_bytes(event, tx + 1, 4);
-    } else {
-        copy_bytes(event, 0, 4);
-    }
-}
 
 SETUP()
 {
     debug("Setting up");
-    sha1_init(&state);
-    usage = 0;
+    initMock();
 }
 
 TEST(test1)
 {
     debug("Hello from Test1");
     reset();
-    finishSha();
-    return true;
+    char r[] = {0xca, 0x37, 0x87, 0x28, 0xab, 0x2a, 0xd6, 0xd6, 0x9b, 0x8, 0x80, 0xc7, 0x3, 0x4d, 0xa6, 0x43, 0xa5, 0x25, 0x48, 0x4f};
+    return cmpMock(r);
 }
 
 TEST(test2)
 {
     reset();
     delay_ms(10);
-    finishSha();
-    return true;
+    char r[] = {0x6e, 0xce, 0x39, 0x54, 0x61, 0x72, 0x12, 0xb0, 0xec, 0xb1, 0xe0, 0xce, 0x32, 0xf2, 0xbb, 0x50, 0xb5, 0x69, 0x55, 0xf6};
+    return cmpMock(r);
 }
 

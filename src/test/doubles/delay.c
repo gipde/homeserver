@@ -1,5 +1,6 @@
 #include "../../main/delay.h"
 #include "../cases/Ds18x20libTest.h"
+#include "../cases/mock.h"
 
 void delay_us(uint16_t const us)
 {
