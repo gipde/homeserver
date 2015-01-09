@@ -1,14 +1,13 @@
 # TODO:
-# * ASM Code -> avra
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
+
 # * Doxygen
 # * ctags / cscope
+# Hardware Spec
 
-# * Unit Testing -> is schwierig, da selbst kleine Frameworks wie Unity zu gross sind, um auf der HW zu laufen
 # * Macros for assertions / Testcases
 # * Mocks
-# Wie werden test in CryptoAvr gemacht?
 
 
 # CPU Type
@@ -18,14 +17,16 @@ MCU = atmega32
 NAME = sensor2
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o ../test/doubles/delay.o
+SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o delay.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
-TEST1_OBJ = cases/Ds18x20libTest.o cases/sha1-asm.o cases/mock.o doubles/ds18x20lib_hw.o doubles/delay.o
+TEST1_OBJ = $(addprefix cases/,Ds18x20libTest.o sha1-asm.o mock.o)
+TEST1_OBJ+= $(addprefix doubles/,ds18x20lib_hw.o delay.o)
+
 ALLTESTS = TEST1 
 
 # If you do Debugging its better to run with -O0
-OPTIMIZE=-O0
+OPTIMIZE=-Os
 
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII
@@ -33,12 +34,12 @@ AVRDUDE_PROGRAMMER = avrispmkII
 SIMULAVR=contrib/simulavr/src/simulavr
 SIMULAVR_OPTS=--writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic
 
-BUILD=build
 
 # -------------- NO NEED TO TOUCH --------------
 
 .DEFAULT_GOAL := all
 
+BUILD=build
 TARGET=$(BUILD)/$(NAME)
 
 # Dependency Files, if changed something, it needs a compile
@@ -54,7 +55,7 @@ CC=avr-gcc
 CFLAGS = ${GCCOPTS} -std=gnu99
 
 CXX=avr-g++
-CXXFLAGS = ${GCCOPTS} -std=gnu++98
+CXXFLAGS = ${GCCOPTS} -std=gnu++11
 
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
@@ -214,16 +215,22 @@ debug: $(TARGET).elf debug_help
 help:
 	@echo "Targets"
 	@echo
-	@echo " all         - make everything"
-	@echo " clean       - clean out"
-	@echo " test        - execute all Tests in the simulator"
-	@echo " testprob    - execute all Tests in the simulator"
+	@echo " all             - make programm"
+	@echo " clean           - clean out"
 	@echo
-	@echo " program     - Download the hex file to the devie"
+	@echo " testprog        - start program in simulator"
+	@echo " debug           - start program in debug mode"
 	@echo
-	@echo " format      - Format all C/C++ sources"
+	@echo " test            - execute all tests in the simulator"
+	@echo " <TESTNAME>      - execute this test"
+	@echo " <TESTNAME>DEBUG - starts test in debug mode"
 	@echo
-	@echo " doc         - Generate Doc"
+	@echo " program         - download the hex file to the devic"
+	@echo
+	@echo " format          - format all C/C++ sources"
+	@echo " check           - static code analysis with cppcheck"
+	@echo
+	@echo " doc             - Generate Doc"
 
 .SECONDARY: # do not cleanup intermediate files
-.PHONY: clean help all sizeafter format test
+.PHONY: clean help all sizeafter format test debug_help check

@@ -40,7 +40,6 @@
 #define OUTPUT              0x01
 
 
-
 struct sensorT {
     uint8_t rom[8];
     uint8_t resolution;

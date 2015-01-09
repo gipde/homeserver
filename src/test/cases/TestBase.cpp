@@ -9,6 +9,15 @@ extern "C" {
 #include "test.h"
 #include "TestBase.h"
 
+static void delim()
+{
+    debugn("=");
+
+    for (int i = 0; i < 80; i++)
+        debugc("=");
+
+    debugnl();
+}
 int TestBase::run(int num, ...)
 {
     debug("Running Tests");
@@ -20,6 +29,9 @@ int TestBase::run(int num, ...)
 
     testResult = true;
 
+    int test_succeeded = 0;
+    int test_failed = 0;
+
     for (int i = 0; i < num; i++) {
         this->setup();
 
@@ -27,12 +39,13 @@ int TestBase::run(int num, ...)
         f = va_arg(ap, bool(*)());
         int retval = f();
         testResult &= retval;
-        debug("Retval: %d State: %d", retval, testResult);
 
-        if (retval) {
-            debug("OK");
+        if (retval == true) {
+            debug("TEST OK");
+            test_succeeded++;
         } else {
-            debug("FAIL");
+            debug("TEST FAIL");
+            test_failed++;
         }
 
         this->tearDown();
@@ -40,25 +53,29 @@ int TestBase::run(int num, ...)
 
     va_end(ap);
     this->afterClass();
+
+    delim();
+    debug("TEST SUMMARY");
+    delim();
+    debug("all tests: %d, succeeded: %d, failed: %d",
+          test_succeeded + test_failed, test_succeeded, test_failed);
+    delim();
+
     return testResult;
 }
 
 void TestBase::setup()
 {
-    debug("Base Setup");
 }
 
 void TestBase::tearDown()
 {
-    debug("Base Teardown");
 }
 
 void TestBase::afterClass()
 {
-    debug("After Class");
 }
 
 void TestBase::beforeClass()
 {
-    debug("Before Class");
 }

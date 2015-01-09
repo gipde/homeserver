@@ -1,6 +1,5 @@
 #ifndef _DS18X20LIB_HW_H
 #define _DS18X20LIB_HW_H
-#include <avr/io.h>
 
 void interrupts();
 void no_interrupts();

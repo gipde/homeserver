@@ -12,15 +12,15 @@
     TODO: * check clock-cycles - µs with avrstudio
           * check optimal flow of power on / power off
           * parameterize PORT/PIN
-          * maybe convert to cpp (constructor port/pin/precision)
-          * extract delay_us for better testing
 */
 
 
 uint8_t reset()
 {
     uint8_t r;
-    direction(OUTPUT);
+    no_interrupts();
+    power(LOW);
+    direction(OUTPUT); //why set to out? does it matte?
     delay_us(480);
     direction(INPUT);
     power(HIGH);
@@ -28,6 +28,7 @@ uint8_t reset()
     r = read_pin(); // no presence detect --> err=1 otherwise err=0
     delay_us(240);
     power(LOW);
+    interrupts();
 
     if ( read_pin() == 0 ) {            // short circuit --> err=2
         r = 2;
@@ -42,18 +43,27 @@ uint8_t reset()
 
 void write_bit_intern(uint8_t const fst, uint8_t const snd)
 {
-    direction(OUTPUT);
+    power(LOW);
     delay_us(fst);
     power(HIGH);
     delay_us(snd);
 }
 
+// lambda write_out
+
 void write_bit(uint8_t wrbit)
 {
+    //intern -> lambda
+    no_interrupts();
+    power(LOW);
+    direction(OUTPUT);
+
     if (wrbit == 0)
         write_bit_intern(65, 5);
     else
         write_bit_intern(10, 15);
+
+    interrupts();
 }
 
 uint8_t read_bit()
