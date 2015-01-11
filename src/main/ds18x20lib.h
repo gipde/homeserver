@@ -39,18 +39,23 @@
 #define INPUT               0x00
 #define OUTPUT              0x01
 
+typedef struct {
+    uint8_t port;
+    uint8_t port_pin;
+    uint8_t ddr;
+    uint8_t pin;
+} one_wire_T;
 
 struct sensorT {
     uint8_t rom[8];
     uint8_t resolution;
 };
 
-uint8_t reset();
-
-float read_temp(struct sensorT*);
+uint8_t reset(one_wire_T*);
+float read_temp(one_wire_T*, struct sensorT*);
 void reset_search();
-uint8_t search_slaves(struct sensorT*);
+uint8_t search_slaves(one_wire_T*, struct sensorT*);
 uint8_t getType(struct sensorT*);
-void set_precision(struct sensorT*, uint8_t);
+void set_precision(one_wire_T*, struct sensorT*, uint8_t);
 
 #endif

@@ -9,28 +9,37 @@
 #include "debug.h"
 
 /*
-    TODO: * check clock-cycles - µs with avrstudio
+    TODO: * check clock-cycles - gtkwave
           * check optimal flow of power on / power off
-          * parameterize PORT/PIN
 */
 
+#include <avr/interrupt.h>
 
-uint8_t reset()
+
+uint8_t reset(one_wire_T* ow)
 {
     uint8_t r;
-    no_interrupts();
-    power(LOW);
-    direction(OUTPUT); //why set to out? does it matte?
-    delay_us(480);
-    direction(INPUT);
-    power(HIGH);
-    delay_us(60);
-    r = read_pin(); // no presence detect --> err=1 otherwise err=0
-    delay_us(240);
-    power(LOW);
-    interrupts();
+    NO_INTERRUPTS;
 
-    if ( read_pin() == 0 ) {            // short circuit --> err=2
+    OW_LOW(ow);
+    OW_OUTPUT(ow);
+
+    delay_us(480);
+    OW_INPUT(ow);
+    OW_HIGH(ow);
+    delay_us(60);
+    r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
+    debug("read bit in reset %d", r);
+    delay_us(240);
+    OW_LOW(ow);
+
+    uint8_t state = OW_READ(ow);
+
+    INTERRUPTS;
+
+    debug("read bit in reset %d", state);
+
+    if ( state == 0 ) {            // short circuit --> err=2
         r = 2;
     }
 
@@ -41,71 +50,69 @@ uint8_t reset()
     return r;
 }
 
-void write_bit_intern(uint8_t const fst, uint8_t const snd)
+
+void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
-    power(LOW);
-    delay_us(fst);
-    power(HIGH);
-    delay_us(snd);
+
+    OW_LOW(ow);
+    OW_OUTPUT(ow);
+
+    if (wrbit == 0) {
+        delay_us(65);
+    } else {
+        delay_us(15);
+        OW_INPUT(ow);
+        delay_us(45);
+    }
+
 }
 
-// lambda write_out
-
-void write_bit(uint8_t wrbit)
-{
-    //intern -> lambda
-    no_interrupts();
-    power(LOW);
-    direction(OUTPUT);
-
-    if (wrbit == 0)
-        write_bit_intern(65, 5);
-    else
-        write_bit_intern(10, 15);
-
-    interrupts();
-}
-
-uint8_t read_bit()
+uint8_t read_bit(one_wire_T* ow)
 {
     uint8_t bit;
-    direction(OUTPUT);
+    OW_OUTPUT(ow);
     delay_us(3);
-    direction(INPUT);
-    power(HIGH);
+    OW_INPUT(ow);
+    OW_HIGH(ow);
     delay_us(10);
-    bit = read_pin();
+    bit = OW_READ(ow);
     delay_us(53);
-    power(LOW);
+    OW_LOW(ow);
     return bit;
 }
 
-uint8_t read_byte()
+uint8_t read_byte(one_wire_T* ow)
 {
     uint8_t readbyte = 0x00;
     uint8_t i;
 
+    NO_INTERRUPTS;
+
     for (i = 0; i < 8; i++) {
-        uint8_t readbit = read_bit();
+        uint8_t readbit = read_bit(ow);
 
         if (readbit == 1) {
             readbyte |= (1 << i);
         }
     }
 
+    INTERRUPTS;
+
     return (readbyte);
 }
 
-void write_byte(uint8_t wrbyte)
+void write_byte(one_wire_T* ow, uint8_t wrbyte)
 {
-    uint8_t i;
+    debug("Write Byte %x", wrbyte);
+    NO_INTERRUPTS;
 
-    for (i = 0; i < 8; i++) {
-        write_bit((wrbyte & 0b00000001));
+    for (int i = 0; i < 8; i++) {
+        write_bit(ow, (wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
-}
 
+    INTERRUPTS;
+}
 
 /************************************************************************/
 /* reset search state                                                   */
@@ -132,7 +139,7 @@ void reset_search()
 /************************************************************************/
 /* search all slaves                                                    */
 /************************************************************************/
-uint8_t search_slaves(struct sensorT* sensor)
+uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
@@ -150,7 +157,7 @@ uint8_t search_slaves(struct sensorT* sensor)
     // if the last call was not the last one
     if (!LastDeviceFlag) {
         // 1-Wire reset
-        if (reset()) {
+        if (reset(ow)) {
             reset_search();
 
             for (int i = 0; i < 8; i++) {
@@ -160,12 +167,14 @@ uint8_t search_slaves(struct sensorT* sensor)
             return FALSE;
         }
 
-        write_byte(SEARCH_ROM);
+        write_byte(ow, SEARCH_ROM);
 
         do  {
             // read a bit and its complement
-            id_bit = read_bit();
-            cmp_id_bit = read_bit();
+            NO_INTERRUPTS;
+            id_bit = read_bit(ow);
+            cmp_id_bit = read_bit(ow);
+            INTERRUPTS;
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
@@ -202,7 +211,9 @@ uint8_t search_slaves(struct sensorT* sensor)
                     ROM_NO[rom_byte_number] &= ~rom_byte_mask;
 
                 // serial number search direction write bit
-                write_bit(search_direction);
+                NO_INTERRUPTS;
+                write_bit(ow, search_direction);
+                INTERRUPTS;
                 // increment the byte counter id_bit_number
                 // and shift the mask rom_byte_mask
                 id_bit_number++;
@@ -240,7 +251,7 @@ uint8_t search_slaves(struct sensorT* sensor)
     for (int i = 0; i < 8; i++) sensor->rom[i] = ROM_NO[i];
 
     //TODO: get config
-    power(LOW);
+    OW_LOW(ow);
     return search_result;
 }
 
@@ -267,23 +278,24 @@ uint8_t crc8(uint8_t* data)
     return crc;
 }
 
-void select(struct sensorT* sensor)
+void select(one_wire_T* ow, struct sensorT* sensor)
 {
-    write_byte(MATCH_ROM);
+    write_byte(ow, MATCH_ROM);
 
     for (int i = 0; i < 8; i++) {
-        write_byte(sensor->rom[i]);
+        write_byte(ow, sensor->rom[i]);
     }
 }
 
-uint8_t read_scratchpad(struct sensorT* sensor, uint8_t* scratchpad)
+uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
+                        uint8_t* scratchpad)
 {
-    if (!reset()) {
-        select(sensor);
-        write_byte(READ_SCRATCHPAD);
+    if (!reset(ow)) {
+        select(ow, sensor);
+        write_byte(ow, READ_SCRATCHPAD);
 
         for (int i = 0; i < 9; i++) {
-            scratchpad[i] = read_byte();
+            scratchpad[i] = read_byte(ow);
         }
 
         if (crc8(scratchpad) != scratchpad[8]) {
@@ -339,12 +351,14 @@ uint8_t getType(struct sensorT* sensor)
 }
 
 
-uint8_t is_parasite(struct sensorT* sensor)
+uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
 {
-    reset();
-    select(sensor);
-    write_byte(READ_POWER);
-    uint8_t parasite_mode = ! read_bit();
+    reset(ow);
+    select(ow, sensor);
+    write_byte(ow, READ_POWER);
+    NO_INTERRUPTS;
+    uint8_t parasite_mode = ! read_bit(ow);
+    INTERRUPTS;
     return parasite_mode;
 }
 
@@ -367,21 +381,21 @@ float calc_temp(uint8_t* scratchpad)
 /************************************************************************/
 /* read temp from a specific sensor                                     */
 /************************************************************************/
-float read_temp(struct sensorT* sensor)
+float read_temp(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t scratchpad[9] = {0};
-    uint8_t parasite_mode = is_parasite(sensor);
+    uint8_t parasite_mode = is_parasite(ow, sensor);
 
-    if (!reset()) {
-        select(sensor);
-        write_byte(CONVERT_T);
+    if (!reset(ow)) {
+        select(ow, sensor);
+        write_byte(ow, CONVERT_T);
 
         if (!parasite_mode) {
-            power(LOW);
+            OW_LOW(ow);
         }
 
-        delay_ms(CONV_TIME_HIGHEST);
-        read_scratchpad(sensor, scratchpad);
+//        delay_ms(CONV_TIME_OW_HIGHEST);
+        read_scratchpad(ow, sensor, scratchpad);
         return calc_temp(scratchpad);
     }
 

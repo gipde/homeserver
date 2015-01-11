@@ -2,9 +2,9 @@
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 
+# EROR: compiliert immer wieder
+
 # * Doxygen
-# * ctags / cscope
-# Hardware Spec
 
 # * Macros for assertions / Testcases
 # * Mocks
@@ -17,11 +17,11 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o ds18x20lib_hw.o debug.o delay.o
+SRC = $(NAME).o ds18x20lib.o debug.o 
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TEST1_OBJ = $(addprefix cases/,Ds18x20libTest.o sha1-asm.o mock.o)
-TEST1_OBJ+= $(addprefix doubles/,ds18x20lib_hw.o delay.o)
+TEST1_OBJ+= $(addprefix doubles/,ds18x20lib_hw.o)
 
 ALLTESTS = TEST1 
 
@@ -50,15 +50,12 @@ else
 endif
 
 BUILD=build
-ifdef SystemRoot
-TARGET=$(NAME)
-else
 TARGET=$(BUILD)/$(NAME)
-endif
+# Windows-Build-Elfs müssen nach dem erzeugen nach toplevel verschoben werden.
 
 # Dependency Files, if changed something, it needs a compile
 GENDEPFLAGS = -MD -MP -MF $(BUILD)/.dep/$(@F).d
-include $(wildcard $(BUILD)/.dep/*)
+include  $(wildcard $(BUILD)/.dep/*)
 
 GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE}
 GCCOPTS += -funsigned-char -funsigned-bitfields -ffunction-sections 
@@ -69,7 +66,7 @@ CC=avr-gcc
 CFLAGS = ${GCCOPTS} -std=gnu99
 
 CXX=avr-g++
-CXXFLAGS = ${GCCOPTS} -std=gnu++11
+CXXFLAGS = ${GCCOPTS} -std=gnu++98
 
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
@@ -78,16 +75,18 @@ OBJ = $(addprefix src/main/,$(SRC))
 LDFLAGS = -Wl,-Map="$(TARGET).map" -Wl,--start-group -Wl,-lm -Wl,--allow-multiple-definition
 LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU)
 
-all: deps-dir all2
-all2: $(addprefix $(TARGET)., elf hex eep sym lss) size
-
-deps-dir:
-	$(MD) $(call FixPath,$(BUILD)/.dep)
+all: $(addprefix $(TARGET)., elf hex eep sym lss) size
 
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 SIZE = avr-size
 NM = avr-nm
+
+buildDir: 
+	@echo Creating Build-Dir and gen tags ...
+	-@$(MD) $(BUILD)/.dep
+	-@ctags -R src
+	-@cscope -R -ssrc -b
 
 # show size
 size: $(TARGET).elf $(OBJ)
@@ -101,14 +100,13 @@ size: $(TARGET).elf $(OBJ)
 	@$(CC) -o $@  $(OBJ) $(LDFLAGS)
 
 # Compile: create object files from C source files.
-%.o : %.c
-	@echo Compiling $< ...
-	@$(CC) -c $(CFLAGS) $< -o $@ 
+%.o : %.c | buildDir
+	@$(CC) $(TESTBUILD) -c $(CFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files.
-%.o : %.cpp
-	@echo Compiling $< ...
-	@$(CXX) -c $(CXXFLAGS) $< -o $@ 
+%.o : %.cpp | buildDir
+	@echo Compiling $@ ...
+	@$(CXX) $(TESTBUILD) -c $(CXXFLAGS) $< -o $@ 
 ifndef SystemRoot
 	@if [ -f $(BUILD)/m4.clean ]; then cat $(BUILD)/m4.clean; cat $(BUILD)/m4.clean | xargs -i rm {}; rm $(BUILD)/m4.clean;  fi
 endif
@@ -117,14 +115,14 @@ endif
 # Compile: create assembler files from C source files.
 %.s : %.c
 	@echo Create Assembler sources from $< ...
-	@$(CC) -S $(CFLAGS) $< -o $@
+	$(CC) -S $(CFLAGS) $< -o $@
 
 %.E : %.c
 	@echo Create Preprocessor output from $< ...
-	@$(CC) -E $(CFLAGS) $< -o $@
+	@$(CC) $(TESTBUILD) -E $(CFLAGS) $< -o $@
 %.E : %.cpp
 	@echo Create Preprocessor output from $< ...
-	@$(CXX) -E $(CXXLAGS) $< -o $@
+	@$(CXX) $(TESTBUILD) -E $(CXXFLAGS) $< -o $@
 
 
 # Create final output files (.hex, .eep) from ELF output file.
@@ -155,14 +153,18 @@ endif
 
 TESTOBJ = src/test/cases/TestBase.o
 
+testenv:
+	@echo Compiling in TESTMODE ...
+	$(eval TESTBUILD=-D_TESTBUILD_)
+	
 define TEST_template 
 CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
 TESTCLEAN += $$(CASEOBJ)
-$(BUILD)/$(1).elf: deps-dir $$(CASEOBJ) $(TESTOBJ) $(OBJ)
+$(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) $(OBJ)
 	@echo Building for Test: $(1).elf ... 
 	@$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
 
-$(1): $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
+$(1): testenv $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
 	@echo .
 	@$(SIZE) -C $(BUILD)/$(1).elf --mcu=${MCU}
 	@echo .
@@ -177,7 +179,7 @@ $(1)DEBUG: $(BUILD)/$(1).elf debug_help
 endef
 $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
-%.cpp : %.case
+%.cpp : %.case | buildDir 
 	@echo Preprocessing $< ...
 	@m4 -DFILE=$< src/test/cases/testcases.m4 > $@
 	$(eval M4TEMP = $<)
@@ -185,7 +187,7 @@ $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
 format:
 	@echo Formatting...
-	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r "src/*.cpp" "src/*.h" "src/*.c" "src/*.case"
+	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r --suffix=none "src/*.cpp" "src/*.h" "src/*.c" "src/*.case"
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 AVRDUDE_FLAGS = -p $(MCU) -B $(AVRDUDE_CYCLE) -c $(AVRDUDE_PROGRAMMER)
@@ -200,6 +202,7 @@ program:
 clean:
 	@echo cleaning ...
 	-@rm -rf $(BUILD) $(OBJ) $(TESTOBJ) $(TESTCLEAN) 
+	-@find . -name "*.lst" -exec rm {} \;
 
 check:
 	@echo checking sources...
@@ -209,7 +212,7 @@ test: $(ALLTESTS)
 
 testprog: $(TARGET).elf 
 	@echo starting all tests in Simulator
-	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS)
+	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS) -c vcd:contrib/tracein.txt:${BUILD}/trace.vcd 
 
 
 debug_help:
@@ -221,7 +224,7 @@ debug_help:
 	@echo  ddd --debugger avr-gdb
 	@echo .
 	@echo after that do this:
-	@echo  file src/[name].elf
+	@echo  file build/[name].elf
 	@echo  target remote localhost:1212
 	@echo  load
 	@echo  b main
@@ -252,4 +255,6 @@ help:
 	@echo  doc             - Generate Doc
 	
 .SECONDARY: # do not cleanup intermediate files
-.PHONY: clean help all sizeafter format test debug_help check deps_dir
+.SECONDEXPANSION:
+	@echo "Secondary"
+.PHONY: clean help all sizeafter format test debug_help check buildDir testenv
