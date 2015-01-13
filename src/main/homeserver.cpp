@@ -39,7 +39,7 @@ void startseq()
 
 int main(void)
 {
-    one_wire_T n = { .port = M_PORTA, .port_pin = M_PINA, .ddr = M_DDRA, .pin = 4};
+    one_wire_T n = {  M_PORTA, M_PINA, M_DDRA, 4};
     sensorT sensor;
     char hex[3];
     debug("Starting Programm..");
