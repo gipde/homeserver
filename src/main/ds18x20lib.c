@@ -54,30 +54,34 @@ uint8_t reset(one_wire_T* ow)
 void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
 
+	debug("Write BIT: %d",wrbit);
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
     if (wrbit == 0) {
         delay_us(65);
+		OW_HIGH(ow);
+		delay_us(5);
     } else {
-        delay_us(15);
-        OW_INPUT(ow);
-        delay_us(45);
+        delay_us(10);
+        OW_HIGH(ow);
+        delay_us(55);
     }
 
 }
 
 uint8_t read_bit(one_wire_T* ow)
 {
+	debug("Read BIT:");
     uint8_t bit;
+	OW_LOW(ow);
     OW_OUTPUT(ow);
     delay_us(3);
     OW_INPUT(ow);
-    OW_HIGH(ow);
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
-    OW_LOW(ow);
+	debug("Result: %d",bit);
     return bit;
 }
 
@@ -110,7 +114,7 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
         write_bit(ow, (wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
-
+	OW_LOW(ow);
     INTERRUPTS;
 }
 
@@ -178,13 +182,13 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                debug("error complement is not identical\n\r");
+                debug("no device found\n\r");
                 break;
             } else  {
                 // all devices coupled have 0 or 1
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
-                else {
+                else { // all are 0
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
                     if (id_bit_number < LastDiscrepancy)
@@ -390,9 +394,11 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
 
+		/*
         if (!parasite_mode) {
             OW_LOW(ow);
         }
+		*/
 
 //        delay_ms(CONV_TIME_OW_HIGHEST);
         read_scratchpad(ow, sensor, scratchpad);

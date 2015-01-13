@@ -41,9 +41,9 @@
 
 typedef struct {
     uint8_t port;
-    uint8_t port_pin;
-    uint8_t ddr;
     uint8_t pin;
+    uint8_t ddr;
+    uint8_t port_pin;
 } one_wire_T;
 
 struct sensorT {

@@ -15,23 +15,6 @@ extern "C" {
 }
 
 
-void startseq()
-{
-    debug("Startseq");
-
-    for (int i = 0; i < 10; i++) {
-        PORTA |= 1 << PA4;
-        _delay_us(10);
-        PORTA &= ~(1 << PA4);
-        _delay_us( 5);
-        PORTA |= 1 << PA4;
-        _delay_us(25);
-        PORTA &= ~(1 << PA4);
-        _delay_us( 5);
-    }
-}
-
-
 
 #define M_PINA  0x19
 #define M_DDRA  0x1A
@@ -39,16 +22,14 @@ void startseq()
 
 int main(void)
 {
-    one_wire_T n = {  M_PORTA, M_PINA, M_DDRA, 4};
+    one_wire_T ow = {  M_PORTA, M_PINA, M_DDRA, 4};
     sensorT sensor;
     char hex[3];
     debug("Starting Programm..");
 
-    startseq();
-
     reset_search();
 
-    while (search_slaves(&n, &sensor) == TRUE) {
+    while (search_slaves(&ow, &sensor) == TRUE) {
         debug("ROM: ");
 
         for (int i = 0; i < 8; i++) {
@@ -74,7 +55,7 @@ int main(void)
         }
 
         debug("\n\r");
-        float temp = read_temp(&n, &sensor);
+        float temp = read_temp(&ow, &sensor);
         debug(" Temperature = ");
         debug(" %f", temp);
         debug(" Grad Celsius\n\r");
