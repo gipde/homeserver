@@ -30,9 +30,9 @@ void delay_hook_ms(uint16_t);
                                             DELEGATE2(power,HIGH)
 #define OW_LOW(ow)          IO(ow->port) &= ~(1 << ow->port_pin); \
                                             DELEGATE2(power,LOW)
-#define OW_INPUT(ow)        IO(ow->port) &= ~( 1 << ow->port_pin); \
+#define OW_INPUT(ow)        IO(ow->ddr) &= ~( 1 << ow->port_pin); \
                                             DELEGATE2(direction,INPUT)
-#define OW_OUTPUT(ow)       IO(ow->port) |= 1 << ow->port_pin; \
+#define OW_OUTPUT(ow)       IO(ow->ddr) |= 1 << ow->port_pin; \
                                             DELEGATE2(direction,OUTPUT)
 
 #define INTERRUPTS          sei(); DELEGATE1(interrupts);

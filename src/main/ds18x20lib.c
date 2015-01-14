@@ -28,9 +28,6 @@ uint8_t reset(one_wire_T* ow)
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
-    OW_LOW(ow);
-    OW_OUTPUT(ow);
-
     delay_us(480);
 	OW_LOW(ow);
     OW_INPUT(ow);
@@ -82,7 +79,7 @@ uint8_t read_bit(one_wire_T* ow)
     uint8_t bit;
     OW_LOW(ow);
     OW_OUTPUT(ow);
-    //delay_us(3);
+    delay_us(3);
     OW_LOW(ow); //TODO: kann aber auch raus ...
     OW_INPUT(ow);
     OW_HIGH(ow); 
