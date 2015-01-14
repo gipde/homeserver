@@ -46,11 +46,36 @@ void encode_rom(int* rom) {
 
 }
 
+void printInts(unsigned int* array, int length) {
+		for (int i=0;i<length;i++)
+				printf("%x ",array[i]);
+}
+
+typedef struct  {
+		int a;
+		int*b;
+} s_T;
+
+void mdo(s_T* s) {
+		printf("%d %d\n",s->a,s->b[0]);
+}
+
 int main() {
-		unsigned int d1[8] = { 0x28,0x61,0xb6,0xce,0x01,0x00,0x00,0xbe };
-		encode_rom(d1);
-		unsigned int d2[8] =  { 0x28,0xd7,0xbd,0xce,0x01,0x00,0x00,0x7b };
-		encode_rom(d2);
+		int a[]={1,2};
+		mdo(&(s_T){
+			2,
+			(int[]){1.2}
+		});
+
+		unsigned int roms[2][8] ={
+			   	{ 0x28,0x61,0xb6,0xce,0x01,0x00,0x00,0xbe },
+				{ 0x28,0xd7,0xbd,0xce,0x01,0x00,0x00,0x7b }
+		};
+
+		printInts((int[]){1,2,3},3);
+
+		for(int i=0;i<2;i++)
+			encode_rom(roms[i]);
 		
 		print(0);
 }

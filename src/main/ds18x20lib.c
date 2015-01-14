@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "delay.h"
+
+#define _TESTBUILD_
+
 #include "ds18x20lib.h"
 #include "ds18x20lib_hw.h"
 
@@ -76,8 +79,10 @@ uint8_t read_bit(one_wire_T* ow)
     uint8_t bit;
     OW_LOW(ow);
     OW_OUTPUT(ow);
-    delay_us(3);
+    //delay_us(3);
+    OW_LOW(ow); //TODO: kann aber auch raus ...
     OW_INPUT(ow);
+    OW_LOW(ow); //TODO: kann aber auch raus ...
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
@@ -115,7 +120,7 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
         wrbyte = wrbyte >> 1;
     }
 
-    OW_LOW(ow);
+    //OW_LOW(ow); 
     INTERRUPTS;
 }
 
@@ -396,11 +401,9 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
 
-        /*
         if (!parasite_mode) {
             OW_LOW(ow);
         }
-        */
 
 //        delay_ms(CONV_TIME_OW_HIGHEST);
         read_scratchpad(ow, sensor, scratchpad);

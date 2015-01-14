@@ -17,7 +17,7 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib_old.o debug.o ../test/cases/mock.cpp ../test/cases/sha1-asm.o
+SRC = $(NAME).o ds18x20lib.o debug.o ../test/cases/mock.o ../test/cases/sha1-asm.o ../test/doubles/ds18x20lib_hw.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TEST1_OBJ = $(addprefix cases/,Ds18x20libTest.o sha1-asm.o mock.o)
