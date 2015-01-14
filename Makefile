@@ -17,7 +17,7 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o debug.o 
+SRC = $(NAME).o ds18x20lib_old.o debug.o 
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TEST1_OBJ = $(addprefix cases/,Ds18x20libTest.o sha1-asm.o mock.o)
@@ -26,7 +26,7 @@ TEST1_OBJ+= $(addprefix doubles/,ds18x20lib_hw.o)
 ALLTESTS = TEST1 
 
 # If you do Debugging its better to run with -O0
-OPTIMIZE=-Os
+OPTIMIZE=-O0
 
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII

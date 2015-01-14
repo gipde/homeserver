@@ -1,45 +1,83 @@
 #include "global.h"
-#include <stdio.h>
-#include <math.h>
-#include "delay.h"
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#define DEBUG
+#include "debug.h"
 #include "ds18x20lib.h"
 #include "ds18x20lib_hw.h"
 
-#define DEBUG
-#include "debug.h"
+#define ONEWIRE_PORT 	PORTA
+#define ONEWIRE_PORTPIN PA4
+#define ONEWIRE_DDR		DDRA
+#define ONEWIRE_PIN		PINA
 
-/*
-    TODO: * check clock-cycles - gtkwave
-          * check optimal flow of power on / power off
-*/
+void interrupts()
+{
+//    sei();
+}
 
-#include <avr/interrupt.h>
+void no_interrupts()
+{
+  //  cli();
+}
+
+
+void power(uint8_t mode)
+{
+    no_interrupts();
+
+    if (mode == HIGH)
+        ONEWIRE_PORT |= 1 << ONEWIRE_PORTPIN;
+    else
+        ONEWIRE_PORT &= ~(1 << ONEWIRE_PORTPIN);
+
+    interrupts();
+}
+
+void direction(uint8_t dir)
+{
+    power(LOW);
+    no_interrupts();
+
+    if (dir == INPUT)
+        ONEWIRE_DDR &= ~(1 << ONEWIRE_PORTPIN);
+    else
+        ONEWIRE_DDR |= 1 << ONEWIRE_PORTPIN;
+
+    interrupts();
+}
+
+uint8_t read_pin()
+{
+    no_interrupts();
+    uint8_t bit = (ONEWIRE_PIN & (1 << ONEWIRE_PORTPIN)) >> ONEWIRE_PORTPIN;
+    interrupts();
+    return bit;
+}
+
+inline static void delay_us(uint16_t const us)
+{
+// for (uint16_t i = 0; i < us; i++)
+   //     _delay_us(1);
+}
 
 
 uint8_t reset(one_wire_T* ow)
 {
     uint8_t r;
-    NO_INTERRUPTS;
+	debug("Port %d Pin %d PortPin %d",ow->port,ow->pin,ow->port_pin);
 
-    OW_LOW(ow);
-    OW_OUTPUT(ow);
-
-    delay_us(480);
-    OW_INPUT(ow);
-    OW_HIGH(ow);
-    delay_us(60);
-    r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
-    debug("read bit in reset %d", r);
+	direction(OUTPUT);
+	OW_OUTPUT(ow);
+	delay_us(480);
+    direction(INPUT);;
+    power(HIGH);
+	delay_us(60);
+    r = read_pin(); // no presence detect --> err=1 otherwise err=0
     delay_us(240);
-    OW_LOW(ow);
+    power(LOW);
 
-    uint8_t state = OW_READ(ow);
-
-    INTERRUPTS;
-
-    debug("read bit in reset %d", state);
-
-    if ( state == 0 ) {            // short circuit --> err=2
+    if ( read_pin() == 0 ) {            // short circuit --> err=2
         r = 2;
     }
 
@@ -50,73 +88,63 @@ uint8_t reset(one_wire_T* ow)
     return r;
 }
 
-
-void write_bit(one_wire_T* ow, uint8_t wrbit)
+inline static void write_bit_intern(uint8_t const fst, uint8_t const snd)
 {
-
-	debug("Write BIT: %d",wrbit);
-    OW_LOW(ow);
-    OW_OUTPUT(ow);
-
-    if (wrbit == 0) {
-        delay_us(65);
-		OW_HIGH(ow);
-		delay_us(5);
-    } else {
-        delay_us(10);
-        OW_HIGH(ow);
-        delay_us(55);
-    }
-
+    direction(OUTPUT);
+    delay_us(fst);
+    power(HIGH);
+    delay_us(snd);
 }
 
-uint8_t read_bit(one_wire_T* ow)
+void write_bit(uint8_t wrbit)
 {
-	debug("Read BIT:");
+    if (wrbit == 0)
+        write_bit_intern(65, 5);
+    else
+        write_bit_intern(10, 15);
+}
+
+uint8_t read_bit()
+{
     uint8_t bit;
-	OW_LOW(ow);
-    OW_OUTPUT(ow);
-    delay_us(3);
-    OW_INPUT(ow);
+    direction(OUTPUT);
+    //_delay_us(3);
+    direction(INPUT);
+    power(HIGH);
     delay_us(10);
-    bit = OW_READ(ow);
+    bit = read_pin();
     delay_us(53);
-	debug("Result: %d",bit);
+    power(LOW);
     return bit;
 }
 
-uint8_t read_byte(one_wire_T* ow)
+uint8_t read_byte()
 {
     uint8_t readbyte = 0x00;
+    uint8_t readbit;
     uint8_t i;
 
-    NO_INTERRUPTS;
-
     for (i = 0; i < 8; i++) {
-        uint8_t readbit = read_bit(ow);
+        readbit = read_bit();
 
         if (readbit == 1) {
             readbyte |= (1 << i);
         }
     }
 
-    INTERRUPTS;
-
     return (readbyte);
 }
 
-void write_byte(one_wire_T* ow, uint8_t wrbyte)
+void write_byte(uint8_t wrbyte)
 {
-    debug("Write Byte %x", wrbyte);
-    NO_INTERRUPTS;
-
-    for (int i = 0; i < 8; i++) {
-        write_bit(ow, (wrbyte & 0b00000001));
+    uint8_t i;
+    for (i = 0; i < 8; i++) {
+        write_bit((wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
-	OW_LOW(ow);
-    INTERRUPTS;
 }
+
+
 
 /************************************************************************/
 /* reset search state                                                   */
@@ -156,8 +184,6 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
     rom_byte_mask = 1;
     search_result = 0;
 
-    debug("Searching slaves...");
-
     // if the last call was not the last one
     if (!LastDeviceFlag) {
         // 1-Wire reset
@@ -171,24 +197,22 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             return FALSE;
         }
 
-        write_byte(ow, SEARCH_ROM);
+        write_byte(SEARCH_ROM);
 
         do  {
             // read a bit and its complement
-            NO_INTERRUPTS;
-            id_bit = read_bit(ow);
-            cmp_id_bit = read_bit(ow);
-            INTERRUPTS;
+            id_bit = read_bit();
+            cmp_id_bit = read_bit();
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                debug("no device found\n\r");
+                debug("error complement is not identical\n\r");
                 break;
             } else  {
                 // all devices coupled have 0 or 1
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
-                else { // all are 0
+                else {
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
                     if (id_bit_number < LastDiscrepancy)
@@ -215,9 +239,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                     ROM_NO[rom_byte_number] &= ~rom_byte_mask;
 
                 // serial number search direction write bit
-                NO_INTERRUPTS;
-                write_bit(ow, search_direction);
-                INTERRUPTS;
+                write_bit(search_direction);
                 // increment the byte counter id_bit_number
                 // and shift the mask rom_byte_mask
                 id_bit_number++;
@@ -255,7 +277,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
     for (int i = 0; i < 8; i++) sensor->rom[i] = ROM_NO[i];
 
     //TODO: get config
-    OW_LOW(ow);
+	power(LOW);
     return search_result;
 }
 
@@ -282,12 +304,12 @@ uint8_t crc8(uint8_t* data)
     return crc;
 }
 
-void select(one_wire_T* ow, struct sensorT* sensor)
+void select(struct sensorT* sensor)
 {
-    write_byte(ow, MATCH_ROM);
+    write_byte(MATCH_ROM);
 
     for (int i = 0; i < 8; i++) {
-        write_byte(ow, sensor->rom[i]);
+        write_byte(sensor->rom[i]);
     }
 }
 
@@ -295,11 +317,11 @@ uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
                         uint8_t* scratchpad)
 {
     if (!reset(ow)) {
-        select(ow, sensor);
-        write_byte(ow, READ_SCRATCHPAD);
+        select(sensor);
+        write_byte(READ_SCRATCHPAD);
 
         for (int i = 0; i < 9; i++) {
-            scratchpad[i] = read_byte(ow);
+            scratchpad[i] = read_byte();
         }
 
         if (crc8(scratchpad) != scratchpad[8]) {
@@ -358,27 +380,30 @@ uint8_t getType(struct sensorT* sensor)
 uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
 {
     reset(ow);
-    select(ow, sensor);
-    write_byte(ow, READ_POWER);
-    NO_INTERRUPTS;
-    uint8_t parasite_mode = ! read_bit(ow);
-    INTERRUPTS;
+    select(sensor);
+    write_byte(READ_POWER);
+    uint8_t parasite_mode = ! read_bit();
     return parasite_mode;
 }
 
-float calc_temp(uint8_t* scratchpad)
+float calc_temp(uint8_t* scratchpad, float temp)
 {
     int16_t raw = (scratchpad[1] << 8) | scratchpad[0];
     uint8_t cfg = (scratchpad[4] & 0x60);
 
+    /*
+    debug("cfg: ");
+    uart_puti(cfg);
+    debug("\n\r");
+    */
     // at lower res, the low bits are undefined, so let's zero them
     if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
     else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
 
     //// default is 12 bit resolution, 750 ms conversion time
-	debug("temp: %f",raw);
-    return (float)raw / 16.0;
+    temp = (float)raw / 16.0;
+    return temp;
 }
 
 
@@ -389,22 +414,23 @@ float calc_temp(uint8_t* scratchpad)
 float read_temp(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t scratchpad[9] = {0};
-    uint8_t parasite_mode = is_parasite(ow, sensor);
+    float temp = 0;
+    uint8_t parasite_mode = is_parasite(ow,sensor);
 
     if (!reset(ow)) {
-        select(ow, sensor);
-        write_byte(ow, CONVERT_T);
+        select(sensor);
+        write_byte(CONVERT_T);
 
-		/*
         if (!parasite_mode) {
-            OW_LOW(ow);
-        }
-		*/
+            power(LOW);
+        } else {
+			debug("reading in parasite mode");
+		}
 
-//        delay_ms(CONV_TIME_OW_HIGHEST);
-        read_scratchpad(ow, sensor, scratchpad);
-        return calc_temp(scratchpad);
-    }
+        //_delay_ms(CONV_TIME_HIGHEST);
+        read_scratchpad(ow,sensor, scratchpad);
+        return calc_temp(scratchpad, temp);;
+    } 
 
     return 0;
 }

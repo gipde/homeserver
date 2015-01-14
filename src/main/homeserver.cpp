@@ -24,42 +24,41 @@ int main(void)
 {
     one_wire_T ow = {  M_PORTA, M_PINA, M_DDRA, 4};
     sensorT sensor;
-    char hex[3];
     debug("Starting Programm..");
 
-    reset_search();
+    for (;;) {
+        reset_search();
 
     while (search_slaves(&ow, &sensor) == TRUE) {
-        debug("ROM: ");
+        debugn("ROM: ");
 
         for (int i = 0; i < 8; i++) {
-            sprintf(hex, "%x", sensor.rom[i]);
-            debug("%s ", hex);
+            debugc("%x ", sensor.rom[i]);
         }
 
         switch (getType(&sensor)) {
         case DS1822:
-            debug("DS1822");
+            debugnl("DS1822");
             break;
 
         case DS18B20:
-            debug("DS18B20");
+            debugnl("DS18B20");
             break;
 
         case DS18S20:
-            debug("DS18S20");
+            debugnl("DS18S20");
             break;
 
         default:
-            debug("Other Device");
+            debugnl("Other Device");
         }
 
-        debug("\n\r");
         float temp = read_temp(&ow, &sensor);
-        debug(" Temperature = ");
-        debug(" %f", temp);
-        debug(" Grad Celsius\n\r");
+    	char s[8];
+	    dtostrf(temp, 0, 2, s);
+        debug(" Temperature = %s Grad Celsius",s);
     }
 
     debug("\n\r");
+	}
 }
