@@ -1,18 +1,18 @@
 #include "global.h"
 #include <stdio.h>
 #include <math.h>
-#define _TESTBUILD_
+//#define _TESTBUILD_
 #include "delay.h"
 
 
 #include "ds18x20lib.h"
 #include "ds18x20lib_hw.h"
 
-#define DEBUG
+//#define DEBUG
 #include "debug.h"
 
 /*
-    TODO: * check clock-cycles - gtkwave
+    TODO: * cleanup e.g. remove _hw 
           * check optimal flow of power on / power off
 */
 
@@ -80,7 +80,6 @@ uint8_t read_bit(one_wire_T* ow)
     OW_LOW(ow);
     OW_OUTPUT(ow);
     delay_us(3);
-    OW_LOW(ow); //TODO: kann aber auch raus ...
     OW_INPUT(ow);
     OW_HIGH(ow); 
     delay_us(10);
@@ -120,7 +119,7 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
         wrbyte = wrbyte >> 1;
     }
 
-    //OW_LOW(ow); 
+    OW_LOW(ow); 
     INTERRUPTS;
 }
 
@@ -409,8 +408,8 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
 
-        if (!parasite_mode) {
-            OW_LOW(ow);
+        if (parasite_mode) {
+            OW_HIGH(ow);
         }
 
 //        delay_ms(CONV_TIME_OW_HIGHEST);

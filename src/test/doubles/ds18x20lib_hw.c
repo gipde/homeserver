@@ -10,6 +10,7 @@
 #include "../cases/Ds18x20libTest.h"
 #include "../cases/mock.h"
 
+
 static replay_T* replay;
 static uint8_t inited;
 static uint16_t bitptr;
@@ -31,6 +32,7 @@ void no_interrupts()
 void delay_hook_us(uint16_t us)
 {
     EVENT(E_DELAY_US, us);
+	UDR=us;
 //    debug("wait %d us", us);
 }
 
@@ -64,6 +66,7 @@ void direction(uint8_t dir)
 
 uint8_t read()
 {
+	UDR=0x1;
     if (!inited) {
         debug("WARNING: not inited");
         return 0;
@@ -77,7 +80,8 @@ uint8_t read()
 //    debug("read pin: %d (%d,%d,%d) [%d,%d]", retval, byte, bit, bitptr,
 //          m[0]);
     bitptr++;
-    EVENT(E_READ_PIN,retval);
+    //EVENT(E_READ_PIN,retval);
+	UDR=0x0;
     return retval;
 }
 

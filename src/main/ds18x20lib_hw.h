@@ -22,7 +22,8 @@ void delay_hook_ms(uint16_t);
 #else
 #define DELEGATE1(fn)
 #define DELEGATE2(fn,arg1)
-#define OW_READ(ow) (IO(ow->pin) & (1 << ow->port_pin)) >> ow->port_pin
+#define OW_READ(ow)     read()
+//#define OW_READ(ow) (IO(ow->pin) & (1 << ow->port_pin)) >> ow->port_pin
 #endif
 
 #define IO(port)            (*(volatile uint8_t *)((port) + 0x20))
