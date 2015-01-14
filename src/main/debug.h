@@ -11,8 +11,8 @@
 */
 
 
-#define DEBUG_UART
-//#define DEBUG_SIMUL
+//#define DEBUG_UART
+#define DEBUG_SIMUL
 
 
 #ifdef DEBUG

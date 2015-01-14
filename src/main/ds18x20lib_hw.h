@@ -18,7 +18,7 @@ void interrupts();
 void no_interrupts();
 void delay_hook_us(uint16_t);
 void delay_hook_ms(uint16_t);
-#define OW_READ(ow)		read()
+#define OW_READ(ow)     read()
 #else
 #define DELEGATE1(fn)
 #define DELEGATE2(fn,arg1)

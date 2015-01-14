@@ -54,14 +54,14 @@ uint8_t reset(one_wire_T* ow)
 void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
 
-	debug("Write BIT: %d",wrbit);
+    debug("Write BIT: %d", wrbit);
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
     if (wrbit == 0) {
         delay_us(65);
-		OW_HIGH(ow);
-		delay_us(5);
+        OW_HIGH(ow);
+        delay_us(5);
     } else {
         delay_us(10);
         OW_HIGH(ow);
@@ -72,16 +72,16 @@ void write_bit(one_wire_T* ow, uint8_t wrbit)
 
 uint8_t read_bit(one_wire_T* ow)
 {
-	debug("Read BIT:");
+    debug("Read BIT:");
     uint8_t bit;
-	OW_LOW(ow);
+    OW_LOW(ow);
     OW_OUTPUT(ow);
     delay_us(3);
     OW_INPUT(ow);
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
-	debug("Result: %d",bit);
+    debug("Result: %d", bit);
     return bit;
 }
 
@@ -114,7 +114,8 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
         write_bit(ow, (wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
-	OW_LOW(ow);
+
+    OW_LOW(ow);
     INTERRUPTS;
 }
 
@@ -377,7 +378,7 @@ float calc_temp(uint8_t* scratchpad)
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
 
     //// default is 12 bit resolution, 750 ms conversion time
-	debug("temp: %f",raw);
+    debug("temp: %f", raw);
     return (float)raw / 16.0;
 }
 
@@ -395,11 +396,11 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
 
-		/*
+        /*
         if (!parasite_mode) {
             OW_LOW(ow);
         }
-		*/
+        */
 
 //        delay_ms(CONV_TIME_OW_HIGHEST);
         read_scratchpad(ow, sensor, scratchpad);

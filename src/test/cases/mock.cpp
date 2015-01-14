@@ -68,6 +68,7 @@ int cmpMock(char expected[])
 
 void event(event_t* event)
 {
+	debug("E %d,%d",event->type,event->value);
     int n_usage = usage + 5;
 
     if (n_usage > MAXBYTES) {
