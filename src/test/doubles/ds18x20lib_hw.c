@@ -32,7 +32,7 @@ void no_interrupts()
 void delay_hook_us(uint16_t us)
 {
     EVENT(E_DELAY_US, us);
-	UDR=us;
+    UDR = us;
 //    debug("wait %d us", us);
 }
 
@@ -56,17 +56,16 @@ void direction(uint8_t dir)
 {
     EVENT(E_DIRECTION, dir);
 
-	/*
+    /*
     if (dir == INPUT)
         debug("setting Direction INPUT");
     else
         debug("setting Direction OUTPUT");
-		*/
+        */
 }
 
 uint8_t read()
 {
-	UDR=0x1;
     if (!inited) {
         debug("WARNING: not inited");
         return 0;
@@ -81,7 +80,6 @@ uint8_t read()
 //          m[0]);
     bitptr++;
     //EVENT(E_READ_PIN,retval);
-	UDR=0x0;
     return retval;
 }
 

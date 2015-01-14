@@ -15,13 +15,13 @@
 
 void interrupts()
 {
-	EVENT(E_INTERRUPTS);
+    EVENT(E_INTERRUPTS);
     sei();
 }
 
 void no_interrupts()
 {
-	EVENT(E_NO_INTERRUPTS);
+    EVENT(E_NO_INTERRUPTS);
     cli();
 }
 
@@ -29,7 +29,8 @@ void no_interrupts()
 void power(uint8_t mode)
 {
     no_interrupts();
-	EVENT(E_POWER,mode);
+    EVENT(E_POWER, mode);
+
     if (mode == HIGH)
         ONEWIRE_PORT |= 1 << ONEWIRE_PORTPIN;
     else
@@ -43,7 +44,7 @@ void direction(uint8_t dir)
     no_interrupts();
     power(LOW);
 
-	EVENT(E_DIRECTION,dir);
+    EVENT(E_DIRECTION, dir);
 
     if (dir == INPUT)
         ONEWIRE_DDR &= ~(1 << ONEWIRE_PORTPIN);
@@ -60,11 +61,12 @@ typedef struct {
 
 
 static uint16_t bitptr;
-static char data[]={0x0A,0x99,0xA6,0x5A,0x5A,0x96,0x59,0x69,0xA5,0xAA,0xAA,0xAA,0xAA,0xAA,0x5A,0x95,0xA9,0x66,0x5A,0x99,0x95,0x55,0x66,0xA5,0x95,0xAA,0xAA,0xAA,0xAA,0xAA,0x5A,0x56,0x09};
+static char data[] = {0x0A, 0x99, 0xA6, 0x5A, 0x5A, 0x96, 0x59, 0x69, 0xA5, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0x5A, 0x95, 0xA9, 0x66, 0x5A, 0x99, 0x95, 0x55, 0x66, 0xA5, 0x95, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0x5A, 0x56, 0x09};
 static replay_T replay = { data, 17 };
 
 
-uint8_t answer_pin() {
+uint8_t answer_pin()
+{
     uint8_t bit = bitptr % 8;
     uint8_t byte = bitptr / 8;
     char* m = replay.data + byte;
@@ -78,23 +80,25 @@ uint8_t read_pin()
 {
     no_interrupts();
     uint8_t bit = (ONEWIRE_PIN & (1 << ONEWIRE_PORTPIN)) >> ONEWIRE_PORTPIN;
-	EVENT(E_READ_PIN,bit);
+    EVENT(E_READ_PIN, bit);
     interrupts();
     return answer_pin();
 }
 
 inline static void delay_us(uint16_t const us)
 {
- EVENT(E_DELAY_US,us);
- for (uint16_t i = 0; i < us; i++)
-         _delay_us(1);
+    EVENT(E_DELAY_US, us);
+
+    for (uint16_t i = 0; i < us; i++)
+        _delay_us(1);
 }
 
 
 uint8_t reset(one_wire_T* ow)
 {
     uint8_t r;
-    debug("*** OW Reset on Port %d Pin %d PortPin %d", ow->port, ow->pin, ow->port_pin);
+    debug("*** OW Reset on Port %d Pin %d PortPin %d", ow->port, ow->pin,
+          ow->port_pin);
 
     direction(OUTPUT);
     direction(OUTPUT);
@@ -114,7 +118,7 @@ uint8_t reset(one_wire_T* ow)
         debug("No Sensor found.");
     }
 
-	debug("*** OW Reset Ende ***");
+    debug("*** OW Reset Ende ***");
     return r;
 }
 
@@ -129,17 +133,18 @@ inline static void write_bit_intern(uint8_t const fst,
 
 void write_bit(uint8_t wrbit)
 {
-//	debug("=== WRITE BIT === ENTER %d",wrbit);
+//  debug("=== WRITE BIT === ENTER %d",wrbit);
     if (wrbit == 0)
         write_bit_intern(65, 5);
     else
         write_bit_intern(10, 15);
-//	debug("=== WRITE BIT === EXIT");
+
+//  debug("=== WRITE BIT === EXIT");
 }
 
 uint8_t read_bit()
 {
-//	debug("=== READ BIT === ENTER ");
+//  debug("=== READ BIT === ENTER ");
     uint8_t bit;
     direction(OUTPUT);
     //_delay_us(3);
@@ -149,7 +154,7 @@ uint8_t read_bit()
     bit = read_pin();
     delay_us(53);
     power(LOW);
-//	debug("=== READ BIT === EXIT %d",bit);
+//  debug("=== READ BIT === EXIT %d",bit);
     return bit;
 }
 
@@ -209,7 +214,7 @@ void reset_search()
 /************************************************************************/
 uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 {
-	debug("*** OW search slaves ** ENTER");
+    debug("*** OW search slaves ** ENTER");
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
     uint8_t id_bit, cmp_id_bit;
@@ -250,19 +255,20 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
                 else {
-					debug("Discrepancy at %d",id_bit_number);
+                    debug("Discrepancy at %d", id_bit_number);
+
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
                     if (id_bit_number < LastDiscrepancy) {
-						debug("get same as last time");
+                        debug("get same as last time");
                         search_direction = ((ROM_NO[rom_byte_number] & rom_byte_mask) > 0);
-					}
-                    else {
+                    } else {
                         // if equal to last pick 1, if not then pick 0
-						uint8_t cmp=id_bit_number == LastDiscrepancy;
-						debug("id_but_nr %d == LastDiscrepancy %d = %d",id_bit_number,LastDiscrepancy,cmp);
+                        uint8_t cmp = id_bit_number == LastDiscrepancy;
+                        debug("id_but_nr %d == LastDiscrepancy %d = %d", id_bit_number,
+                              LastDiscrepancy, cmp);
                         search_direction = cmp;
-					}
+                    }
 
                     // if 0 was picked then record its position in LastZero
                     if (search_direction == 0) {
@@ -276,7 +282,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
                 // set or clear the bit in the ROM byte rom_byte_number
                 // with mask rom_byte_mask
-				//debug("ROM BIT: %d",search_direction);
+                //debug("ROM BIT: %d",search_direction);
                 if (search_direction == 1)
                     ROM_NO[rom_byte_number] |= rom_byte_mask;
                 else
@@ -291,7 +297,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
                 // if the mask is 0 then go to new SerialNum byte rom_byte_number and reset mask
                 if (rom_byte_mask == 0) {
-					//debug("ROM BYTE: 0x%X",ROM_NO[rom_byte_number]);
+                    //debug("ROM BYTE: 0x%X",ROM_NO[rom_byte_number]);
                     rom_byte_number++;
                     rom_byte_mask = 1;
                 }
@@ -306,8 +312,8 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             // check for last device
             if (LastDiscrepancy == 0) {
                 LastDeviceFlag = TRUE;
-				debug("no more discrepancy occured");
-			}
+                debug("no more discrepancy occured");
+            }
 
             search_result = TRUE;
         }
@@ -325,7 +331,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
     //TODO: get config
     power(LOW);
-	debug("*** OW search slaves ** EXIT");
+    debug("*** OW search slaves ** EXIT");
     return search_result;
 }
 

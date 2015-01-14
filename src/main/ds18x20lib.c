@@ -12,7 +12,7 @@
 #include "debug.h"
 
 /*
-    TODO: * cleanup e.g. remove _hw 
+    TODO: * cleanup e.g. remove _hw
           * check optimal flow of power on / power off
 */
 
@@ -21,7 +21,7 @@
 
 uint8_t reset(one_wire_T* ow)
 {
-	debug("*** OW Reset");
+    debug("*** OW Reset");
     uint8_t r;
     NO_INTERRUPTS;
 
@@ -29,7 +29,6 @@ uint8_t reset(one_wire_T* ow)
     OW_OUTPUT(ow);
 
     delay_us(480);
-	OW_LOW(ow);
     OW_INPUT(ow);
     OW_HIGH(ow);
     delay_us(60);
@@ -49,7 +48,7 @@ uint8_t reset(one_wire_T* ow)
         debug("No Sensor found.");
     }
 
-	debug("*** OW Reset Ende ***");
+    debug("*** OW Reset Ende ***");
     return r;
 }
 
@@ -70,6 +69,7 @@ void write_bit(one_wire_T* ow, uint8_t wrbit)
         OW_HIGH(ow);
         delay_us(15);
     }
+
     debug("=== WRITE BIT === EXIT: %d", wrbit);
 }
 
@@ -81,11 +81,11 @@ uint8_t read_bit(one_wire_T* ow)
     OW_OUTPUT(ow);
     delay_us(3);
     OW_INPUT(ow);
-    OW_HIGH(ow); 
+    OW_HIGH(ow);
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
-	OW_LOW(ow);
+    OW_LOW(ow);
     debug("=== READ BIT === EXIT: %d", bit);
     return bit;
 }
@@ -119,7 +119,7 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
         wrbyte = wrbyte >> 1;
     }
 
-    OW_LOW(ow); 
+    OW_LOW(ow);
     INTERRUPTS;
 }
 
@@ -161,7 +161,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
     rom_byte_mask = 1;
     search_result = 0;
 
-    debug("Searching slaves... ORG");
+    debug("Searching slaves...");
 
     // if the last call was not the last one
     if (!LastDeviceFlag) {
@@ -194,19 +194,21 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
                 else { // all are 0
-					debug("Discrepancy at %d",id_bit_number);
+                    debug("Discrepancy at %d", id_bit_number);
+
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
                     if (id_bit_number < LastDiscrepancy) {
                         search_direction = ((ROM_NO[rom_byte_number] & rom_byte_mask) > 0);
-						debug("get same as last time");
-					}  else {
+                        debug("get same as last time");
+                    }  else {
                         // if equal to last pick 1, if not then pick 0
-						uint8_t cmp=id_bit_number == LastDiscrepancy;
-						debug("id_but_nr %d == LastDiscrepancy %d = %d",id_bit_number,LastDiscrepancy,cmp);
+                        uint8_t cmp = id_bit_number == LastDiscrepancy;
+                        debug("id_but_nr %d == LastDiscrepancy %d = %d", id_bit_number,
+                              LastDiscrepancy, cmp);
                         search_direction = (cmp);
-					}
-					
+                    }
+
 
                     // if 0 was picked then record its position in LastZero
                     if (search_direction == 0) {
@@ -250,8 +252,8 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             // check for last device
             if (LastDiscrepancy == 0) {
                 LastDeviceFlag = TRUE;
-				debug("no more discrepancy occured");
-			}
+                debug("no more discrepancy occured");
+            }
 
             search_result = TRUE;
         }
