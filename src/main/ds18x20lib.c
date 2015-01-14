@@ -1,9 +1,9 @@
 #include "global.h"
 #include <stdio.h>
 #include <math.h>
+#define _TESTBUILD_
 #include "delay.h"
 
-#define _TESTBUILD_
 
 #include "ds18x20lib.h"
 #include "ds18x20lib_hw.h"
@@ -21,26 +21,28 @@
 
 uint8_t reset(one_wire_T* ow)
 {
+	debug("*** OW Reset");
     uint8_t r;
     NO_INTERRUPTS;
 
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
+    OW_LOW(ow);
+    OW_OUTPUT(ow);
+
     delay_us(480);
+	OW_LOW(ow);
     OW_INPUT(ow);
     OW_HIGH(ow);
     delay_us(60);
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
-    debug("read bit in reset %d", r);
     delay_us(240);
     OW_LOW(ow);
 
     uint8_t state = OW_READ(ow);
 
     INTERRUPTS;
-
-    debug("read bit in reset %d", state);
 
     if ( state == 0 ) {            // short circuit --> err=2
         r = 2;
@@ -50,6 +52,7 @@ uint8_t reset(one_wire_T* ow)
         debug("No Sensor found.");
     }
 
+	debug("*** OW Reset Ende ***");
     return r;
 }
 
@@ -57,7 +60,7 @@ uint8_t reset(one_wire_T* ow)
 void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
 
-    debug("Write BIT: %d", wrbit);
+    debug("=== WRITE BIT === ENTER: %d", wrbit);
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
@@ -68,25 +71,26 @@ void write_bit(one_wire_T* ow, uint8_t wrbit)
     } else {
         delay_us(10);
         OW_HIGH(ow);
-        delay_us(55);
+        delay_us(15);
     }
-
+    debug("=== WRITE BIT === EXIT: %d", wrbit);
 }
 
 uint8_t read_bit(one_wire_T* ow)
 {
-    debug("Read BIT:");
+    debug("=== READ BIT === ENTER");
     uint8_t bit;
     OW_LOW(ow);
     OW_OUTPUT(ow);
     //delay_us(3);
     OW_LOW(ow); //TODO: kann aber auch raus ...
     OW_INPUT(ow);
-    OW_LOW(ow); //TODO: kann aber auch raus ...
+    OW_HIGH(ow); 
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
-    debug("Result: %d", bit);
+	OW_LOW(ow);
+    debug("=== READ BIT === EXIT: %d", bit);
     return bit;
 }
 
@@ -112,7 +116,6 @@ uint8_t read_byte(one_wire_T* ow)
 
 void write_byte(one_wire_T* ow, uint8_t wrbyte)
 {
-    debug("Write Byte %x", wrbyte);
     NO_INTERRUPTS;
 
     for (int i = 0; i < 8; i++) {
@@ -162,7 +165,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
     rom_byte_mask = 1;
     search_result = 0;
 
-    debug("Searching slaves...");
+    debug("Searching slaves... ORG");
 
     // if the last call was not the last one
     if (!LastDeviceFlag) {
@@ -188,20 +191,26 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                debug("no device found\n\r");
+                debug("error complement is not identical\n\r");
                 break;
             } else  {
                 // all devices coupled have 0 or 1
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
                 else { // all are 0
+					debug("Discrepancy at %d",id_bit_number);
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
-                    if (id_bit_number < LastDiscrepancy)
+                    if (id_bit_number < LastDiscrepancy) {
                         search_direction = ((ROM_NO[rom_byte_number] & rom_byte_mask) > 0);
-                    else
+						debug("get same as last time");
+					}  else {
                         // if equal to last pick 1, if not then pick 0
-                        search_direction = (id_bit_number == LastDiscrepancy);
+						uint8_t cmp=id_bit_number == LastDiscrepancy;
+						debug("id_but_nr %d == LastDiscrepancy %d = %d",id_bit_number,LastDiscrepancy,cmp);
+                        search_direction = (cmp);
+					}
+					
 
                     // if 0 was picked then record its position in LastZero
                     if (search_direction == 0) {
@@ -243,8 +252,10 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             LastDiscrepancy = last_zero;
 
             // check for last device
-            if (LastDiscrepancy == 0)
+            if (LastDiscrepancy == 0) {
                 LastDeviceFlag = TRUE;
+				debug("no more discrepancy occured");
+			}
 
             search_result = TRUE;
         }
