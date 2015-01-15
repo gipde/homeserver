@@ -56,6 +56,7 @@ uint8_t reset(one_wire_T* ow)
 void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
 
+	UDR=0x1;
     debug("=== WRITE BIT === ENTER: %d", wrbit);
     OW_LOW(ow);
     OW_OUTPUT(ow);
@@ -67,14 +68,16 @@ void write_bit(one_wire_T* ow, uint8_t wrbit)
     } else {
         delay_us(10);
         OW_HIGH(ow);
-        delay_us(15);
+        delay_us(55);
     }
-
+	// Unterschiedliche Zeiten beim Send 0,1 u Receive Window
     debug("=== WRITE BIT === EXIT: %d", wrbit);
+	UDR=0x0;
 }
 
 uint8_t read_bit(one_wire_T* ow)
 {
+	UDR=0x2;
     debug("=== READ BIT === ENTER");
     uint8_t bit;
     OW_LOW(ow);
@@ -87,6 +90,7 @@ uint8_t read_bit(one_wire_T* ow)
     delay_us(53);
     OW_LOW(ow);
     debug("=== READ BIT === EXIT: %d", bit);
+	UDR=0x0;
     return bit;
 }
 
