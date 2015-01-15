@@ -1,13 +1,9 @@
 # TODO:
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
-
-# EROR: compiliert immer wieder
-
 # * Doxygen
 
 # * Macros for assertions / Testcases
-# * Mocks
 
 
 # CPU Type
@@ -73,7 +69,7 @@ ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cp
 OBJ = $(addprefix src/main/,$(SRC)) 
 
 LDFLAGS = -Wl,-Map="$(TARGET).map" -Wl,--start-group -Wl,-lm -Wl,--allow-multiple-definition
-LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU)
+LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU) 
 
 all: $(addprefix $(TARGET)., elf hex eep sym lss) size
 
@@ -233,6 +229,9 @@ debug_help:
 debug: $(TARGET).elf debug_help 
 	@$(SIMULAVR) -g --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS)
 
+doc:
+	doxygen doc/doxygen.conf
+
 help:
 	@echo Targets
 	@echo .
@@ -254,6 +253,4 @@ help:
 	@echo  doc             - Generate Doc
 	
 .SECONDARY: # do not cleanup intermediate files
-.SECONDEXPANSION:
-	@echo "Secondary"
-.PHONY: clean help all sizeafter format test debug_help check buildDir testenv
+.PHONY: clean help all sizeafter format test debug_help check buildDir testenv doc

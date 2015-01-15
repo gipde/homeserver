@@ -10,3 +10,4 @@
 *.lst
 tags
 cscope.out
+build

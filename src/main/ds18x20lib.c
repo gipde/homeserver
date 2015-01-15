@@ -1,3 +1,4 @@
+
 #include "global.h"
 #include <stdio.h>
 #include <math.h>
@@ -21,7 +22,9 @@ static uint8_t LastDiscrepancy;
 static uint8_t LastFamilyDiscrepancy;
 static uint8_t LastDeviceFlag;
 
-
+/*!
+ * Reset the Onewire Bus
+ */
 uint8_t reset(one_wire_T* ow)
 {
     debug("*** OW Reset");
@@ -133,6 +136,9 @@ static void reset_search()
     }
 }
 
+/*!
+ * search the next slave on the bus
+ */
 uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t id_bit_number;
@@ -326,6 +332,9 @@ uint8_t get_precision(struct sensorT* sensor) {
 }
 */
 
+/*!
+ * get the type of the sensor
+ */
 uint8_t getType(struct sensorT* sensor)
 {
     uint8_t r = OTHER;
@@ -381,7 +390,9 @@ static float calc_temp(uint8_t* scratchpad)
 }
 
 
-
+/*!
+ * read the temp of specific sensor
+ */
 float read_temp(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t scratchpad[9] = {0};

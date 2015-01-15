@@ -1,3 +1,10 @@
+/*! \file 
+ * \brief DS18x20 OneWire Interface Driver.
+ * This Driver connects to the DS18x20 Sensors on a OneWire Bus
+ * \addtogroup ds18x20 
+ * @{
+ */
+
 #ifndef _DS18X20LIB_h_
 #define _DS18X20LIB_h_
 
@@ -43,7 +50,6 @@
 #define M_DDRA  0x1A
 #define M_PORTA 0x1B
 
-/* API */
 typedef struct {
     uint8_t port;
     uint8_t pin;
@@ -51,9 +57,14 @@ typedef struct {
     uint8_t port_pin;
 } one_wire_T;
 
+/*!
+ * \brief sensorT holds all relevant data of a sensor
+ *
+ * the most notable info is the rom-address
+ */
 struct sensorT {
-    uint8_t rom[8];
-    uint8_t resolution;
+    uint8_t rom[8]; 
+    uint8_t resolution; 
 };
 
 uint8_t reset(one_wire_T*);
@@ -104,3 +115,4 @@ void delay_hook_ms(uint16_t);
 
 
 #endif
+/** @}*/
