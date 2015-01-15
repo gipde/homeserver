@@ -1,7 +1,7 @@
-/*! \file 
+/*! \file
  * \brief DS18x20 OneWire Interface Driver.
  * This Driver connects to the DS18x20 Sensors on a OneWire Bus
- * \addtogroup ds18x20 
+ * \addtogroup ds18x20
  * @{
  */
 
@@ -30,7 +30,7 @@
 #define RESOLUTION_UNKNOWN  0xFF
 
 #define CONV_TIME_HIGHEST   750
-#define CON_TIME_HIGH       CONV_TIME_HIGHEST/2
+#define CONV_TIME_HIGH      CONV_TIME_HIGHEST/2
 #define CONV_TIME_MEDIUM    CONV_TIME_HIGHEST/4
 #define CONV_TIME_LOW       CONV_TIME_HIGHEST/8
 
@@ -63,8 +63,8 @@ typedef struct {
  * the most notable info is the rom-address
  */
 struct sensorT {
-    uint8_t rom[8]; 
-    uint8_t resolution; 
+    uint8_t rom[8];
+    uint8_t resolution;
 };
 
 uint8_t reset(one_wire_T*);

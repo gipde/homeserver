@@ -10,8 +10,8 @@
 #include "debug.h"
 
 /*
-    TODO: * cleanup e.g. remove _hw
-          * check optimal flow of power on / power off
+ * TODO:
+ * check search_slaves better
 */
 
 #include <avr/interrupt.h>
@@ -134,6 +134,126 @@ static void reset_search()
 
         if ( i == 0) break;
     }
+}
+
+static uint8_t crc8(uint8_t* data)
+{
+    uint8_t crc = 0;
+
+    for (uint8_t j = 0; j < 8; j++)     {
+        uint8_t inbyte = *data++;
+
+        for (uint8_t i = 8; i; i--) {
+            uint8_t mix = (crc ^ inbyte) & 0x01;
+            crc >>= 1;
+
+            if (mix) crc ^= 0x8C;
+
+            inbyte >>= 1;
+        }
+    }
+
+    return crc;
+}
+
+static void select(one_wire_T* ow, struct sensorT* sensor)
+{
+    write_byte(ow, MATCH_ROM);
+
+    for (int i = 0; i < 8; i++) {
+        write_byte(ow, sensor->rom[i]);
+    }
+}
+
+static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
+                               uint8_t* scratchpad)
+{
+    if (!reset(ow)) {
+        select(ow, sensor);
+        write_byte(ow, READ_SCRATCHPAD);
+
+        for (int i = 0; i < 9; i++) {
+            scratchpad[i] = read_byte(ow);
+        }
+
+        if (crc8(scratchpad) != scratchpad[8]) {
+            debug("CRC Error!\n\r ");
+            return FALSE;
+        }
+    } else {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/*!
+ * get the type of the sensor
+ */
+uint8_t getType(struct sensorT* sensor)
+{
+    uint8_t r = OTHER;
+
+    switch (sensor->rom[0]) {
+    case 0x10:
+        r = DS18S20;
+        //type_s = 1;
+        break;
+
+    case 0x28:
+        r = DS18B20;
+        //type_s = 0;
+        break;
+
+    case 0x22:
+        r = DS1822;
+        //type_s = 0;
+        break;
+
+    default:
+        r = OTHER;
+    }
+
+    return r;
+}
+
+
+/*! Set the Precision of the Sensor
+ */
+void set_precision(one_wire_T* ow, struct sensorT* sensor, uint8_t precision)
+{
+    uint8_t sp[9];
+
+    if (getType(sensor) == DS18B20) {
+        if (read_scratchpad(ow, sensor, (uint8_t*)&sp) && !reset(ow)) {
+            select(ow,sensor);
+            write_byte(ow, WRITE_SCRATCHPAD);
+            write_byte(ow, sp[2]);
+            write_byte(ow, sp[3]);
+            //TODO:
+            //maybe manipulate only bits 5 6
+            //maybe transmit in eeprom
+            write_byte(ow, precision);
+        }
+    } else {
+        debug("only works on DS18S20");
+	}
+}
+
+/*! Get the actual Precision of the Sensor
+ */
+uint8_t get_precision(one_wire_T* ow, struct sensorT* sensor)
+{
+	if (getType(sensor) == DS18B20) {
+		uint8_t scratchpad[9] = {0};
+
+    if (read_scratchpad(ow, sensor, scratchpad)) {
+        return scratchpad[4] & 0b01100000;
+    }
+	} else {
+        debug("only works on DS18S20");
+	}
+    return RESOLUTION_UNKNOWN;
 }
 
 /*!
@@ -262,106 +382,12 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
     for (int i = 0; i < 8; i++) sensor->rom[i] = ROM_NO[i];
 
-    //TODO: get config
     OW_LOW(ow);
+
+	sensor->resolution=get_precision(ow,sensor);
+
     return search_result;
 }
-
-static uint8_t crc8(uint8_t* data)
-{
-    uint8_t crc = 0;
-
-    for (uint8_t j = 0; j < 8; j++)     {
-        uint8_t inbyte = *data++;
-
-        for (uint8_t i = 8; i; i--) {
-            uint8_t mix = (crc ^ inbyte) & 0x01;
-            crc >>= 1;
-
-            if (mix) crc ^= 0x8C;
-
-            inbyte >>= 1;
-        }
-    }
-
-    return crc;
-}
-
-static void select(one_wire_T* ow, struct sensorT* sensor)
-{
-    write_byte(ow, MATCH_ROM);
-
-    for (int i = 0; i < 8; i++) {
-        write_byte(ow, sensor->rom[i]);
-    }
-}
-
-static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
-                               uint8_t* scratchpad)
-{
-    if (!reset(ow)) {
-        select(ow, sensor);
-        write_byte(ow, READ_SCRATCHPAD);
-
-        for (int i = 0; i < 9; i++) {
-            scratchpad[i] = read_byte(ow);
-        }
-
-        if (crc8(scratchpad) != scratchpad[8]) {
-            debug("CRC Error!\n\r ");
-            return FALSE;
-        }
-    } else {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-/*
-void set_precision(struct sensorT* sensor, uint8_t precision) {
-
-}
-
-uint8_t get_precision(struct sensorT* sensor) {
-    uint8_t scratchpad[9]={0};
-    if(read_scratchpad(sensor,scratchpad)) {
-        return scratchpad[4] && 0b1100000;
-    }
-    return RESOLUTION_UNKNOWN;
-}
-*/
-
-/*!
- * get the type of the sensor
- */
-uint8_t getType(struct sensorT* sensor)
-{
-    uint8_t r = OTHER;
-
-    switch (sensor->rom[0]) {
-    case 0x10:
-        r = DS18S20;
-        //type_s = 1;
-        break;
-
-    case 0x28:
-        r = DS18B20;
-        //type_s = 0;
-        break;
-
-    case 0x22:
-        r = DS1822;
-        //type_s = 0;
-        break;
-
-    default:
-        r = OTHER;
-    }
-
-    return r;
-}
-
 
 static uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
 {
@@ -379,12 +405,15 @@ static float calc_temp(uint8_t* scratchpad)
     int16_t raw = (scratchpad[1] << 8) | scratchpad[0];
     uint8_t cfg = (scratchpad[4] & 0x60);
 
+	// TODO:
+	// Wenn es ein DS18S20 ist, dann muss anders berechbet werden
+	//
     // at lower res, the low bits are undefined, so let's zero them
     if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
     else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
 
-    //// default is 12 bit resolution, 750 ms conversion time
+    // default is 12 bit resolution, 750 ms conversion time
     debug("temp: %f", raw);
     return (float)raw / 16.0;
 }
@@ -406,7 +435,17 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
             OW_HIGH(ow);
         }
 
-//        delay_ms(CONV_TIME_OW_HIGHEST);
+		switch(sensor->resolution) {
+			case RESOLUTION_HIGHEST:
+				delay_ms(CONV_TIME_HIGHEST); break;
+			case RESOLUTION_HIGH:
+				delay_ms(CONV_TIME_HIGH); break;
+			case RESOLUTION_MEDIUM:
+				delay_ms(CONV_TIME_MEDIUM); break;
+			case RESOLUTION_LOW:
+				delay_ms(CONV_TIME_LOW); break;
+		}
+
         read_scratchpad(ow, sensor, scratchpad);
         return calc_temp(scratchpad);
     }

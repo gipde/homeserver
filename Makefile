@@ -1,10 +1,7 @@
 # TODO:
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
-# * Doxygen
-
 # * Macros for assertions / Testcases
-
 
 # CPU Type
 MCU = atmega32

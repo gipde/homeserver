@@ -1,4 +1,4 @@
-/** 
+/**
  * \mainpage Homeserver - Automation with ATMEL AVR
  *
  * \section intro_sec Introduction
@@ -7,8 +7,8 @@
  *
  * \section install_sec Installation
  *
- * \subsection step1 Step 1: 
- *  
+ * \subsection step1 Step 1:
+ *
  * etc...
  */
 
