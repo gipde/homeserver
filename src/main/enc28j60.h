@@ -279,26 +279,26 @@
 
 // setup ports for I/O
 
-void nicSetMacAddress(u08* macaddr);
+void nicSetMacAddress(uint8_t* macaddr);
 
 //! do a ENC28J60 read operation
-u08 enc28j60ReadOp(u08 op, u08 address);
+uint8_t enc28j60ReadOp(uint8_t op, uint8_t address);
 //! do a ENC28J60 write operation
-void enc28j60WriteOp(u08 op, u08 address, u08 data);
+void enc28j60WriteOp(uint8_t op, uint8_t address, uint8_t data);
 //! read the packet buffer memory
-void enc28j60ReadBuffer(u16 len, u08* data);
+void enc28j60ReadBuffer(uint16_t len, uint8_t* data);
 //! write the packet buffer memory
-void enc28j60WriteBuffer(u16 len, u08* data);
+void enc28j60WriteBuffer(uint16_t len, uint8_t* data);
 //! set the register bank for register at address
-void enc28j60SetBank(u08 address);
+void enc28j60SetBank(uint8_t address);
 //! read ax88796 register
-u08 enc28j60Read(u08 address);
+uint8_t enc28j60Read(uint8_t address);
 //! write ax88796 register
-void enc28j60Write(u08 address, u08 data);
+void enc28j60Write(uint8_t address, uint8_t data);
 //! read a PHY register
-u16 enc28j60PhyRead(u08 address);
+uint16_t enc28j60PhyRead(uint8_t address);
 //! write a PHY register
-void enc28j60PhyWrite(u08 address, u16 data);
+void enc28j60PhyWrite(uint8_t address, uint16_t data);
 
 //! initialize the ethernet interface for transmit/receive
 void enc28j60Init(void);

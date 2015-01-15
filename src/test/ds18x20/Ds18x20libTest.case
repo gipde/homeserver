@@ -77,3 +77,14 @@ TEST(search_test)
     return cmpMock(r);
 }
 
+TEST(readTemp) {
+	return true;
+}
+
+TEST(readTemp_9Bit) {
+	return true;
+}
+
+TEST(crc) {
+	return true;
+}

@@ -22,13 +22,12 @@
 #include <avr/io.h>
 
 
-u08 Enc28j60Bank;
-u16 NextPacketPtr;
+uint8_t Enc28j60Bank;
+uint16_t NextPacketPtr;
 #define ENC28J60_CONTROL_PORT   PORTD
 #define ENC28J60_CONTROL_DDR    DDRD
 #define ENC28J60_CONTROL_CS     4
 
-#define F_CPU           8000000                     /* Processor Speed */
 #define CYCLES_PER_US   ((F_CPU+500000)/1000000)    /* cpu cycles per microsecond */
 
 void delay(unsigned short us)
@@ -43,7 +42,7 @@ void delay(unsigned short us)
     for (i = 0; i < delay_loops; i++) {};
 }
 
-void nicSetMacAddress(u08* macaddr)
+void nicSetMacAddress(uint8_t* macaddr)
 {
     // write MAC address
     // NOTE: MAC address in ENC28J60 is byte-backward
@@ -59,9 +58,9 @@ void nicSetMacAddress(u08* macaddr)
 
 
 
-u08 enc28j60ReadOp(u08 op, u08 address)
+uint8_t enc28j60ReadOp(uint8_t op, uint8_t address)
 {
-    u08 data;
+    uint8_t data;
 
     // assert CS
     ENC28J60_CONTROL_PORT &= ~(1 << ENC28J60_CONTROL_CS);
@@ -91,7 +90,7 @@ u08 enc28j60ReadOp(u08 op, u08 address)
     return data;
 }
 
-void enc28j60WriteOp(u08 op, u08 address, u08 data)
+void enc28j60WriteOp(uint8_t op, uint8_t address, uint8_t data)
 {
     // assert CS
     ENC28J60_CONTROL_PORT &= ~(1 << ENC28J60_CONTROL_CS);
@@ -110,7 +109,7 @@ void enc28j60WriteOp(u08 op, u08 address, u08 data)
     ENC28J60_CONTROL_PORT |= (1 << ENC28J60_CONTROL_CS);
 }
 
-void enc28j60ReadBuffer(u16 len, u08* data)
+void enc28j60ReadBuffer(uint16_t len, uint8_t* data)
 {
     // assert CS
     ENC28J60_CONTROL_PORT &= ~(1 << ENC28J60_CONTROL_CS);
@@ -133,7 +132,7 @@ void enc28j60ReadBuffer(u16 len, u08* data)
     ENC28J60_CONTROL_PORT |= (1 << ENC28J60_CONTROL_CS);
 }
 
-void enc28j60WriteBuffer(u16 len, u08* data)
+void enc28j60WriteBuffer(uint16_t len, uint8_t* data)
 {
     // assert CS
     ENC28J60_CONTROL_PORT &= ~(1 << ENC28J60_CONTROL_CS);
@@ -154,7 +153,7 @@ void enc28j60WriteBuffer(u16 len, u08* data)
     ENC28J60_CONTROL_PORT |= (1 << ENC28J60_CONTROL_CS);
 }
 
-void enc28j60SetBank(u08 address)
+void enc28j60SetBank(uint8_t address)
 {
     // set the bank (if needed)
     if ((address & BANK_MASK) != Enc28j60Bank) {
@@ -167,7 +166,7 @@ void enc28j60SetBank(u08 address)
     }
 }
 
-u08 enc28j60Read(u08 address)
+uint8_t enc28j60Read(uint8_t address)
 {
     // set the bank
     enc28j60SetBank(address);
@@ -175,7 +174,7 @@ u08 enc28j60Read(u08 address)
     return enc28j60ReadOp(ENC28J60_READ_CTRL_REG, address);
 }
 
-void enc28j60Write(u08 address, u08 data)
+void enc28j60Write(uint8_t address, uint8_t data)
 {
     // set the bank
     enc28j60SetBank(address);
@@ -185,7 +184,7 @@ void enc28j60Write(u08 address, u08 data)
 
 
 
-void enc28j60PhyWrite(u08 address, u16 data)
+void enc28j60PhyWrite(uint8_t address, uint16_t data)
 {
     // set the PHY register address
     enc28j60Write(MIREGADR, address);
@@ -305,8 +304,8 @@ void enc28j60PacketSend(unsigned int len, unsigned char* packet)
 unsigned int enc28j60PacketReceive(unsigned int maxlen,
                                    unsigned char* packet)
 {
-    u16 rxstat;
-    u16 len;
+    uint16_t rxstat;
+    uint16_t len;
 
     // check if a packet has been received and buffered
     if ( !(enc28j60Read(EIR) & EIR_PKTIF) )

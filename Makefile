@@ -10,7 +10,7 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o debug.o 
+SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
