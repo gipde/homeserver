@@ -3,7 +3,7 @@
 extern "C" {
 #include <stdarg.h>
 #include <stdio.h>
-#include "../../main/debug.h"
+#include "../main/debug.h"
 }
 
 #include "test.h"

@@ -2,7 +2,7 @@
 
 #define DEBUG
 extern "C" {
-#include "../../main/debug.h"
+#include "../main/debug.h"
 }
 typedef struct  {
     char h[20];

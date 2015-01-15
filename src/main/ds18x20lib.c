@@ -1,14 +1,11 @@
 #include "global.h"
 #include <stdio.h>
 #include <math.h>
-//#define _TESTBUILD_
 #include "delay.h"
 
-
 #include "ds18x20lib.h"
-#include "ds18x20lib_hw.h"
 
-//#define DEBUG
+#define DEBUG
 #include "debug.h"
 
 /*
@@ -17,6 +14,12 @@
 */
 
 #include <avr/interrupt.h>
+
+// global search state
+static unsigned char ROM_NO[8];
+static uint8_t LastDiscrepancy;
+static uint8_t LastFamilyDiscrepancy;
+static uint8_t LastDeviceFlag;
 
 
 uint8_t reset(one_wire_T* ow)
@@ -53,11 +56,8 @@ uint8_t reset(one_wire_T* ow)
 }
 
 
-void write_bit(one_wire_T* ow, uint8_t wrbit)
+static void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
-
-	UDR=0x1;
-    debug("=== WRITE BIT === ENTER: %d", wrbit);
     OW_LOW(ow);
     OW_OUTPUT(ow);
 
@@ -70,31 +70,24 @@ void write_bit(one_wire_T* ow, uint8_t wrbit)
         OW_HIGH(ow);
         delay_us(55);
     }
-	// Unterschiedliche Zeiten beim Send 0,1 u Receive Window
-    debug("=== WRITE BIT === EXIT: %d", wrbit);
-	UDR=0x0;
 }
 
-uint8_t read_bit(one_wire_T* ow)
+static uint8_t read_bit(one_wire_T* ow)
 {
-	UDR=0x2;
-    debug("=== READ BIT === ENTER");
     uint8_t bit;
     OW_LOW(ow);
     OW_OUTPUT(ow);
     delay_us(3);
     OW_INPUT(ow);
-    OW_HIGH(ow);
+    OW_HIGH(ow); // Pullup
     delay_us(10);
     bit = OW_READ(ow);
     delay_us(53);
-    OW_LOW(ow);
-    debug("=== READ BIT === EXIT: %d", bit);
-	UDR=0x0;
+    OW_LOW(ow); //TODO: could be removed
     return bit;
 }
 
-uint8_t read_byte(one_wire_T* ow)
+static uint8_t read_byte(one_wire_T* ow)
 {
     uint8_t readbyte = 0x00;
     uint8_t i;
@@ -111,10 +104,10 @@ uint8_t read_byte(one_wire_T* ow)
 
     INTERRUPTS;
 
-    return (readbyte);
+    return readbyte;
 }
 
-void write_byte(one_wire_T* ow, uint8_t wrbyte)
+static void write_byte(one_wire_T* ow, uint8_t wrbyte)
 {
     NO_INTERRUPTS;
 
@@ -127,16 +120,7 @@ void write_byte(one_wire_T* ow, uint8_t wrbyte)
     INTERRUPTS;
 }
 
-/************************************************************************/
-/* reset search state                                                   */
-/************************************************************************/
-// global search state
-unsigned char ROM_NO[8];
-uint8_t LastDiscrepancy;
-uint8_t LastFamilyDiscrepancy;
-uint8_t LastDeviceFlag;
-
-void reset_search()
+static void reset_search()
 {
     LastDiscrepancy = 0;
     LastDeviceFlag = FALSE;
@@ -149,15 +133,13 @@ void reset_search()
     }
 }
 
-/************************************************************************/
-/* search all slaves                                                    */
-/************************************************************************/
 uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
     uint8_t id_bit, cmp_id_bit;
     unsigned char rom_byte_mask, search_direction;
+
     // initialize for search
     id_bit_number = 1;
     last_zero = 0;
@@ -213,7 +195,6 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                         search_direction = (cmp);
                     }
 
-
                     // if 0 was picked then record its position in LastZero
                     if (search_direction == 0) {
                         last_zero = id_bit_number;
@@ -261,6 +242,8 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
             search_result = TRUE;
         }
+    } else {
+        reset_search();
     }
 
     // if no device found then reset counters so next 'search' will be like a first
@@ -278,10 +261,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
     return search_result;
 }
 
-/************************************************************************/
-/* do crc8 calculation of the data                                      */
-/************************************************************************/
-uint8_t crc8(uint8_t* data)
+static uint8_t crc8(uint8_t* data)
 {
     uint8_t crc = 0;
 
@@ -301,7 +281,7 @@ uint8_t crc8(uint8_t* data)
     return crc;
 }
 
-void select(one_wire_T* ow, struct sensorT* sensor)
+static void select(one_wire_T* ow, struct sensorT* sensor)
 {
     write_byte(ow, MATCH_ROM);
 
@@ -310,8 +290,8 @@ void select(one_wire_T* ow, struct sensorT* sensor)
     }
 }
 
-uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
-                        uint8_t* scratchpad)
+static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
+                               uint8_t* scratchpad)
 {
     if (!reset(ow)) {
         select(ow, sensor);
@@ -374,7 +354,7 @@ uint8_t getType(struct sensorT* sensor)
 }
 
 
-uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
+static uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
 {
     reset(ow);
     select(ow, sensor);
@@ -385,7 +365,7 @@ uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
     return parasite_mode;
 }
 
-float calc_temp(uint8_t* scratchpad)
+static float calc_temp(uint8_t* scratchpad)
 {
     int16_t raw = (scratchpad[1] << 8) | scratchpad[0];
     uint8_t cfg = (scratchpad[4] & 0x60);
@@ -402,9 +382,6 @@ float calc_temp(uint8_t* scratchpad)
 
 
 
-/************************************************************************/
-/* read temp from a specific sensor                                     */
-/************************************************************************/
 float read_temp(one_wire_T* ow, struct sensorT* sensor)
 {
     uint8_t scratchpad[9] = {0};

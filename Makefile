@@ -17,11 +17,11 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o debug.o ../test/cases/mock.o ../test/cases/sha1-asm.o ../test/doubles/ds18x20lib_hw.o
+SRC = $(NAME).o ds18x20lib.o debug.o 
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
-TEST1_OBJ = $(addprefix cases/,Ds18x20libTest.o sha1-asm.o mock.o)
-TEST1_OBJ+= $(addprefix doubles/,ds18x20lib_hw.o)
+TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
+TEST1_OBJ = $(addprefix ds18x20/,Ds18x20libTest.o ds18x20lib_hw.o)
 
 ALLTESTS = TEST1 
 
@@ -63,10 +63,10 @@ GCCOPTS += -fdata-sections -fpack-struct -fshort-enums
 GCCOPTS += -mmcu=$(MCU) -I. $(GENDEPFLAGS) 
 
 CC=avr-gcc
-CFLAGS = ${GCCOPTS} -std=gnu99
+CFLAGS = ${GCCOPTS} -std=gnu11
 
 CXX=avr-g++
-CXXFLAGS = ${GCCOPTS} -std=gnu++98
+CXXFLAGS = ${GCCOPTS} -std=gnu++11
 
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
@@ -115,7 +115,7 @@ endif
 # Compile: create assembler files from C source files.
 %.s : %.c
 	@echo Create Assembler sources from $< ...
-	$(CC) -S $(CFLAGS) $< -o $@
+	@$(CC) -S $(CFLAGS) $< -o $@
 
 %.E : %.c
 	@echo Create Preprocessor output from $< ...
@@ -151,7 +151,6 @@ endif
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
 
-TESTOBJ = src/test/cases/TestBase.o
 
 testenv:
 	@echo Compiling in TESTMODE ...
@@ -181,7 +180,7 @@ $(foreach test,$(ALLTESTS),$(eval $(call TEST_template,$(test))))
 
 %.cpp : %.case | buildDir 
 	@echo Preprocessing $< ...
-	@m4 -DFILE=$< src/test/cases/testcases.m4 > $@
+	@m4 -DFILE=$< src/test/testcases.m4 > $@
 	$(eval M4TEMP = $<)
 	@echo $@ > $(BUILD)/m4.clean
 

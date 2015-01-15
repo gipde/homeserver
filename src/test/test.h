@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "../../main/debug.h"
+#include "../main/debug.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
