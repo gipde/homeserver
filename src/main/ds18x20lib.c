@@ -39,7 +39,6 @@ uint8_t reset(one_wire_T* ow)
     OW_HIGH(ow);
     delay_us(60);
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
-	debug("r=%d",r);
     delay_us(240);
     OW_LOW(ow);
 
@@ -72,7 +71,7 @@ static void write_bit(one_wire_T* ow, uint8_t wrbit)
     } else {
         delay_us(10);
         OW_HIGH(ow);
-        delay_us(55);
+        delay_us(15);
     }
 }
 
@@ -80,8 +79,11 @@ static uint8_t read_bit(one_wire_T* ow)
 {
     uint8_t bit;
     OW_LOW(ow);
-    OW_OUTPUT(ow);
+    
+	OW_OUTPUT(ow);
     delay_us(3);
+
+	OW_LOW(ow);
     OW_INPUT(ow);
     OW_HIGH(ow); // Pullup
     delay_us(10);
@@ -120,7 +122,7 @@ static void write_byte(one_wire_T* ow, uint8_t wrbyte)
         wrbyte = wrbyte >> 1;
     }
 
-    OW_LOW(ow);
+//    OW_LOW(ow);
     INTERRUPTS;
 }
 
@@ -289,6 +291,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             return FALSE;
         }
 
+		debug("Write Byte %x",SEARCH_ROM);
         write_byte(ow, SEARCH_ROM);
 
         do  {
@@ -300,7 +303,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                debug("error complement is not identical\n\r");
+                debug("error complement is not identical bit %d \n\r",id_bit_number);
                 break;
             } else  {
                 // all devices coupled have 0 or 1
