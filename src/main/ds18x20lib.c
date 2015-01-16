@@ -39,6 +39,7 @@ uint8_t reset(one_wire_T* ow)
     OW_HIGH(ow);
     delay_us(60);
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
+	debug("r=%d",r);
     delay_us(240);
     OW_LOW(ow);
 

@@ -10,7 +10,7 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o
+SRC = $(NAME).o ds18x20lib.o debug.o
 
 # linkage allows multiple definitions for functions in test doubles -> first wins
 TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
@@ -187,9 +187,9 @@ AVRDUDE_FLAGS += -v -v
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 
-program:
+program: $(TARGET).hex
 	@echo programming
-	@echo avrdude $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH)
+	@avrdude $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH)
 
 clean:
 	@echo cleaning ...
