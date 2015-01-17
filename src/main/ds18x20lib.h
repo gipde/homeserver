@@ -67,11 +67,11 @@ struct sensorT {
     uint8_t resolution;
 };
 
-uint8_t reset(one_wire_T*);
 float read_temp(one_wire_T*, struct sensorT*);
 uint8_t search_slaves(one_wire_T*, struct sensorT*);
 uint8_t getType(struct sensorT*);
-void set_precision(one_wire_T*, struct sensorT*, uint8_t);
+void set_resolution(one_wire_T*, struct sensorT*, uint8_t);
+uint8_t get_resolution(one_wire_T*, struct sensorT*);
 
 
 /* macros */
@@ -95,7 +95,7 @@ void delay_hook_ms(uint16_t);
 #else
 #define DELEGATE1(fn)
 #define DELEGATE2(fn,arg1)
-#define OW_READ(ow)			(IO(ow->pin) & (1 << ow->port_pin)) >> ow->port_pin
+#define OW_READ(ow)         (IO(ow->pin) & (1 << ow->port_pin)) >> ow->port_pin
 #endif //_TESTBUILD_
 
 #define IO(port)            (*(volatile uint8_t *)((port) + 0x20))

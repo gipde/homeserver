@@ -33,7 +33,7 @@ int main(void)
     sensorT sensor;
     debug("Starting Programm..");
 
-    for (int j = 0; j < 100; j++) {
+    for (;;) {
         while (search_slaves(&ow, &sensor) == TRUE) {
             debugn("ROM: ");
 
@@ -43,27 +43,28 @@ int main(void)
 
             switch (getType(&sensor)) {
             case DS1822:
-                debugnl("DS1822");
+                debugc("DS1822");
                 break;
 
             case DS18B20:
-                debugnl("DS18B20");
+                debugc("DS18B20");
                 break;
 
             case DS18S20:
-                debugnl("DS18S20");
+                debugc("DS18S20");
                 break;
 
             default:
                 debugnl("Other Device");
             }
 
-            //TODO: Precision selection
+            set_resolution(&ow, &sensor, RESOLUTION_HIGHEST);
 
             float temp = read_temp(&ow, &sensor);
             char s[8];
             dtostrf(temp, 0, 2, s);
-            debug(" Temperature = %s Grad Celsius", s);
+            debugc(" Temperature = %s Grad Celsius", s);
+            debugnl();
         }
 
         debug("\n\r");

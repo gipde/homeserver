@@ -1,3 +1,4 @@
+#include <avr/interrupt.h>
 
 #include "global.h"
 #include <stdio.h>
@@ -6,20 +7,12 @@
 
 #include "ds18x20lib.h"
 
-#define DEBUG
+//#define DEBUG
 #include "debug.h"
 
-/*
- * TODO:
- * check search_slaves better
-*/
 
-#include <avr/interrupt.h>
-
-//#define UD(u) UDR=u
-#define UD(u) 
-
-// global search state
+/*! global search state
+ */
 static unsigned char ROM_NO[8];
 static uint8_t LastDiscrepancy;
 static uint8_t LastFamilyDiscrepancy;
@@ -28,27 +21,21 @@ static uint8_t LastDeviceFlag;
 /*!
  * Reset the Onewire Bus
  */
-uint8_t reset(one_wire_T* ow)
+static uint8_t reset(one_wire_T* ow)
 {
     debug("*** OW Reset");
     uint8_t r;
-    NO_INTERRUPTS;
 
     OW_LOW(ow);
     OW_OUTPUT(ow);
-	UD(1);
     delay_us(480);
     OW_INPUT(ow);
     OW_HIGH(ow);
-	UD(2);
     delay_us(60);
-	UD(3);
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
     delay_us(240);
     OW_LOW(ow);
-	UD(4);
     uint8_t state = OW_READ(ow);
-    INTERRUPTS;
 
     if ( state == 0 ) {            // short circuit --> err=2
         r = 2;
@@ -58,50 +45,47 @@ uint8_t reset(one_wire_T* ow)
         debug("No Sensor found.");
     }
 
-    debug("*** OW Reset Ende ***");
-//	return r;
-	UD(5);
-    return 0;
+    return r;
 }
 
 
+/*!
+ * write a bit on the bus
+ */
 static void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
-	UD(30);
     OW_LOW(ow);
     OW_OUTPUT(ow);
-	UD(31);
+
     if (wrbit == 0) {
         delay_us(60);
-		UD(32);
         OW_HIGH(ow);
         delay_us(5);
     } else {
         delay_us(5);
-		UD(33);
         OW_HIGH(ow);
         delay_us(60);
     }
-	UD(34);
 }
 
+/*!
+ * read a bit from the bus
+ */
 static uint8_t read_bit(one_wire_T* ow)
 {
     uint8_t bit;
-	UD(40);
     OW_LOW(ow);
     OW_OUTPUT(ow);
-	UD(41);
     OW_INPUT(ow);
     delay_us(15);
-	UD(42);
     bit = OW_READ(ow);
-	UD(43);
     delay_us(53);
-	UD(44);
     return bit;
 }
 
+/*!
+ * read a byte from the bus
+ */
 static uint8_t read_byte(one_wire_T* ow)
 {
     uint8_t readbyte = 0x00;
@@ -118,21 +102,20 @@ static uint8_t read_byte(one_wire_T* ow)
     return readbyte;
 }
 
+/*!
+ * write a byte from the bus
+ */
 static void write_byte(one_wire_T* ow, uint8_t wrbyte)
 {
-	UD(20);
-    NO_INTERRUPTS;
-
     for (int i = 0; i < 8; i++) {
         write_bit(ow, (wrbyte & 0b00000001));
         wrbyte = wrbyte >> 1;
     }
-
-    //OW_LOW(ow);
-    INTERRUPTS;
-	UD(21);
 }
 
+/*!
+ * resetting search, so that search_slaves begins from from a clear state
+ */
 static void reset_search()
 {
     LastDiscrepancy = 0;
@@ -146,6 +129,9 @@ static void reset_search()
     }
 }
 
+/*!
+ * calcualte crc8 of scrathpad
+ */
 static uint8_t crc8(uint8_t* data)
 {
     uint8_t crc = 0;
@@ -166,6 +152,9 @@ static uint8_t crc8(uint8_t* data)
     return crc;
 }
 
+/*!
+ * select a specific sensor
+ */
 static void select(one_wire_T* ow, struct sensorT* sensor)
 {
     write_byte(ow, MATCH_ROM);
@@ -175,6 +164,9 @@ static void select(one_wire_T* ow, struct sensorT* sensor)
     }
 }
 
+/*!
+ * read scratchpad from sensor
+ */
 static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
                                uint8_t* scratchpad)
 {
@@ -182,13 +174,9 @@ static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
         select(ow, sensor);
         write_byte(ow, READ_SCRATCHPAD);
 
-		NO_INTERRUPTS;
-
         for (int i = 0; i < 9; i++) {
             scratchpad[i] = read_byte(ow);
         }
-
-		INTERRUPTS;
 
         if (crc8(scratchpad) != scratchpad[8]) {
             debug("CRC Error!\n\r ");
@@ -198,8 +186,13 @@ static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
         return FALSE;
     }
 
+    // set resolution
+    sensor->resolution = scratchpad[4] & 0b01100000;
+
     return TRUE;
 }
+
+
 
 /*!
  * get the type of the sensor
@@ -234,40 +227,56 @@ uint8_t getType(struct sensorT* sensor)
 
 /*! Set the Precision of the Sensor
  */
-void set_precision(one_wire_T* ow, struct sensorT* sensor, uint8_t precision)
+void set_resolution(one_wire_T* ow, struct sensorT* sensor,
+                    uint8_t resolution)
 {
     uint8_t sp[9];
 
+    NO_INTERRUPTS;
+
     if (getType(sensor) == DS18B20) {
-        if (read_scratchpad(ow, sensor, (uint8_t*)&sp) && !reset(ow)) {
-            select(ow,sensor);
+        if (read_scratchpad(ow, sensor, (uint8_t*)&sp) ) {
+            debug("set resolution %d, want %d", sensor->resolution, resolution);
+            reset(ow);
+            select(ow, sensor);
             write_byte(ow, WRITE_SCRATCHPAD);
-            write_byte(ow, sp[2]);
-            write_byte(ow, sp[3]);
-            //TODO:
-            //maybe manipulate only bits 5 6
-            //maybe transmit in eeprom
-            write_byte(ow, precision);
+            write_byte(ow, sp[2]); //Th
+            write_byte(ow, sp[3]); //Tl
+            write_byte(ow, resolution | (sp[4] & 0b10011111)); // only set bit 6/7
+            sensor->resolution = resolution;
+        } else {
+            debug("Error reading Scratchpad");
         }
     } else {
         debug("only works on DS18S20");
-	}
+    }
+
+    INTERRUPTS;
 }
 
 /*! Get the actual Precision of the Sensor
  */
-uint8_t get_precision(one_wire_T* ow, struct sensorT* sensor)
+uint8_t get_resolution(one_wire_T* ow, struct sensorT* sensor)
 {
-	if (getType(sensor) == DS18B20) {
-		uint8_t scratchpad[9] = {0};
 
-    if (read_scratchpad(ow, sensor, scratchpad)) {
-        return scratchpad[4] & 0b01100000;
-    }
-	} else {
+    uint8_t retval = RESOLUTION_UNKNOWN;
+
+    NO_INTERRUPTS;
+
+    if (getType(sensor) == DS18B20) {
+        uint8_t scratchpad[9] = {0};
+
+        if (read_scratchpad(ow, sensor, scratchpad)) {
+            retval = sensor->resolution;
+        } else {
+            debug("Error reading Scratchpad");
+        }
+    } else {
         debug("only works on DS18S20");
-	}
-    return RESOLUTION_UNKNOWN;
+    }
+
+    INTERRUPTS;
+    return retval;
 }
 
 /*!
@@ -289,6 +298,8 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
     debug("Searching slaves...");
 
+    NO_INTERRUPTS;
+
     // if the last call was not the last one
     if (!LastDeviceFlag) {
         // 1-Wire reset
@@ -299,26 +310,21 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                 sensor->rom[i] = 0;
             }
 
+            INTERRUPTS;
             return FALSE;
         }
 
-		UD(6);
-		debug("Write Byte %x",SEARCH_ROM);
+        debug("Write Byte %x", SEARCH_ROM);
         write_byte(ow, SEARCH_ROM);
-		UD(7);
 
         do  {
             // read a bit and its complement
-            NO_INTERRUPTS;
-			UD(8);
             id_bit = read_bit(ow);
             cmp_id_bit = read_bit(ow);
-			UD(9);
-            INTERRUPTS;
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
-                debug("error complement is not identical bit %d \n\r",id_bit_number);
+                debug("error complement is not identical bit %d \n\r", id_bit_number);
                 break;
             } else  {
                 // all devices coupled have 0 or 1
@@ -353,9 +359,7 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                     ROM_NO[rom_byte_number] &= ~rom_byte_mask;
 
                 // serial number search direction write bit
-                NO_INTERRUPTS;
                 write_bit(ow, search_direction);
-                INTERRUPTS;
                 // increment the byte counter id_bit_number
                 // and shift the mask rom_byte_mask
                 id_bit_number++;
@@ -397,37 +401,41 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
 
     OW_LOW(ow);
 
-	sensor->resolution=get_precision(ow,sensor);
+    INTERRUPTS;
 
     return search_result;
 }
 
+/*!
+ * check if on parasite Mode
+ */
 static uint8_t is_parasite(one_wire_T* ow, struct sensorT* sensor)
 {
     reset(ow);
     select(ow, sensor);
     write_byte(ow, READ_POWER);
-    NO_INTERRUPTS;
     uint8_t parasite_mode = ! read_bit(ow);
-    INTERRUPTS;
     return parasite_mode;
 }
 
-static float calc_temp(uint8_t* scratchpad)
+/*!
+ * calculate temperature depending on resoltuion
+ */
+static float calc_temp(struct sensorT* sensor, uint8_t* scratchpad)
 {
     int16_t raw = (scratchpad[1] << 8) | scratchpad[0];
-    uint8_t cfg = (scratchpad[4] & 0x60);
+    uint8_t res = sensor->resolution;
 
-	// TODO:
-	// Wenn es ein DS18S20 ist, dann muss anders berechbet werden
-	//
     // at lower res, the low bits are undefined, so let's zero them
-    if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-    else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-    else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
+    if (getType(sensor) == DS18B20) {
+        if (res == RESOLUTION_LOW) raw = raw &
+                                             ~7;  // 9 bit resolution, 93.75 ms
+        else if (res == RESOLUTION_MEDIUM) raw = raw &
+                    ~3; // 10 bit res, 187.5 ms
+        else if (res == RESOLUTION_HIGH) raw = raw & ~1; // 11 bit res, 375 ms
+    }
 
     // default is 12 bit resolution, 750 ms conversion time
-    debug("temp: %f", raw);
     return (float)raw / 16.0;
 }
 
@@ -440,6 +448,10 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
     uint8_t scratchpad[9] = {0};
     uint8_t parasite_mode = is_parasite(ow, sensor);
 
+    float retval = 0;
+
+    NO_INTERRUPTS;
+
     if (!reset(ow)) {
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
@@ -448,22 +460,31 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
             OW_LOW(ow);
         }
 
-		switch(sensor->resolution) {
-			case RESOLUTION_HIGHEST:
-				delay_ms(CONV_TIME_HIGHEST); break;
-			case RESOLUTION_HIGH:
-				delay_ms(CONV_TIME_HIGH); break;
-			case RESOLUTION_MEDIUM:
-				delay_ms(CONV_TIME_MEDIUM); break;
-			case RESOLUTION_LOW:
-				delay_ms(CONV_TIME_LOW); break;
-		}
+        switch (sensor->resolution) {
+        case RESOLUTION_HIGHEST:
+            delay_ms(CONV_TIME_HIGHEST);
+            break;
+
+        case RESOLUTION_HIGH:
+            delay_ms(CONV_TIME_HIGH);
+            break;
+
+        case RESOLUTION_MEDIUM:
+            delay_ms(CONV_TIME_MEDIUM);
+            break;
+
+        case RESOLUTION_LOW:
+            delay_ms(CONV_TIME_LOW);
+            break;
+        }
 
         read_scratchpad(ow, sensor, scratchpad);
-        return calc_temp(scratchpad);
+        retval = calc_temp(sensor, scratchpad);
     }
 
-    return 0;
+    INTERRUPTS;
+
+    return retval;
 }
 
 
