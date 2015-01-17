@@ -33,7 +33,7 @@ int main(void)
     sensorT sensor;
     debug("Starting Programm..");
 
-    for (int j = 0; j < 1; j++) {
+    for (int j = 0; j < 100; j++) {
         while (search_slaves(&ow, &sensor) == TRUE) {
             debugn("ROM: ");
 

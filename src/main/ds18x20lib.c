@@ -16,6 +16,9 @@
 
 #include <avr/interrupt.h>
 
+//#define UD(u) UDR=u
+#define UD(u) 
+
 // global search state
 static unsigned char ROM_NO[8];
 static uint8_t LastDiscrepancy;
@@ -33,17 +36,18 @@ uint8_t reset(one_wire_T* ow)
 
     OW_LOW(ow);
     OW_OUTPUT(ow);
-
+	UD(1);
     delay_us(480);
     OW_INPUT(ow);
     OW_HIGH(ow);
+	UD(2);
     delay_us(60);
+	UD(3);
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
     delay_us(240);
     OW_LOW(ow);
-
+	UD(4);
     uint8_t state = OW_READ(ow);
-
     INTERRUPTS;
 
     if ( state == 0 ) {            // short circuit --> err=2
@@ -55,41 +59,46 @@ uint8_t reset(one_wire_T* ow)
     }
 
     debug("*** OW Reset Ende ***");
-    return r;
+//	return r;
+	UD(5);
+    return 0;
 }
 
 
 static void write_bit(one_wire_T* ow, uint8_t wrbit)
 {
+	UD(30);
     OW_LOW(ow);
     OW_OUTPUT(ow);
-
+	UD(31);
     if (wrbit == 0) {
-        delay_us(65);
+        delay_us(60);
+		UD(32);
         OW_HIGH(ow);
         delay_us(5);
     } else {
-        delay_us(10);
+        delay_us(5);
+		UD(33);
         OW_HIGH(ow);
-        delay_us(15);
+        delay_us(60);
     }
+	UD(34);
 }
 
 static uint8_t read_bit(one_wire_T* ow)
 {
     uint8_t bit;
+	UD(40);
     OW_LOW(ow);
-    
-	OW_OUTPUT(ow);
-    delay_us(3);
-
-	OW_LOW(ow);
+    OW_OUTPUT(ow);
+	UD(41);
     OW_INPUT(ow);
-    OW_HIGH(ow); // Pullup
-    delay_us(10);
+    delay_us(15);
+	UD(42);
     bit = OW_READ(ow);
+	UD(43);
     delay_us(53);
-    OW_LOW(ow); //TODO: could be removed
+	UD(44);
     return bit;
 }
 
@@ -97,8 +106,6 @@ static uint8_t read_byte(one_wire_T* ow)
 {
     uint8_t readbyte = 0x00;
     uint8_t i;
-
-    NO_INTERRUPTS;
 
     for (i = 0; i < 8; i++) {
         uint8_t readbit = read_bit(ow);
@@ -108,13 +115,12 @@ static uint8_t read_byte(one_wire_T* ow)
         }
     }
 
-    INTERRUPTS;
-
     return readbyte;
 }
 
 static void write_byte(one_wire_T* ow, uint8_t wrbyte)
 {
+	UD(20);
     NO_INTERRUPTS;
 
     for (int i = 0; i < 8; i++) {
@@ -122,8 +128,9 @@ static void write_byte(one_wire_T* ow, uint8_t wrbyte)
         wrbyte = wrbyte >> 1;
     }
 
-//    OW_LOW(ow);
+    //OW_LOW(ow);
     INTERRUPTS;
+	UD(21);
 }
 
 static void reset_search()
@@ -175,9 +182,13 @@ static uint8_t read_scratchpad(one_wire_T* ow, struct sensorT* sensor,
         select(ow, sensor);
         write_byte(ow, READ_SCRATCHPAD);
 
+		NO_INTERRUPTS;
+
         for (int i = 0; i < 9; i++) {
             scratchpad[i] = read_byte(ow);
         }
+
+		INTERRUPTS;
 
         if (crc8(scratchpad) != scratchpad[8]) {
             debug("CRC Error!\n\r ");
@@ -291,14 +302,18 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             return FALSE;
         }
 
+		UD(6);
 		debug("Write Byte %x",SEARCH_ROM);
         write_byte(ow, SEARCH_ROM);
+		UD(7);
 
         do  {
             // read a bit and its complement
             NO_INTERRUPTS;
+			UD(8);
             id_bit = read_bit(ow);
             cmp_id_bit = read_bit(ow);
+			UD(9);
             INTERRUPTS;
 
             // check for no devices on 1-wire
@@ -310,18 +325,13 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
                 if (id_bit != cmp_id_bit)
                     search_direction = id_bit;  // bit write value for search
                 else { // all are 0
-                    debug("Discrepancy at %d", id_bit_number);
-
                     // if this discrepancy if before the Last Discrepancy
                     // on a previous next then pick the same as last time
                     if (id_bit_number < LastDiscrepancy) {
                         search_direction = ((ROM_NO[rom_byte_number] & rom_byte_mask) > 0);
-                        debug("get same as last time");
                     }  else {
                         // if equal to last pick 1, if not then pick 0
                         uint8_t cmp = id_bit_number == LastDiscrepancy;
-                        debug("id_but_nr %d == LastDiscrepancy %d = %d", id_bit_number,
-                              LastDiscrepancy, cmp);
                         search_direction = (cmp);
                     }
 
@@ -367,7 +377,6 @@ uint8_t search_slaves(one_wire_T* ow, struct sensorT* sensor)
             // check for last device
             if (LastDiscrepancy == 0) {
                 LastDeviceFlag = TRUE;
-                debug("no more discrepancy occured");
             }
 
             search_result = TRUE;
@@ -435,8 +444,8 @@ float read_temp(one_wire_T* ow, struct sensorT* sensor)
         select(ow, sensor);
         write_byte(ow, CONVERT_T);
 
-        if (parasite_mode) {
-            OW_HIGH(ow);
+        if (!parasite_mode) {
+            OW_LOW(ow);
         }
 
 		switch(sensor->resolution) {

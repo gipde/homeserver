@@ -8,7 +8,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include "global.h"
-#define BAUD 9600
+#define BAUD 38400
 #include <util/setbaud.h>
 void usart_init()
 {
