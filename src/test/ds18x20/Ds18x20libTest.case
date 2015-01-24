@@ -1,6 +1,7 @@
 // vim: set filetype=cpp:
 
 #include "Ds18x20libTest.h"
+#include <avr/interrupt.h>
 
 extern "C" {
 #include "../../main/ds18x20lib.h"
@@ -11,26 +12,22 @@ CASE(Ds18x20LibTest, TestBase)
 
 static one_wire_T ow;
 
+static uint16_t cycles;
+
+BEFORECLASS()
+{
+		/*
+	TCCR0 = (1<<CS01);
+	TIMSK |= (1<<TOIE0);
+	sei();
+	*/
+}
+
 SETUP()
 {
     ow = { M_PORTA, M_PINA, M_DDRA, 4};
     initMock();
-}
-
-TEST(reset_test)
-{
-    debug("Reset Test");
-
-    char rdat[] = {0x02};
-    replay_T replay = { rdat, 1 };
-    set_replay_data(&replay);
-
-    reset(&ow);
-
-    char r[] = {0x15, 0x4, 0x5a, 0x2d, 0x2f, 0x3f, 0x40, 0xd6, 0x0, 0xbd,
-                0xc6, 0x7b, 0x35, 0x3e, 0xa8, 0xa2, 0xd4, 0xf3, 0xc3, 0xc1
-               };
-    return cmpMock(r);
+	cycles=0;
 }
 
 TEST(search_test)
@@ -59,21 +56,24 @@ TEST(search_test)
     uint8_t romptr = 0;
 
     while (search_slaves(&ow, &sensor)) {
+		debug("cycles %d %d ",cycles,TCNT0);
         debugn("ROM: ");
 
         for (int i = 0; i < 8; i++) {
             debugc("%02X ", sensor.rom[i]);
 
-            if (*((char*)roms + romptr++) != sensor.rom[i])
+            if (*((char*)roms + romptr++) != sensor.rom[i]) {
+                debugc(" flase rom byte: %x<>%x", *((char*)roms + romptr++),
+                       sensor.rom[i]);
+                debugnl();
                 return false;
+            }
         }
 
         debugnl();
     }
 
-    char r[] = {0xab, 0x49, 0xc2, 0x3c, 0x97, 0xea, 0x68, 0x71, 0xf4, 0x15,
-                0x1, 0x4d, 0xc5, 0x31, 0x49, 0xbf, 0xa6, 0x72, 0x67, 0x9b
-               };
+    char r[] =  {0x7e, 0x94, 0xd4, 0xbe, 0xba, 0xc8, 0x89, 0x45, 0x98, 0x6f, 0x1b, 0xdf, 0x72, 0xf7, 0x59, 0x96, 0xe4, 0x8, 0xa6, 0x48};
     return cmpMock(r);
 }
 
@@ -90,4 +90,9 @@ TEST(readTemp_9Bit)
 TEST(crc)
 {
     return true;
+}
+
+ISR (TIMER0_OVF_vect) 
+{
+		cycles++;
 }

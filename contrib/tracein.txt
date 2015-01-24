@@ -3,3 +3,23 @@
 + PORTA.DDR
 + PORTA.A4-Out
 + UART0.UDR
++ SPI.SPDR
++ SPI.SPSR
++ SPI.SPCR
++ SPI.shift_in
++ SPI.data_read
++ SPI.data_write
++ PORTB.PORT
++ PORTB.PIN
++ PORTB.DDR
++ PORTB.B4-Out
++ PORTB.B5-Out
++ PORTB.B6-Out
++ PORTB.B7-Out
++ PORTD.PORT
++ PORTD.PIN
++ PORTD.DDR
++ PORTD.D0-Out
++ PORTD.D1-Out
++ TIMER0.Counter
+

@@ -6,16 +6,16 @@ Travis: https://travis-ci.org/gipde/homeserver
 Über den AVR-Net IO soll alles gesteuert werden
 
 * AVR-Net IO
-	* Temperatursensoren DS18S20 für Heizung 
+	* Temperatursensoren DS18S20 für Heizung (1 Pin pro OW)
 	* Durchfluss Sensor für Umwälzpumpe
 	* Stromzähler via Optokoppler
 	* Wasserzähler via Optokoppler
 	* Schaltung für Umwälzpumpe
 	* Home-RF Funkmodul
 	* TCPIP Stack
-	* Ethernet Treiber
+	* Ethernet Treiber (5 Pins SPI bereits verdrahtet)
 	* Scheduler
-	* Matrix-Display
+	* Matrix-Display (6 Pins)
 	* Datenpersistierung auf SD-Karte
 	* Webserver
 	* Sensorüberwachung via Heartbeat

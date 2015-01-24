@@ -2,6 +2,8 @@
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 # * Macros for assertions / Testcases
+# * 16MHz Upgrade
+# * Bootloader damit ich nur noch Seriell brauche
 
 # CPU Type
 MCU = atmega32
@@ -10,9 +12,9 @@ MCU = atmega32
 NAME = homeserver
 
 # expliit List objects here
-SRC = $(NAME).o ds18x20lib.o debug.o
+SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o hello-world.o uip/uip.o
 
-# linkage allows multiple definitions for functions in test doubles -> first wins
+# linkage allows multiple definitions for functions in test s -> first wins
 TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
 TEST1_OBJ = $(addprefix ds18x20/,Ds18x20libTest.o ds18x20lib_hw.o)
 
@@ -24,13 +26,17 @@ OPTIMIZE=-Os
 AVRDUDE_CYCLE=4
 AVRDUDE_PROGRAMMER = avrispmkII
 
+BUILD=build
+
 SIMULAVR=contrib/simulavr/src/simulavr
-SIMULAVR_OPTS=--writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic
+SIMULAVR_OPTS = --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic 
+SIMULAVR_OPTS+= -c vcd:contrib/tracein.txt:${BUILD}/trace.vcd 
+
 
 
 # -------------- NO NEED TO TOUCH --------------
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := 
 
 ifdef SystemRoot
    MD = md 2>NUL
@@ -42,7 +48,6 @@ else
    endif
 endif
 
-BUILD=build
 TARGET=$(BUILD)/$(NAME)
 # Windows-Build-Elfs müssen nach dem erzeugen nach toplevel verschoben werden.
 
@@ -160,6 +165,7 @@ $(1): testenv $(BUILD)/$(1).elf $(BUILD)/$(1).lss
 	@echo .
 	@$(SIZE) -C $(BUILD)/$(1).elf --mcu=${MCU}
 	@echo .
+	@echo DO NOT FORGET TO CLEAN!
 	@echo Running Test $(1) ...
 	@$(SIMULAVR) --file $(BUILD)/$(1).elf --device $(MCU) $(SIMULAVR_OPTS)
 
@@ -204,8 +210,7 @@ test: $(ALLTESTS)
 
 testprog: $(TARGET).elf 
 	@echo starting all tests in Simulator
-	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS) -c vcd:contrib/tracein.txt:${BUILD}/trace.vcd 
-
+	@$(SIMULAVR) --file $(TARGET).elf --device $(MCU) $(SIMULAVR_OPTS) 
 
 debug_help:
 	@echo --------------------------------
