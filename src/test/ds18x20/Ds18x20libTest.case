@@ -56,7 +56,6 @@ TEST(search_test)
     uint8_t romptr = 0;
 
     while (search_slaves(&ow, &sensor)) {
-		debug("cycles %d %d ",cycles,TCNT0);
         debugn("ROM: ");
 
         for (int i = 0; i < 8; i++) {

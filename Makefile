@@ -4,15 +4,21 @@
 # * Macros for assertions / Testcases
 # * 16MHz Upgrade
 # * Bootloader damit ich nur noch Seriell brauche
+# * Fuse Bits setzen
+# * Upload Application with Uart (wie macht der Arduino Bootloader das, das das Programm läuft, und immer ein Upload möglich ist)
 
 # CPU Type
 MCU = atmega32
+FREQ = 8000000
 
 # Project Name
 NAME = homeserver
 
-# expliit List objects here
+# explizit List objects and bootobjects here
 SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o hello-world.o uip/uip.o
+BOOTSRC = boot/bootloader.o debug.o 
+BOOTSTART = 0x7000
+TRANSFER = upload.o
 
 # linkage allows multiple definitions for functions in test s -> first wins
 TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
@@ -29,7 +35,7 @@ AVRDUDE_PROGRAMMER = avrispmkII
 BUILD=build
 
 SIMULAVR=contrib/simulavr/src/simulavr
-SIMULAVR_OPTS = --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=8000000 --irqstatistic 
+SIMULAVR_OPTS = --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufrequency=$(FREQ) --irqstatistic 
 SIMULAVR_OPTS+= -c vcd:contrib/tracein.txt:${BUILD}/trace.vcd 
 
 
@@ -55,12 +61,13 @@ TARGET=$(BUILD)/$(NAME)
 GENDEPFLAGS = -MD -MP -MF $(BUILD)/.dep/$(@F).d
 include  $(wildcard $(BUILD)/.dep/*)
 
-GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE}
+GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE} -DF_CPU=$(FREQ)
 GCCOPTS += -funsigned-char -funsigned-bitfields -ffunction-sections 
 GCCOPTS += -fdata-sections -fpack-struct -fshort-enums
 GCCOPTS += -mmcu=$(MCU) -I. $(GENDEPFLAGS) 
 
 CC=avr-gcc
+HOSTCC=gcc
 CFLAGS = ${GCCOPTS} -std=gnu11
 
 CXX=avr-g++
@@ -69,11 +76,13 @@ CXXFLAGS = ${GCCOPTS} -std=gnu++11
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
 OBJ = $(addprefix src/main/,$(SRC)) 
+BOOTOBJ= $(addprefix src/main/,$(BOOTSRC))
 
 LDFLAGS = -Wl,-Map="$(TARGET).map" -Wl,--start-group -Wl,-lm -Wl,--allow-multiple-definition
 LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU) 
 
-all: $(addprefix $(TARGET)., elf hex eep sym lss) size
+all: $(addprefix $(TARGET)., elf hex eep sym lss) $(BUILD)/transfer size
+boot: $(addprefix $(BUILD)/bootloader., elf hex lss) 
 
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
@@ -86,19 +95,29 @@ buildDir:
 	-@ctags -R src
 	-@cscope -R -ssrc -b
 
+$(BUILD)/transfer: src/main/$(TRANSFER)
+	@echo Building Transfer Utility $< ...
+	@$(HOSTCC) -c $(CFLAGS) $< -o $@
+
 # show size
 size: $(TARGET).elf $(OBJ)
 	@echo .
 	@$(SIZE) -C $(TARGET).elf --mcu=${MCU}
-#	@$(SIZE) $(OBJ) --mcu=${MCU}
+	@$(SIZE) $(OBJ) --mcu=${MCU}
 
 # Link: create ELF output file from object files.
 %.elf: $(OBJ)
-	@echo Linking $@ ...
+	@echo Linking Application $@ ...
 	@$(CC) -o $@  $(OBJ) $(LDFLAGS)
+
+$(BUILD)/bootloader.elf: $(BOOTOBJ)
+	@echo Linking Bootloader $@ ...
+	@$(CC) -o $@ $(BOOTOBJ) $(LDFLAGS) -Wl,-Ttext=$(BOOTSTART)
+	@$(SIZE) -C $(BUILD)/bootloader.elf --mcu=$(MCU)
 
 # Compile: create object files from C source files.
 %.o : %.c | buildDir
+	@echo Compiling $@ ...
 	@$(CC) $(TESTBUILD) -c $(CFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files.
@@ -187,15 +206,20 @@ format:
 	@echo Formatting...
 	@astyle -v -A3 -H -p -f -k1 -W3 -c --max-code-length=72 -xL -r --suffix=none "src/*.cpp" "src/*.h" "src/*.c" "src/*.case"
 
-AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 AVRDUDE_FLAGS = -p $(MCU) -B $(AVRDUDE_CYCLE) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += -v -v 
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 
-program: $(TARGET).hex
-	@echo programming
-	@avrdude $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH)
+program: $(TARGET).hex $(BUILD)/bootloader.hex
+	@echo programming device ...
+#	@avrdude $(AVRDUDE_FLAGS) -U fuse:
+#	@avrdude $(AVRDUDE_FLAGS) -U lock:
+	@avrdude $(AVRDUDE_FLAGS) -U flash:w:$(TARGET).hex 
+	@avrdude $(AVRDUDE_FLAGS) -U flash:w:$(BUILD)/bootloader.hex -D
+
+upload: $(TARGET).hex
+	@echo uploading $< ...
 
 clean:
 	@echo cleaning ...
@@ -237,7 +261,8 @@ doc:
 help:
 	@echo Targets
 	@echo .
-	@echo  all             - make programm
+	@echo  all (dflt)      - make application
+	@echo  boot            - make bootloader
 	@echo  clean           - clean out
 	@echo .
 	@echo  testprog        - start program in simulator
@@ -247,7 +272,8 @@ help:
 	@echo  TESTNAME        - execute this test
 	@echo  TESTNAME DEBUG - starts test in debug mode
 	@echo .
-	@echo  program         - download the hex file to the devic
+	@echo  program         - download the hex file to the device
+	@echo  upload          - upload programm via bootloader
 	@echo .
 	@echo  format          - format all C/C++ sources
 	@echo  check           - static code analysis with cppcheck

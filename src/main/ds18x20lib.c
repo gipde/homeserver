@@ -28,10 +28,14 @@ static uint8_t reset(one_wire_T* ow)
 
     OW_LOW(ow);
     OW_OUTPUT(ow);
+	UDR=1;
     delay_us(480);
+	UDR=2;
     OW_INPUT(ow);
     OW_HIGH(ow);
+	UDR=3;
     delay_us(60);
+	UDR=4;
     r = OW_READ(ow); // no presence detect --> err=1 otherwise err=0
     delay_us(240);
     OW_LOW(ow);

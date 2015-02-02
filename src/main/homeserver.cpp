@@ -35,6 +35,7 @@ int main(void)
     debug("Starting Programm..");
 	hello_world_init();
 
+	//Timer0 Interrupt einschalten
 	TCCR0 = (1<<CS01);
 	TIMSK |= (1<<TOIE0);
 
