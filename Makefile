@@ -2,23 +2,31 @@
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 # * Macros for assertions / Testcases
-# * 16MHz Upgrade
+# * Bauen des Bootloaders
 # * Bootloader damit ich nur noch Seriell brauche
-# * Fuse Bits setzen
 # * Upload Application with Uart (wie macht der Arduino Bootloader das, das das Programm läuft, und immer ein Upload möglich ist)
+
+
+# Serial speed in Baud
+BAUD = 38400
 
 # CPU Type
 MCU = atmega32
-FREQ = 8000000
+FREQ = 16000000
+FUSES = -U lfuse:w:0xcf:m -U hfuse:w:0xc0:m
 
 # Project Name
 NAME = homeserver
 
 # explizit List objects and bootobjects here
 SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o hello-world.o uip/uip.o
-BOOTSRC = boot/bootloader.o debug.o 
+
+
+# Achtung, die Bootstart Adresse ist häufig in Words angegeben
+BOOTSRC = boot/bootloader.o 
 BOOTSTART = 0x7000
-TRANSFER = upload.o
+
+TRANSFER = atool
 
 # linkage allows multiple definitions for functions in test s -> first wins
 TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
@@ -39,10 +47,9 @@ SIMULAVR_OPTS = --writetopipe 0x20,- --writetoexit 0x21 --terminate exit --cpufr
 SIMULAVR_OPTS+= -c vcd:contrib/tracein.txt:${BUILD}/trace.vcd 
 
 
-
 # -------------- NO NEED TO TOUCH --------------
 
-.DEFAULT_GOAL := 
+.DEFAULT_GOAL := all
 
 ifdef SystemRoot
    MD = md 2>NUL
@@ -59,11 +66,11 @@ TARGET=$(BUILD)/$(NAME)
 
 # Dependency Files, if changed something, it needs a compile
 GENDEPFLAGS = -MD -MP -MF $(BUILD)/.dep/$(@F).d
-include  $(wildcard $(BUILD)/.dep/*)
+include $(wildcard $(BUILD)/.dep/*)
 
-GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE} -DF_CPU=$(FREQ)
+GCCOPTS = -g2 -Wall -Wextra ${OPTIMIZE} -DF_CPU=$(FREQ) -DBAUD=$(BAUD)
 GCCOPTS += -funsigned-char -funsigned-bitfields -ffunction-sections 
-GCCOPTS += -fdata-sections -fpack-struct -fshort-enums
+GCCOPTS += -fdata-sections -fpack-struct -fshort-enums -mrelax -nodefaultlibs -nostartfiles -fno-inline-small-functions
 GCCOPTS += -mmcu=$(MCU) -I. $(GENDEPFLAGS) 
 
 CC=avr-gcc
@@ -76,13 +83,12 @@ CXXFLAGS = ${GCCOPTS} -std=gnu++11
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs -mmcu=$(MCU) -I. -x assembler-with-cpp
 
 OBJ = $(addprefix src/main/,$(SRC)) 
-BOOTOBJ= $(addprefix src/main/,$(BOOTSRC))
+BOOTOBJ = $(addprefix src/main/,$(BOOTSRC))
 
 LDFLAGS = -Wl,-Map="$(TARGET).map" -Wl,--start-group -Wl,-lm -Wl,--allow-multiple-definition
 LDFLAGS += -Wl,--end-group -Wl,--gc-section -mmcu=$(MCU) 
 
-all: $(addprefix $(TARGET)., elf hex eep sym lss) $(BUILD)/transfer size
-boot: $(addprefix $(BUILD)/bootloader., elf hex lss) 
+all: $(addprefix $(TARGET)., elf hex eep sym lss) $(addprefix $(BUILD)/bootloader., elf hex eep sym lss) size $(BUILD)/$(TRANSFER)
 
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
@@ -100,7 +106,7 @@ $(BUILD)/transfer: src/main/$(TRANSFER)
 	@$(HOSTCC) -c $(CFLAGS) $< -o $@
 
 # show size
-size: $(TARGET).elf $(OBJ)
+size: $(TARGET).elf $(OBJ) $(BOOTOBJ)
 	@echo .
 	@$(SIZE) -C $(TARGET).elf --mcu=${MCU}
 	@$(SIZE) $(OBJ) --mcu=${MCU}
@@ -167,7 +173,8 @@ endif
 	@echo Assembling $< ...
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
-
+$(BUILD)/$(TRANSFER) : src/main/$(TRANSFER).c | buildDir
+	gcc -O2 -g  -o $(BUILD)/$(TRANSFER) src/main/$(TRANSFER).c 
 
 testenv:
 	@echo Compiling in TESTMODE ...
@@ -211,19 +218,21 @@ AVRDUDE_FLAGS += -v -v
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 
+program_fuses:
+	@avrdude $(AVRDUDE_FLAGS) $(FUSES)
+
 program: $(TARGET).hex $(BUILD)/bootloader.hex
 	@echo programming device ...
-#	@avrdude $(AVRDUDE_FLAGS) -U fuse:
-#	@avrdude $(AVRDUDE_FLAGS) -U lock:
-	@avrdude $(AVRDUDE_FLAGS) -U flash:w:$(TARGET).hex 
-	@avrdude $(AVRDUDE_FLAGS) -U flash:w:$(BUILD)/bootloader.hex -D
+#	@avrdude $(AVRDUDE_FLAGS) -U flash:w:$(TARGET).hex 
+	avrdude $(AVRDUDE_FLAGS) -U flash:w:$(BUILD)/bootloader.hex 
+#	avrdude $(AVRDUDE_FLAGS) -U flash:r:$(BUILD)/flash.hex.read:i
 
 upload: $(TARGET).hex
 	@echo uploading $< ...
 
 clean:
 	@echo cleaning ...
-	-@rm -rf $(BUILD) $(OBJ) $(TESTOBJ) $(TESTCLEAN) 
+	-@rm -rf $(BUILD) $(OBJ) $(TESTOBJ) $(BOOTOBJ) $(TESTCLEAN) 
 	-@find . -name "*.lst" -exec rm {} \;
 
 check:
@@ -261,8 +270,7 @@ doc:
 help:
 	@echo Targets
 	@echo .
-	@echo  all (dflt)      - make application
-	@echo  boot            - make bootloader
+	@echo  "all (dflt)      - make application"
 	@echo  clean           - clean out
 	@echo .
 	@echo  testprog        - start program in simulator

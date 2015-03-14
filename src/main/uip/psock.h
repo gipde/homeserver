@@ -84,17 +84,17 @@
 #include "uipopt.h"
 #include "pt.h"
 
- /*
- * The structure that holds the state of a buffer.
- *
- * This structure holds the state of a uIP buffer. The structure has
- * no user-visible elements, but is used through the functions
- * provided by the library.
- *
- */
+/*
+* The structure that holds the state of a buffer.
+*
+* This structure holds the state of a uIP buffer. The structure has
+* no user-visible elements, but is used through the functions
+* provided by the library.
+*
+*/
 struct psock_buf {
-  u8_t *ptr;
-  unsigned short left;
+    u8_t* ptr;
+    unsigned short left;
 };
 
 /**
@@ -104,26 +104,27 @@ struct psock_buf {
  * elements.
  */
 struct psock {
-  struct pt pt, psockpt; /* Protothreads - one that's using the psock
-			    functions, and one that runs inside the
-			    psock functions. */
-  const u8_t *sendptr;   /* Pointer to the next data to be sent. */
-  u8_t *readptr;         /* Pointer to the next data to be read. */
-  
-  char *bufptr;          /* Pointer to the buffer used for buffering
-			    incoming data. */
-  
-  u16_t sendlen;         /* The number of bytes left to be sent. */
-  u16_t readlen;         /* The number of bytes left to be read. */
+    struct pt pt, psockpt; /* Protothreads - one that's using the psock
+                functions, and one that runs inside the
+                psock functions. */
+    const u8_t* sendptr;   /* Pointer to the next data to be sent. */
+    u8_t* readptr;         /* Pointer to the next data to be read. */
 
-  struct psock_buf buf;  /* The structure holding the state of the
-			    input buffer. */
-  unsigned int bufsize;  /* The size of the input buffer. */
-  
-  unsigned char state;   /* The state of the protosocket. */
+    char* bufptr;          /* Pointer to the buffer used for buffering
+                incoming data. */
+
+    u16_t sendlen;         /* The number of bytes left to be sent. */
+    u16_t readlen;         /* The number of bytes left to be read. */
+
+    struct psock_buf buf;  /* The structure holding the state of the
+                input buffer. */
+    unsigned int bufsize;  /* The size of the input buffer. */
+
+    unsigned char state;   /* The state of the protosocket. */
 };
 
-void psock_init(struct psock *psock, char *buffer, unsigned int buffersize);
+void psock_init(struct psock* psock, char* buffer,
+                unsigned int buffersize);
 /**
  * Initialize a protosocket.
  *
@@ -157,7 +158,8 @@ void psock_init(struct psock *psock, char *buffer, unsigned int buffersize);
  */
 #define PSOCK_BEGIN(psock) PT_BEGIN(&((psock)->pt))
 
-PT_THREAD(psock_send(struct psock *psock, const char *buf, unsigned int len));
+PT_THREAD(psock_send(struct psock* psock, const char* buf,
+                     unsigned int len));
 /**
  * Send data.
  *
@@ -175,7 +177,7 @@ PT_THREAD(psock_send(struct psock *psock, const char *buf, unsigned int len));
  *
  * \hideinitializer
  */
-#define PSOCK_SEND(psock, data, datalen)		\
+#define PSOCK_SEND(psock, data, datalen)        \
     PT_WAIT_THREAD(&((psock)->pt), psock_send(psock, data, datalen))
 
 /**
@@ -188,11 +190,11 @@ PT_THREAD(psock_send(struct psock *psock, const char *buf, unsigned int len));
  *
  * \hideinitializer
  */
-#define PSOCK_SEND_STR(psock, str)      		\
+#define PSOCK_SEND_STR(psock, str)              \
     PT_WAIT_THREAD(&((psock)->pt), psock_send(psock, str, strlen(str)))
 
-PT_THREAD(psock_generator_send(struct psock *psock,
-				unsigned short (*f)(void *), void *arg));
+PT_THREAD(psock_generator_send(struct psock* psock,
+                               unsigned short (*f)(void*), void* arg));
 
 /**
  * \brief      Generate data with a function and send it
@@ -217,8 +219,8 @@ PT_THREAD(psock_generator_send(struct psock *psock,
  * \hideinitializer
  */
 #define PSOCK_GENERATOR_SEND(psock, generator, arg)     \
-    PT_WAIT_THREAD(&((psock)->pt),					\
-		   psock_generator_send(psock, generator, arg))
+    PT_WAIT_THREAD(&((psock)->pt),                  \
+           psock_generator_send(psock, generator, arg))
 
 
 /**
@@ -234,7 +236,7 @@ PT_THREAD(psock_generator_send(struct psock *psock,
  */
 #define PSOCK_CLOSE(psock) uip_close()
 
-PT_THREAD(psock_readbuf(struct psock *psock));
+PT_THREAD(psock_readbuf(struct psock* psock));
 /**
  * Read data until the buffer is full.
  *
@@ -247,10 +249,10 @@ PT_THREAD(psock_readbuf(struct psock *psock));
  *
  * \hideinitializer
  */
-#define PSOCK_READBUF(psock)				\
+#define PSOCK_READBUF(psock)                \
   PT_WAIT_THREAD(&((psock)->pt), psock_readbuf(psock))
 
-PT_THREAD(psock_readto(struct psock *psock, unsigned char c));
+PT_THREAD(psock_readto(struct psock* psock, unsigned char c));
 /**
  * Read data up to a specified character.
  *
@@ -265,7 +267,7 @@ PT_THREAD(psock_readto(struct psock *psock, unsigned char c));
  *
  * \hideinitializer
  */
-#define PSOCK_READTO(psock, c)				\
+#define PSOCK_READTO(psock, c)              \
   PT_WAIT_THREAD(&((psock)->pt), psock_readto(psock, c))
 
 /**
@@ -280,7 +282,7 @@ PT_THREAD(psock_readto(struct psock *psock, unsigned char c));
  */
 #define PSOCK_DATALEN(psock) psock_datalen(psock)
 
-u16_t psock_datalen(struct psock *psock);
+u16_t psock_datalen(struct psock* psock);
 
 /**
  * Exit the protosocket's protothread.
@@ -305,10 +307,10 @@ u16_t psock_datalen(struct psock *psock);
  *
  * \hideinitializer
  */
-#define PSOCK_CLOSE_EXIT(psock)		\
-  do {						\
-    PSOCK_CLOSE(psock);			\
-    PSOCK_EXIT(psock);			\
+#define PSOCK_CLOSE_EXIT(psock)     \
+  do {                      \
+    PSOCK_CLOSE(psock);         \
+    PSOCK_EXIT(psock);          \
   } while(0)
 
 /**
@@ -324,7 +326,7 @@ u16_t psock_datalen(struct psock *psock);
  */
 #define PSOCK_END(psock) PT_END(&((psock)->pt))
 
-char psock_newdata(struct psock *s);
+char psock_newdata(struct psock* s);
 
 /**
  * Check if new data has arrived on a protosocket.
@@ -353,13 +355,13 @@ char psock_newdata(struct psock *s);
    PSOCK_BEGIN(s);
 
    PSOCK_WAIT_UNTIL(s, PSOCK_NEWADATA(s) || timer_expired(t));
-   
+
    if(PSOCK_NEWDATA(s)) {
      PSOCK_READTO(s, '\n');
    } else {
      handle_timed_out(s);
    }
-   
+
    PSOCK_END(s);
  }
  \endcode

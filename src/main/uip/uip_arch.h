@@ -81,7 +81,7 @@
  *
  * \param op16 A 16-bit integer in host byte order.
  */
-void uip_add32(u8_t *op32, u16_t op16);
+void uip_add32(u8_t* op32, u16_t op16);
 
 /**
  * Calculate the Internet checksum over a buffer.
@@ -102,7 +102,7 @@ void uip_add32(u8_t *op32, u16_t op16);
  *
  * \return The Internet checksum of the buffer.
  */
-u16_t uip_chksum(u16_t *buf, u16_t len);
+u16_t uip_chksum(u16_t* buf, u16_t len);
 
 /**
  * Calculate the IP header checksum of the packet header in uip_buf.

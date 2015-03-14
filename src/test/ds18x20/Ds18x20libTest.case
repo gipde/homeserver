@@ -16,18 +16,18 @@ static uint16_t cycles;
 
 BEFORECLASS()
 {
-		/*
-	TCCR0 = (1<<CS01);
-	TIMSK |= (1<<TOIE0);
-	sei();
-	*/
+    /*
+    TCCR0 = (1<<CS01);
+    TIMSK |= (1<<TOIE0);
+    sei();
+    */
 }
 
 SETUP()
 {
     ow = { M_PORTA, M_PINA, M_DDRA, 4};
     initMock();
-	cycles=0;
+    cycles = 0;
 }
 
 TEST(search_test)
@@ -91,7 +91,7 @@ TEST(crc)
     return true;
 }
 
-ISR (TIMER0_OVF_vect) 
+ISR (TIMER0_OVF_vect)
 {
-		cycles++;
+    cycles++;
 }

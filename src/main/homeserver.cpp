@@ -33,13 +33,13 @@ extern "C" {
 int main(void)
 {
     debug("Starting Programm..");
-	hello_world_init();
+    hello_world_init();
 
-	//Timer0 Interrupt einschalten
-	TCCR0 = (1<<CS01);
-	TIMSK |= (1<<TOIE0);
+    //Timer0 Interrupt einschalten
+    TCCR0 = (1 << CS01);
+    TIMSK |= (1 << TOIE0);
 
-	sei();
+    sei();
 
     enc28j60_init();
 
@@ -94,9 +94,9 @@ int main(void)
 
 static uint8_t c;
 
-ISR (TIMER0_OVF_vect) 
+ISR (TIMER0_OVF_vect)
 {
-				if (!++c)
-					debug("ich bin im Interrupt");
+    if (!++c)
+        debug("ich bin im Interrupt");
 
 }

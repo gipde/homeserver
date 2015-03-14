@@ -5,7 +5,7 @@ uint8_t read_buffer_memory();
 #define PORT_SPI    PORTB
 #define DDR_SPI     DDRB
 
-#define DD_INT		PB2
+#define DD_INT      PB2
 #define DD_CS       PB4
 #define DD_MOSI     PB5
 #define DD_MISO     PB6
@@ -32,8 +32,8 @@ uint8_t read_buffer_memory();
 // Control Registers
 #define ETXSTL      (0x04|BANK0)
 #define ETXSTH      (0x05|BANK0)
-#define ETXNDL		(0x06|BANK0)
-#define ETXNDH		(0x07|BANK0)
+#define ETXNDL      (0x06|BANK0)
+#define ETXNDH      (0x07|BANK0)
 #define ERXSTL      (0x08|BANK0)
 #define ERXSTH      (0x09|BANK0)
 #define ERXNDL      (0x0a|BANK0)
@@ -119,6 +119,6 @@ uint8_t read_buffer_memory();
 #define RX_START    0x0000
 #define RX_END      0x0FFF
 #define TX_START    0x1000
-#define TX_END		0x1FFF
+#define TX_END      0x1FFF
 
 #define MAX_FRAMELEN    1518
