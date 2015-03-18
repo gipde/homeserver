@@ -23,13 +23,13 @@ SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o hello-world.o uip/uip.o
 
 
 # Achtung, die Bootstart Adresse ist häufig in Words angegeben
-BOOTSRC = boot/bootloader.o 
+BOOTSRC = boot/bootloader.o sha1-asm.o
 BOOTSTART = 0x7000
 
 TRANSFER = atool
 
 # linkage allows multiple definitions for functions in test s -> first wins
-TESTOBJ = $(addprefix src/test/,TestBase.o mock.o sha1-asm.o)
+TESTOBJ = $(addprefix src/test/,TestBase.o mock.o) src/main/sha1-asm.o
 TEST1_OBJ = $(addprefix ds18x20/,Ds18x20libTest.o ds18x20lib_hw.o)
 
 ALLTESTS = TEST1 
@@ -174,7 +174,7 @@ endif
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
 $(BUILD)/$(TRANSFER) : src/main/$(TRANSFER).c | buildDir
-	gcc -O2 -g  -o $(BUILD)/$(TRANSFER) src/main/$(TRANSFER).c 
+	gcc -std=gnu11 -O2 -g -o $(BUILD)/$(TRANSFER) src/main/$(TRANSFER).c -lcrypto 
 
 testenv:
 	@echo Compiling in TESTMODE ...
@@ -185,7 +185,7 @@ CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
 TESTCLEAN += $$(CASEOBJ)
 $(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) $(OBJ)
 	@echo Building for Test: $(1).elf ... 
-	@$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
+	$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
 
 $(1): testenv $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
 	@echo .

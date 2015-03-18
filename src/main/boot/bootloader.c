@@ -10,6 +10,12 @@
  * 3. flash
  * 4. start des anwendungsprogrammes
  *
+ * TODO:
+ * 0.5 Schreibroutinte in bootloader
+ * 0.6 Bootloader testen und entschlanken
+ * 1. Main Programm als Hexfile rausschreiben
+ * 2. Main Programm einlesen von atool
+ * 3. Main Programm flashen
  *
  */
 
@@ -23,14 +29,44 @@
 #include <util/delay.h>
 #include <util/setbaud.h>
 #include <stdint.h>
+#include <util/crc16.h>
+#include <avr/wdt.h>
+
 
 #define TIMEOUT     3
 
 #define ERROR       0
 #define OK          1
 
-#define PAGESIZE    128
 #define MAGIC_START "BOOTLOADER_START"
+
+#define ERR		"0"
+#define WARN	"1"
+#define INFO	"2"
+#define DEBUG	"3"
+
+// Debugging
+#define DEB
+#ifdef DEB
+#define mlog(...)	mylog(__VA_ARGS__)
+#else
+#define mlog(...)
+#endif
+
+#define soft_reset()  do { wdt_enable(WDTO_15MS); for(;;) { } } while(0)
+#define check(exp,text,...) if(exp) { mlog(text "\n" ,##__VA_ARGS__); return ERROR; }
+
+int mylog(char const* s, ...)
+{
+    int retval;
+    va_list args;
+    va_start(args, s);
+
+    retval = vprintf(s, args);
+    va_end(args);
+    return retval;
+}
+
 
 int uart_putc(unsigned char c)
 {
@@ -43,18 +79,7 @@ int uart_putc(unsigned char c)
 static FILE n_out = FDEV_SETUP_STREAM(uart_putc, NULL,
                                       _FDEV_SETUP_WRITE);
 
-int debug (char const* s, ...)
-{
-    int retval;
-    va_list args;
-    va_start(args, s);
-
-    retval = vprintf(s, args);
-    va_end(args);
-    return retval;
-}
-
-
+//TODO: das ist noch buggy, geht erst nach minicom start
 void usart_init()
 {
     //redirect stdout to uart_putc
@@ -75,53 +100,46 @@ void usart_disable()
 }
 
 
-void programPage(uint16_t page, uint8_t* buf)
-{
-
-    cli(); // Disable Interrupts
-
-    debug("* %d,%p", page, buf);
-
-    sei();
-
-}
-
-uint8_t page[PAGESIZE];
-uint8_t page_ptr = 0;
 
 uint8_t read_uart( uint8_t* buf, uint8_t len)
 {
     uint8_t ptr = 0;
 
-    debug("Read from uart %d bytes\n", len);
+    mlog(DEBUG "Read from uart %d bytes\n", len);
 
-    uint32_t t1 = F_CPU / 10;
-    //uint32_t t1 = UINT32_MAX;
+    uint32_t timeout = F_CPU / 10;
     cli();
+
+	if (UCSRA & (1 << DOR)) {
+		mlog(ERR "Data Overrun!\n");
+		return ERROR;
+	}
 
     while (ptr < len) {
         if (UCSRA & (1 << RXC)) {
             buf[ptr++] = UDR;
         }
 
-        t1 = t1 - 1;
+        timeout--;
 
-        if (! t1) {
+        if (! timeout) {
             break;
         }
     }
 
     sei();
 
-    if (ptr > 0) {
+#ifdef DEB
+	mlog(DEBUG "read uart (%d:%d): ",ptr,len);
+    if (ptr==len) {
         for (int i = 0; i < len; i++) {
-            debug("%c", buf[i]);
+            mlog("%02x ", buf[i]);
         }
     }
+    mlog(" timeout: %ld\n",timeout);
+#endif
 
-    debug("\n");
-
-    return OK;
+    return ptr==len?OK:ERROR;
 
 }
 
@@ -131,8 +149,8 @@ uint8_t check_uart( uint8_t* bytes, uint8_t len)
     uint8_t buf[len];
     uint8_t retval = OK;
 
-    if (read_uart(buf, len) != ERROR) {
-        if (strncmp((char*)buf, (char*)bytes, len) != 1)
+    if (read_uart(buf, len) == OK) {
+        if (strncmp((char*)buf, (char*)bytes, len) != 0)
             retval = ERROR;
     } else {
         retval = ERROR;
@@ -141,46 +159,83 @@ uint8_t check_uart( uint8_t* bytes, uint8_t len)
     return retval;
 }
 
-uint8_t check_sha(uint8_t* sha, uint8_t* page, uint8_t page_size)
+uint8_t check_crc16(uint16_t crc16, uint8_t* page, uint8_t page_size)
 {
-    debug("%p %p %d", sha, page, page_size);
+
+	uint16_t own_crc16=0;
+	for (int i=0;i<page_size;i++) {
+			own_crc16=_crc16_update(own_crc16,page[i]);
+	};
+
+	mlog(DEBUG "Crc: %02x <> %02x Remote\n",own_crc16,crc16);
+
+    return crc16==own_crc16;
+}
+
+
+uint8_t write_page(uint8_t* page, uint8_t page_num)
+{
+    mlog(INFO "WritePage %d: %p %d\n", page_num,page);
+
+	uint8_t sreg = SREG;
+	cli();
+	eeprom_busy_wait();
+
+	boot_page_erase(page_num);
+	boot_spm_busy_wait();
+    for (int i=0; i<SPM_PAGESIZE; i+=2)
+    {
+        /* Set up little-endian word. */
+        uint16_t w = *page++;
+        w += (*page++) << 8;
+ 
+        boot_page_fill (page_num + i, w);
+    }
+    boot_page_write (page_num);     /* Store buffer in flash page.		*/
+    boot_spm_busy_wait();       /* Wait until the memory is written.*/
+ 
+    /* Reenable RWW-section again. We need this if we want to jump back */
+    /* to the application after bootloading. */
+    boot_rww_enable ();
+ 
+    /* Re-enable interrupts (if they were ever enabled). */
+    SREG = sreg;
+
     return OK;
 }
 
-uint8_t write_page(uint8_t* page, uint8_t page_size)
-{
-    debug("%p %d", page, page_size);
-    return OK;
-}
-
-#define check(exp,text,...) if(exp) { debug(text "\n" ,##__VA_ARGS__); return ERROR; }
 uint8_t write_flash()
 {
 
     uint16_t pages_all;
     uint16_t page_count = 0;
     uint16_t page_size;
-    uint8_t page[PAGESIZE];
-    uint8_t sha[20];
+	uint8_t page_num;
+    uint8_t page[SPM_PAGESIZE];
+    uint16_t crc16;
 
     const char magic[] = MAGIC_START;
-    check(!check_uart((uint8_t*)magic, 16), "No Begin found")
-    check(!read_uart((uint8_t*)&pages_all, 2), "No Page count transmitted")
+    check(!check_uart((uint8_t*)magic, 16), ERR "No Begin found")
+    check(!read_uart((uint8_t*)&pages_all, 2), ERR "No Page count transmitted")
 
     while (page_count < pages_all) {
 
+		check(!read_uart(&page_num,1),ERR "No Page num")
         check(!read_uart((uint8_t*)&page_size, 2),
-              "No Page size for Page %d")
-        check(!read_uart(sha, 20), "Incomplete SHA received")
-        check(!read_uart(page, page_size), "Incomplete Page received")
+              ERR "No Page size for Page %d",page_num)
+        check(!read_uart((uint8_t*)&crc16, 2), ERR "Incomplete SHA received")
+        check(!read_uart(page, page_size), ERR "Incomplete Page received")
 
-        if (check_sha(sha, page, page_size)) {
+        if (check_crc16(crc16, page, page_size)) {
             if (!write_page(page, page_size))
                 return ERROR;
         } else
             return ERROR;
+
+		page_count++;
     }
 
+	mlog("Everything is ok - ending write-flash\n");
     return OK;
 
 }
@@ -189,12 +244,12 @@ int main(void)
 {
 
     usart_init();
-    debug("Hallo hier ist der Bootloader\n");
+    mlog(INFO "Hallo hier ist der Bootloader\n");
 
     write_flash();
     usart_disable();
 
-    debug("Starting main...\n");
+    mlog(INFO "Starting main...\n");
 
     /* vor Rücksprung eventuell benutzte Hardware deaktivieren
        und Interrupts global deaktivieren, da kein "echter" Reset erfolgt */

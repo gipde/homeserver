@@ -5,13 +5,11 @@
  *      2. rec Begin-Flash
  *      3. send Flash-File
  *
- *  Sha verify
+ *  Einfaches Resetten des Controller via Parameter
  *
  *  Error Handling is grausam
  *
- *  Logging ins File rein
- *
- *  Beshreibung rs232 parameter
+ *  Beshreibung rs232 parameter kontrollieren, da immer noch minicom notwendig ist.
  */
 
 #include <stdio.h>
@@ -23,6 +21,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <signal.h>
+#include <stdint.h>
 
 void gen_head(char* head, char* col, char* lev)
 {
@@ -53,11 +52,11 @@ void log_msg(char* msg, FILE* f)
         break;
 
     case '2':
-        gen_head(head, "", "DEBUG ");
+        gen_head(head, "", "INFO  ");
         break;
 
     case '3':
-        gen_head(head, "", "INFO  ");
+        gen_head(head, "", "DEBUG ");
         break;
 
     default:
@@ -74,6 +73,7 @@ void usage(void)
     printf("usage: atool [-l|-f <filename>] -d <device> -b <baud>\n");
     printf("   -l  				log events from device\n");
     printf("   -f <filename>	flash file into controller\n\n");
+	printf("   -r               reset controller\n");
 }
 
 void error_exit(char* msg)
@@ -112,7 +112,7 @@ int init_port(int fd, int baud)
     memset (&tty, 0, sizeof tty);
 
     if (tcgetattr (fd, &tty) != 0) {
-        error("error %d from tcgetattr", errno);
+        //error("error %d from tcgetattr", errno);
         return -1;
     }
 
@@ -132,7 +132,7 @@ int init_port(int fd, int baud)
     tty.c_cc[VTIME] = 0;
 
     if (tcsetattr (fd, TCSANOW, &tty) != 0)
-        error("error %d setting term attributes", errno);
+        printf("error %d setting term attributes", errno);
 
     return 0;
 }
@@ -173,6 +173,85 @@ void sig_handler(int signo)
     }
 }
 
+uint16_t crc16_update(uint16_t crc, uint8_t a)
+{
+		int i;
+		crc ^= a;
+		for (i = 0; i < 8; ++i)
+		{
+				if (crc & 1)
+						crc = (crc >> 1) ^ 0xA001;
+				else
+						crc = (crc >> 1);
+		}
+		return crc;
+}
+
+void write_uart(int devp, unsigned char* c, int len) 
+{
+		printf("%d: ",len);
+		for(int i=0;i<len;i++)
+			printf("%x ",c[i]);
+		printf("\n");
+		int b = write(devp,c,len);
+		if (b != len) 
+				printf("Error transmitting %d bytes\n",len);
+		usleep(1000*100);
+}
+
+int do_program(int devp)
+{
+
+
+        int buf[1];
+        printf("Sending ... \n");
+
+		// Magic
+		//TODO: Reset Controller über einen MAGIC_STRING an USART (im Hauptprogramm über INTR)
+		//	    danach muss der Controller in den Bootloader springen.
+		//	    hierbei wird keine MAGIC_SIGNATUR mehr überprüft
+		//
+		//		Verbindungslose Kommunikation, da sonst ein laufender Logger kaputt gehen kann.
+		
+		unsigned char m[] = "BOOTLOADER_START";
+
+		// Pages
+		unsigned char pc[] = { 0x02,0x00};
+
+		// Page n
+		unsigned char ps[] = { 0x06,0x00};
+		// CRC
+		unsigned char s[] = { 0x90,0x3f };
+		unsigned char d[] = "Werner";
+
+		write_uart(devp,m,16);
+		write_uart(devp,pc,2);
+		for(int i=0;i<2;i++) {
+			
+			write_uart(devp,(unsigned char*)&i,1); // pageno
+			write_uart(devp,ps,2); // page_size
+			write_uart(devp,s,2);  // crc
+			write_uart(devp,d,6);  // payload
+		}
+}
+
+void test_crc() {
+	uint16_t crc=0;
+	const char text[] = "Werner";
+	for (int i=0;i<6;i++) {
+			crc=crc16_update(crc,text[i]);
+	}
+
+	unsigned char * ptr = (unsigned char*) &crc;
+
+	printf("CRC: %x %x\n",ptr[0],ptr[1]);
+	exit(1);
+}
+
+
+void do_reset(int devp) 
+{
+}
 
 int main(int argc, char* argv[])
 {
@@ -180,7 +259,7 @@ int main(int argc, char* argv[])
     if (signal(SIGINT, sig_handler) == SIG_ERR)
         printf("\ncan't catch SIGINT\n");
 
-    int log = 0, flash = 0;
+    int log = 0, flash = 0, reset = 0;
     int dev = 0, baud = 0;
 
     char* fname;
@@ -201,11 +280,15 @@ int main(int argc, char* argv[])
             fp = fopen(optarg, "r");
 
             if (fp == NULL)  {
-                error("could not open file: %d", errno);
+                printf("could not open file: %d", errno);
                 exit(1);
             }
 
             break;
+
+		case 'r':
+			reset = 1;
+			break;
 
         case 'd':
             devp = open_port(optarg);
@@ -229,26 +312,16 @@ int main(int argc, char* argv[])
     if (baud == 0)
         error_exit("no Baudrate specified");
 
-    if (log + flash != 1)
-        error_exit("specify ether log or flash");
+    if (log + flash + reset != 1)
+        error_exit("specify log, flash or reset");
 
 
     if (log) {
         do_log(devp);
+    } else if (flash) {
+		do_program(devp);
     } else {
-        int buf[1];
-        printf("Sending ... \n");
-        char ch;
-
-        while ( (ch = fgetc(fp)) != EOF) {
-            printf("%c", ch);
-            int b = write(devp, &ch, 1);
-
-            if (b != 1)
-                error_exit("Error transmitting flash");
-        }
-
-        fclose(fp);
-    }
+		do_reset(devp);
+	}
 
 }
