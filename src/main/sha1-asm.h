@@ -9,9 +9,9 @@ typedef struct  {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void sha1_init(sha1_ctx_t*);
-    void sha1_nextBlock(sha1_ctx_t*, char*);
-    void sha1_lastBlock(sha1_ctx_t*, char*, uint16_t);
+void sha1_init(sha1_ctx_t*);
+void sha1_nextBlock(sha1_ctx_t*, char*);
+void sha1_lastBlock(sha1_ctx_t*, char*, uint16_t);
 #ifdef __cplusplus
 }
 #endif

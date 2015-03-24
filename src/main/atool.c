@@ -10,7 +10,27 @@
  *  Error Handling is grausam
  *
  *  Beshreibung rs232 parameter kontrollieren, da immer noch minicom notwendig ist.
+ *
+ *  Pagesize konfigurierbar machen
  */
+
+
+/*
+Intel Hex Format
+
+:               Recordmark
+Len             hex 2 byte
+offset          16 Bit adresse (4 Byte)
+rectype         2 Byte
+                00 Data
+                01 EOF
+                02 Extended Segment
+                03 Start Segment
+                04 Extended Linear Segment
+data            in hex bytes
+checksum        2 bytes
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +43,8 @@
 #include <signal.h>
 #include <stdint.h>
 
+#define PAGE_SIZE 128
+
 void gen_head(char* head, char* col, char* lev)
 {
     time_t t = time(NULL);
@@ -33,7 +55,6 @@ void gen_head(char* head, char* col, char* lev)
     sprintf(head, "%s%20s%03.0f %s", col, " ", spec.tv_nsec / 1.0e6, lev);
     strftime(head + strlen(col), 20, "%d.%m.%Y %H:%M:%S", t2);
     head[19 + strlen(col)] = '.';
-
 }
 
 void log_msg(char* msg, FILE* f)
@@ -73,7 +94,7 @@ void usage(void)
     printf("usage: atool [-l|-f <filename>] -d <device> -b <baud>\n");
     printf("   -l  				log events from device\n");
     printf("   -f <filename>	flash file into controller\n\n");
-	printf("   -r               reset controller\n");
+    printf("   -r               reset controller\n");
 }
 
 void error_exit(char* msg)
@@ -175,81 +196,209 @@ void sig_handler(int signo)
 
 uint16_t crc16_update(uint16_t crc, uint8_t a)
 {
-		int i;
-		crc ^= a;
-		for (i = 0; i < 8; ++i)
-		{
-				if (crc & 1)
-						crc = (crc >> 1) ^ 0xA001;
-				else
-						crc = (crc >> 1);
-		}
-		return crc;
+    int i;
+    crc ^= a;
+
+    for (i = 0; i < 8; ++i) {
+        if (crc & 1)
+            crc = (crc >> 1) ^ 0xA001;
+        else
+            crc = (crc >> 1);
+    }
+
+    return crc;
 }
 
-void write_uart(int devp, unsigned char* c, int len) 
+void write_uart(int devp, unsigned char* c, int len)
 {
-		printf("%d: ",len);
-		for(int i=0;i<len;i++)
-			printf("%x ",c[i]);
-		printf("\n");
-		int b = write(devp,c,len);
-		if (b != len) 
-				printf("Error transmitting %d bytes\n",len);
-		usleep(1000*100);
+    printf("%d: ", len);
+
+    for (int i = 0; i < len; i++)
+        printf("%x ", c[i]);
+
+    printf("\n");
+    int b = write(devp, c, len);
+
+    if (b != len)
+        printf("Error transmitting %d bytes\n", len);
+
+    usleep(1000 * 100);
 }
+
+typedef struct page {
+    uint16_t no ;
+    uint16_t size ;
+    uint16_t crc;
+    struct page* next ;
+    unsigned char buf[PAGE_SIZE];
+} page_t;
+
+page_t* pageptr = NULL;
+page_t* start = NULL;
+uint16_t pagescount = 0;
+
 
 int do_program(int devp)
 {
 
+    int buf[1];
+    printf("Sending ... \n");
 
-        int buf[1];
-        printf("Sending ... \n");
 
-		// Magic
-		//TODO: Reset Controller über einen MAGIC_STRING an USART (im Hauptprogramm über INTR)
-		//	    danach muss der Controller in den Bootloader springen.
-		//	    hierbei wird keine MAGIC_SIGNATUR mehr überprüft
-		//
-		//		Verbindungslose Kommunikation, da sonst ein laufender Logger kaputt gehen kann.
-		
-		unsigned char m[] = "BOOTLOADER_START";
+    // Magic
+    //TODO: Reset Controller über einen MAGIC_STRING an USART (im Hauptprogramm über INTR)
+    //      danach muss der Controller in den Bootloader springen.
+    //      hierbei wird keine MAGIC_SIGNATUR mehr überprüft
+    //
+    //      Verbindungslose Kommunikation, da sonst ein laufender Logger kaputt gehen kann.
 
-		// Pages
-		unsigned char pc[] = { 0x02,0x00};
 
-		// Page n
-		unsigned char ps[] = { 0x06,0x00};
-		// CRC
-		unsigned char s[] = { 0x90,0x3f };
-		unsigned char d[] = "Werner";
+    write_uart(devp, "BOOTLOADER_START", 16);
 
-		write_uart(devp,m,16);
-		write_uart(devp,pc,2);
-		for(int i=0;i<2;i++) {
-			
-			write_uart(devp,(unsigned char*)&i,1); // pageno
-			write_uart(devp,ps,2); // page_size
-			write_uart(devp,s,2);  // crc
-			write_uart(devp,d,6);  // payload
-		}
+    write_uart(devp, (unsigned char*)&pagescount, 2);
+
+    page_t* p = start;
+    page_t* next;
+
+    do {
+        // page nr
+        write_uart(devp, (unsigned char*)&p->no, 2);
+
+        // page size
+        write_uart(devp, (unsigned char*)&p->size, 2);
+
+		// crc
+		write_uart(devp, (unsigned char*)&p->crc,2);
+
+        // payload
+        write_uart(devp, p->buf, p->size);
+
+        page_t* pold = p;
+        next = p->next;
+        p = next;
+        free(pold);
+    } while (next != NULL);
+
+    free(p);
 }
 
-void test_crc() {
-	uint16_t crc=0;
-	const char text[] = "Werner";
-	for (int i=0;i<6;i++) {
-			crc=crc16_update(crc,text[i]);
-	}
+void test_crc()
+{
+    uint16_t crc = 0;
+    const char text[] = "Werner";
 
-	unsigned char * ptr = (unsigned char*) &crc;
+    for (int i = 0; i < 6; i++) {
+        crc = crc16_update(crc, text[i]);
+    }
 
-	printf("CRC: %x %x\n",ptr[0],ptr[1]);
-	exit(1);
+    unsigned char* ptr = (unsigned char*) &crc;
+
+    printf("CRC: %x %x\n", ptr[0], ptr[1]);
+    exit(1);
 }
 
 
-void do_reset(int devp) 
+int c_hex(char* begin, int len)
+{
+    char mystring[len + 1];
+    mystring[len] = 0;
+
+    memcpy(mystring, begin, len);
+    char* end;
+    return strtol(mystring, &end, 16);
+}
+
+
+void add_page(int page, unsigned char* buf, int len)
+{
+    // create crc
+    int crc = 0;
+
+    for (int i = 0; i < len; i++) {
+        crc = crc16_update(crc, buf[i]);
+    }
+
+    // add to linked list
+    page_t* p = malloc(sizeof(page_t));
+    p->no = page;
+    p->size = len;
+    p->crc = crc;
+    memcpy(p->buf, buf, len);
+    p->next = NULL;
+
+    if (pageptr != NULL)
+        pageptr->next = p;
+    else
+        start = p;
+
+    pageptr = p;
+
+    pagescount++;
+
+}
+
+void parse(FILE* flashfile)
+{
+    page_t p ;
+    p.no = 0;
+
+    char* line = NULL;
+    size_t len = 0;
+    size_t read = 0;
+
+    int lastpage = 0;
+
+    unsigned char buf[PAGE_SIZE];
+    int bufptr = 0;
+
+    while ((read = getline(&line, &len, flashfile)) != -1 ) {
+
+        // Invalid Line
+        if (line[0] != ':') {
+            printf("invalid line\n");
+            continue;
+        }
+
+        int r_len = c_hex(line + 1, 2);
+        int offset = c_hex(line + 3, 4);
+        int type = c_hex(line + 7, 2);
+
+        // EOF Record
+        if (type == 1) {
+            printf("Writing %d bytes at end\n", bufptr + 1);
+            add_page(++lastpage, buf, bufptr + 1);
+            break;
+        }
+
+        int check = r_len + (offset >> 8) + (offset & 0xff) + type;
+
+        for (int i = 0; i < r_len; i++) {
+            bufptr = (offset + i) % PAGE_SIZE;
+            buf[bufptr] = c_hex(line + 9 + i * 2, 2);
+            check += buf[bufptr];
+
+            if (bufptr + 1 == PAGE_SIZE) {
+                lastpage = (offset + i) / PAGE_SIZE;
+                add_page(lastpage, buf, bufptr + 1);
+            }
+        }
+
+        int check_given = c_hex(line + 9 + r_len * 2, 2);
+        check = (~(check & 0xff) + 1) & 0xff;
+
+        if (check_given != check) {
+            printf("Invalid Checksum %02x<>%02x in line %d", check, check_given, 1);
+            exit(1);
+        }
+
+    }
+
+    if (line)
+        free(line);
+
+}
+
+void do_reset(int devp)
 {
 }
 
@@ -262,8 +411,7 @@ int main(int argc, char* argv[])
     int log = 0, flash = 0, reset = 0;
     int dev = 0, baud = 0;
 
-    char* fname;
-    FILE* fp;
+    FILE* flashfile;
     int devp = 0;
 
     int opt;
@@ -277,18 +425,20 @@ int main(int argc, char* argv[])
         case 'f':
             flash = 1;
             //TODO: nullcheck
-            fp = fopen(optarg, "r");
+            flashfile = fopen(optarg, "r");
 
-            if (fp == NULL)  {
+            if (flashfile == NULL)  {
                 printf("could not open file: %d", errno);
                 exit(1);
+            } else {
+                parse(flashfile);
             }
 
             break;
 
-		case 'r':
-			reset = 1;
-			break;
+        case 'r':
+            reset = 1;
+            break;
 
         case 'd':
             devp = open_port(optarg);
@@ -319,9 +469,9 @@ int main(int argc, char* argv[])
     if (log) {
         do_log(devp);
     } else if (flash) {
-		do_program(devp);
+        do_program(devp);
     } else {
-		do_reset(devp);
-	}
+        do_reset(devp);
+    }
 
 }

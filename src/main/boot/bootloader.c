@@ -40,15 +40,15 @@
 
 #define MAGIC_START "BOOTLOADER_START"
 
-#define ERR		"0"
-#define WARN	"1"
-#define INFO	"2"
-#define DEBUG	"3"
+#define ERR     "0"
+#define WARN    "1"
+#define INFO    "2"
+#define DEBUG   "3"
 
 // Debugging
 #define DEB
 #ifdef DEB
-#define mlog(...)	mylog(__VA_ARGS__)
+#define mlog(...)   mylog(__VA_ARGS__)
 #else
 #define mlog(...)
 #endif
@@ -110,10 +110,10 @@ uint8_t read_uart( uint8_t* buf, uint8_t len)
     uint32_t timeout = F_CPU / 10;
     cli();
 
-	if (UCSRA & (1 << DOR)) {
-		mlog(ERR "Data Overrun!\n");
-		return ERROR;
-	}
+    if (UCSRA & (1 << DOR)) {
+        mlog(ERR "Data Overrun!\n");
+        return ERROR;
+    }
 
     while (ptr < len) {
         if (UCSRA & (1 << RXC)) {
@@ -130,16 +130,18 @@ uint8_t read_uart( uint8_t* buf, uint8_t len)
     sei();
 
 #ifdef DEB
-	mlog(DEBUG "read uart (%d:%d): ",ptr,len);
-    if (ptr==len) {
+    mlog(DEBUG "read uart (%d:%d): ", ptr, len);
+
+    if (ptr == len) {
         for (int i = 0; i < len; i++) {
             mlog("%02x ", buf[i]);
         }
     }
-    mlog(" timeout: %ld\n",timeout);
+
+    mlog(" timeout: %ld\n", timeout);
 #endif
 
-    return ptr==len?OK:ERROR;
+    return ptr == len ? OK : ERROR;
 
 }
 
@@ -162,42 +164,44 @@ uint8_t check_uart( uint8_t* bytes, uint8_t len)
 uint8_t check_crc16(uint16_t crc16, uint8_t* page, uint8_t page_size)
 {
 
-	uint16_t own_crc16=0;
-	for (int i=0;i<page_size;i++) {
-			own_crc16=_crc16_update(own_crc16,page[i]);
-	};
+    uint16_t own_crc16 = 0;
 
-	mlog(DEBUG "Crc: %02x <> %02x Remote\n",own_crc16,crc16);
+    for (int i = 0; i < page_size; i++) {
+        own_crc16 = _crc16_update(own_crc16, page[i]);
+    };
 
-    return crc16==own_crc16;
+    mlog(DEBUG "Crc: %02x <> %02x Remote\n", own_crc16, crc16);
+
+    return crc16 == own_crc16;
 }
 
 
-uint8_t write_page(uint8_t* page, uint8_t page_num)
+uint8_t write_page(uint8_t* page, uint16_t page_num)
 {
-    mlog(INFO "WritePage %d: %p %d\n", page_num,page);
+    mlog(INFO "WritePage %d: page* %p\n", page_num, page);
 
-	uint8_t sreg = SREG;
-	cli();
-	eeprom_busy_wait();
+    uint8_t sreg = SREG;
+    cli();
+    eeprom_busy_wait();
 
-	boot_page_erase(page_num);
-	boot_spm_busy_wait();
-    for (int i=0; i<SPM_PAGESIZE; i+=2)
-    {
+    boot_page_erase(page_num);
+    boot_spm_busy_wait();
+
+    for (int i = 0; i < SPM_PAGESIZE; i += 2) {
         /* Set up little-endian word. */
         uint16_t w = *page++;
         w += (*page++) << 8;
- 
+
         boot_page_fill (page_num + i, w);
     }
-    boot_page_write (page_num);     /* Store buffer in flash page.		*/
+
+    boot_page_write (page_num);     /* Store buffer in flash page.      */
     boot_spm_busy_wait();       /* Wait until the memory is written.*/
- 
+
     /* Reenable RWW-section again. We need this if we want to jump back */
     /* to the application after bootloading. */
     boot_rww_enable ();
- 
+
     /* Re-enable interrupts (if they were ever enabled). */
     SREG = sreg;
 
@@ -210,32 +214,33 @@ uint8_t write_flash()
     uint16_t pages_all;
     uint16_t page_count = 0;
     uint16_t page_size;
-	uint8_t page_num;
+    uint16_t page_num;
     uint8_t page[SPM_PAGESIZE];
     uint16_t crc16;
 
     const char magic[] = MAGIC_START;
     check(!check_uart((uint8_t*)magic, 16), ERR "No Begin found")
-    check(!read_uart((uint8_t*)&pages_all, 2), ERR "No Page count transmitted")
+    check(!read_uart((uint8_t*)&pages_all, 2),
+          ERR "No Page count transmitted")
 
     while (page_count < pages_all) {
 
-		check(!read_uart(&page_num,1),ERR "No Page num")
+        check(!read_uart((uint8_t*)&page_num, 2), ERR "No Page num")
         check(!read_uart((uint8_t*)&page_size, 2),
-              ERR "No Page size for Page %d",page_num)
+              ERR "No Page size for Page %d", page_num)
         check(!read_uart((uint8_t*)&crc16, 2), ERR "Incomplete SHA received")
         check(!read_uart(page, page_size), ERR "Incomplete Page received")
 
         if (check_crc16(crc16, page, page_size)) {
-            if (!write_page(page, page_size))
+            if (!write_page(page, page_num))
                 return ERROR;
         } else
             return ERROR;
 
-		page_count++;
+        page_count++;
     }
 
-	mlog("Everything is ok - ending write-flash\n");
+    mlog("Everything is ok - ending write-flash\n");
     return OK;
 
 }
