@@ -189,63 +189,6 @@ void init_spi()
     SPCR = 1 << SPE | 1 << MSTR | 1 << SPR0;
 }
 
-/*
-Ethernet II, Src: IntelCor_b4:13:16 (8c:a9:82:b4:13:16), Dst: Broadcast (ff:ff:ff:ff:ff:ff)
-            Destination: Broadcast (ff:ff:ff:ff:ff:ff)
-                Address: Broadcast (ff:ff:ff:ff:ff:ff)
-                .... ..1. .... .... .... .... = LG bit: Locally administered address (this is NOT the factory default)
-                .... ...1 .... .... .... .... = IG bit: Group address (multicast/broadcast)
-            Source: IntelCor_b4:13:16 (8c:a9:82:b4:13:16)
-                Address: IntelCor_b4:13:16 (8c:a9:82:b4:13:16)
-                .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
-                .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
-            Type: ARP (0x0806)
-        Address Resolution Protocol (request)
-            Hardware type: Ethernet (1)
-            Protocol type: IP (0x0800)
-            Hardware size: 6
-                Protocol size: 4
-                    Opcode: request (1)
-            Sender MAC address: IntelCor_b4:13:16 (8c:a9:82:b4:13:16)
-            Sender IP address: 10.0.1.57 (10.0.1.57)
-            Target MAC address: 00:00:00_00:00:00 (00:00:00:00:00:00)
-            Target IP address: 10.0.1.1 (10.0.1.1)
-
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x8c, 0xa9, 0x82, 0xb4, 0x13, 0x16, 0x08, 0x06, 0x00, 0x01,
-    0x08, 0x00, 0x06, 0x04, 0x00, 0x01, 0x8c, 0xa9, 0x82, 0xb4, 0x13, 0x16, 0x0a, 0x00, 0x01, 0x39,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x01, 0x01
-
-*/
-typedef struct {
-    uint8_t dest[6];
-    uint8_t src[6];
-    uint8_t type[2];
-    uint8_t* payload; // 46-1500 Bytes
-    uint8_t fcs[4];
-} eth_frm;
-
-void transmit_dummy()   //ARP WHO HAS?
-{
-    uint8_t arp[] = {0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x01, 0x8c, 0xa9, 0x82, 0xb4, 0x13, 0x16, 0x0a, 0x00, 0x01, 0x39,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x01, 0x01
-                    };
-    eth_frm f = {
-        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}, // dest
-        MAC_ADDR,                        // src
-        {0x08, 0x06}, // type ARP
-        arp,
-        {0, 0, 0, 0}
-    };
-
-    for (int i = 0; i < 18 + 28; i++) {
-        write_buffer_memory(*((uint8_t*)&f + i));
-    }
-
-    debug("Transmitted Dummy... ");
-}
-
-
-
 void enc28j60_init()
 {
     debug("Initiating enc28j60...");
@@ -253,8 +196,6 @@ void enc28j60_init()
     init_spi();
 
     soft_reset();
-
-    transmit_dummy();
 
     //recv buffer start
     write_control_register(ERXSTL, RX_START & 0xff);
@@ -325,6 +266,8 @@ void enc28j60_init()
     bitfield_set(ECON2, 1 << AUTOINC);
 
     debug("RevID: 0x%02x", read_control_register(EREVID));
+	print_mac();
+
 
 }
 

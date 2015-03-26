@@ -23,7 +23,7 @@ SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o hello-world.o uip/uip.o
 
 
 # Achtung, die Bootstart Adresse ist häufig in Words angegeben
-BOOTSRC = boot/bootloader.o sha1-asm.o
+BOOTSRC = boot/bootloader.o 
 BOOTSTART = 0x7000
 
 TRANSFER = atool
@@ -98,8 +98,8 @@ NM = avr-nm
 buildDir: 
 	@echo Creating Build-Dir and gen tags ...
 	-@$(MD) $(BUILD)/.dep
-	-@ctags -R src
-	-@cscope -R -ssrc -b
+	ctags -R src
+	cscope -R -ssrc -b
 
 $(BUILD)/transfer: src/main/$(TRANSFER)
 	@echo Building Transfer Utility $< ...
@@ -174,7 +174,7 @@ endif
 	@$(CC) -c $(ASFLAGS) $< -o $@
 
 $(BUILD)/$(TRANSFER) : src/main/$(TRANSFER).c | buildDir
-	gcc -std=gnu11 -O2 -g -o $(BUILD)/$(TRANSFER) src/main/$(TRANSFER).c -lcrypto 
+	gcc -std=gnu11 -O2 -g -o $(BUILD)/$(TRANSFER) src/main/$(TRANSFER).c  
 
 testenv:
 	@echo Compiling in TESTMODE ...
@@ -229,6 +229,7 @@ program: $(TARGET).hex $(BUILD)/bootloader.hex
 
 upload: $(TARGET).hex
 	@echo uploading $< ...
+	build/atool -f $< -d /dev/ttyUSB0 -b $(BAUD)
 
 clean:
 	@echo cleaning ...

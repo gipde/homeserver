@@ -1,17 +1,12 @@
 /*
- * TODO
- *  Handshake zum flashen
- *      1. send Magic-Flash
- *      2. rec Begin-Flash
- *      3. send Flash-File
- *
- *  Einfaches Resetten des Controller via Parameter
- *
  *  Error Handling is grausam
- *
  *  Beshreibung rs232 parameter kontrollieren, da immer noch minicom notwendig ist.
- *
  *  Pagesize konfigurierbar machen
+ *
+ *  Die Programmierung erfolgt ohne eine Verbindungsschicht (vgl. UDP) es wird nur
+ *  gesendet, so dass ein weiteres atool den lesenden Zugriff nicht unterbrechen
+ *  braucht. Damit entfällt auch das programmieren eines Interrupts für UART im
+ *  Hauptprogramm.
  */
 
 
@@ -45,6 +40,9 @@ checksum        2 bytes
 
 #define PAGE_SIZE 128
 
+/**
+ * generate head for log statements
+ */
 void gen_head(char* head, char* col, char* lev)
 {
     time_t t = time(NULL);
@@ -57,6 +55,9 @@ void gen_head(char* head, char* col, char* lev)
     head[19 + strlen(col)] = '.';
 }
 
+/**
+ * log Mesage to console and to file
+ */
 void log_msg(char* msg, FILE* f)
 {
 
@@ -89,6 +90,9 @@ void log_msg(char* msg, FILE* f)
     fprintf(f, "%s %s \x1b[37;0m\n", head, msg + ind);
 }
 
+/**
+ * print program usage
+ */
 void usage(void)
 {
     printf("usage: atool [-l|-f <filename>] -d <device> -b <baud>\n");
@@ -97,6 +101,9 @@ void usage(void)
     printf("   -r               reset controller\n");
 }
 
+/**
+ * exit fn
+ */
 void error_exit(char* msg)
 {
     perror(msg);
@@ -104,7 +111,9 @@ void error_exit(char* msg)
     exit(1);
 }
 
-
+/**
+ * setup UART
+ */
 int open_port(char* dev)
 {
     int fd;
@@ -114,8 +123,7 @@ int open_port(char* dev)
     fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
 
     if (fd == -1) {
-        perror("open_port: Unable to open file");
-        exit(1);
+        error_exit("open_port: Unable to open file");
     } else
         fcntl(fd, F_SETFL, 0);
 
@@ -160,6 +168,9 @@ int init_port(int fd, int baud)
 
 FILE* logfile;
 
+/**
+ * primary log method
+ */
 void do_log(int devp)
 {
 
@@ -174,7 +185,8 @@ void do_log(int devp)
 
     for (;;) { //endless
         int c = read(devp, &buf, 1);
-
+		
+		// maxline = 1024 chars
         if (buf == 0x0a || lineptr == 1024) {
             line[lineptr] = 0x0;
             log_msg(line, logfile);
@@ -182,10 +194,12 @@ void do_log(int devp)
         } else if (buf != 0x0d) {
             line[lineptr++] = buf;
         }
-
     }
 }
 
+/**
+ * close file on ctrl-c
+ */
 void sig_handler(int signo)
 {
     if (signo == SIGINT) {
@@ -194,6 +208,9 @@ void sig_handler(int signo)
     }
 }
 
+/**
+ * calculate crc16
+ */
 uint16_t crc16_update(uint16_t crc, uint8_t a)
 {
     int i;
@@ -209,20 +226,25 @@ uint16_t crc16_update(uint16_t crc, uint8_t a)
     return crc;
 }
 
+/**
+ * write to uart
+ */
 void write_uart(int devp, unsigned char* c, int len)
 {
-    printf("%d: ", len);
+    /*
+	printf("%d: ", len);
 
     for (int i = 0; i < len; i++)
         printf("%x ", c[i]);
 
     printf("\n");
+	*/
     int b = write(devp, c, len);
 
     if (b != len)
         printf("Error transmitting %d bytes\n", len);
 
-    usleep(1000 * 100);
+    usleep(1000 * 30);
 }
 
 typedef struct page {
@@ -237,21 +259,14 @@ page_t* pageptr = NULL;
 page_t* start = NULL;
 uint16_t pagescount = 0;
 
-
+/**
+ * programming the controller
+ */
 int do_program(int devp)
 {
 
     int buf[1];
     printf("Sending ... \n");
-
-
-    // Magic
-    //TODO: Reset Controller über einen MAGIC_STRING an USART (im Hauptprogramm über INTR)
-    //      danach muss der Controller in den Bootloader springen.
-    //      hierbei wird keine MAGIC_SIGNATUR mehr überprüft
-    //
-    //      Verbindungslose Kommunikation, da sonst ein laufender Logger kaputt gehen kann.
-
 
     write_uart(devp, "BOOTLOADER_START", 16);
 
@@ -261,6 +276,8 @@ int do_program(int devp)
     page_t* next;
 
     do {
+
+		printf("Write page %d ... \n",p->no);
         // page nr
         write_uart(devp, (unsigned char*)&p->no, 2);
 
@@ -282,22 +299,10 @@ int do_program(int devp)
     free(p);
 }
 
-void test_crc()
-{
-    uint16_t crc = 0;
-    const char text[] = "Werner";
 
-    for (int i = 0; i < 6; i++) {
-        crc = crc16_update(crc, text[i]);
-    }
-
-    unsigned char* ptr = (unsigned char*) &crc;
-
-    printf("CRC: %x %x\n", ptr[0], ptr[1]);
-    exit(1);
-}
-
-
+/*
+ * convert hex char to int
+ */
 int c_hex(char* begin, int len)
 {
     char mystring[len + 1];
@@ -308,7 +313,9 @@ int c_hex(char* begin, int len)
     return strtol(mystring, &end, 16);
 }
 
-
+/**
+ * add a page to the linked list of pages
+ */
 void add_page(int page, unsigned char* buf, int len)
 {
     // create crc
@@ -337,6 +344,9 @@ void add_page(int page, unsigned char* buf, int len)
 
 }
 
+/**
+ * parse the intel hex flash-file
+ */
 void parse(FILE* flashfile)
 {
     page_t p ;
@@ -398,17 +408,13 @@ void parse(FILE* flashfile)
 
 }
 
-void do_reset(int devp)
-{
-}
-
 int main(int argc, char* argv[])
 {
 
     if (signal(SIGINT, sig_handler) == SIG_ERR)
         printf("\ncan't catch SIGINT\n");
 
-    int log = 0, flash = 0, reset = 0;
+    int log = 0, flash = 0;
     int dev = 0, baud = 0;
 
     FILE* flashfile;
@@ -424,7 +430,6 @@ int main(int argc, char* argv[])
 
         case 'f':
             flash = 1;
-            //TODO: nullcheck
             flashfile = fopen(optarg, "r");
 
             if (flashfile == NULL)  {
@@ -434,10 +439,6 @@ int main(int argc, char* argv[])
                 parse(flashfile);
             }
 
-            break;
-
-        case 'r':
-            reset = 1;
             break;
 
         case 'd':
@@ -462,7 +463,7 @@ int main(int argc, char* argv[])
     if (baud == 0)
         error_exit("no Baudrate specified");
 
-    if (log + flash + reset != 1)
+    if (log + flash != 1)
         error_exit("specify log, flash or reset");
 
 
@@ -471,7 +472,7 @@ int main(int argc, char* argv[])
     } else if (flash) {
         do_program(devp);
     } else {
-        do_reset(devp);
+        error_exit("Error parsing command line\n");
     }
 
 }

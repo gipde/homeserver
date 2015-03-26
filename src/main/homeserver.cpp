@@ -15,6 +15,7 @@
 #include "global.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,27 +31,34 @@ extern "C" {
 #include "hello-world.h"
 }
 
+#define soft_reset()  do { wdt_enable(WDTO_15MS); for(;;) { } } while(0)
+
 int main(void)
 {
     debug("Starting Programm..");
-    hello_world_init();
 
+//    hello_world_init();
+
+	/*
     //Timer0 Interrupt einschalten
     TCCR0 = (1 << CS01);
     TIMSK |= (1 << TOIE0);
 
     sei();
+	*/
 
     enc28j60_init();
 
+	/*
     for (int i = 0; i < 8192; i++) {
         debugc("%02x ", read_buffer_memory());
 
         if (i % 20 == 0)
             debugnl();
     }
+	*/
 
-    /*
+	/*
     one_wire_T ow = {  M_PORTA, M_PINA, M_DDRA, 4};
     sensorT sensor;
     for (int i=0;i<10;i++) {
@@ -89,7 +97,7 @@ int main(void)
 
         debug("\n\r");
     }
-    */
+	*/
 }
 
 static uint8_t c;
