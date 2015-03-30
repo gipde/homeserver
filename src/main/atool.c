@@ -1,6 +1,6 @@
 /*
  *  Error Handling is grausam
- *  Beshreibung rs232 parameter kontrollieren, da immer noch minicom notwendig ist.
+ *  Beschreibung rs232 parameter kontrollieren, da immer noch minicom notwendig ist.
  *  Pagesize konfigurierbar machen
  *
  *  Die Programmierung erfolgt ohne eine Verbindungsschicht (vgl. UDP) es wird nur
@@ -148,15 +148,21 @@ int init_port(int fd, int baud)
     cfsetospeed(&tty, baud);
     cfsetispeed(&tty, baud);
 
+	/* input modes */
     tty.c_iflag &= ~(IGNBRK | BRKINT | ICRNL |
                      INLCR | PARMRK | INPCK | ISTRIP | IXON);
 
+	/* output modes */
     tty.c_oflag = 0;
+
+	/* local modes */
     tty.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
 
+	/* control modes */
     tty.c_cflag &= ~(CSIZE | PARENB);
     tty.c_cflag |= CS8;
 
+	/* special character */
     tty.c_cc[VMIN]  = 1;
     tty.c_cc[VTIME] = 0;
 
@@ -185,8 +191,8 @@ void do_log(int devp)
 
     for (;;) { //endless
         int c = read(devp, &buf, 1);
-		
-		// maxline = 1024 chars
+
+        // maxline = 1024 chars
         if (buf == 0x0a || lineptr == 1024) {
             line[lineptr] = 0x0;
             log_msg(line, logfile);
@@ -232,13 +238,13 @@ uint16_t crc16_update(uint16_t crc, uint8_t a)
 void write_uart(int devp, unsigned char* c, int len)
 {
     /*
-	printf("%d: ", len);
+    printf("%d: ", len);
 
     for (int i = 0; i < len; i++)
         printf("%x ", c[i]);
 
     printf("\n");
-	*/
+    */
     int b = write(devp, c, len);
 
     if (b != len)
@@ -268,6 +274,10 @@ int do_program(int devp)
     int buf[1];
     printf("Sending ... \n");
 
+	// Transmit Character that forces soft-reset via USART_RXC intr 
+	write_uart(devp,"x",1);
+	sleep(1);	
+
     write_uart(devp, "BOOTLOADER_START", 16);
 
     write_uart(devp, (unsigned char*)&pagescount, 2);
@@ -277,15 +287,15 @@ int do_program(int devp)
 
     do {
 
-		printf("Write page %d ... \n",p->no);
+        printf("Write page %d ... \n", p->no);
         // page nr
         write_uart(devp, (unsigned char*)&p->no, 2);
 
         // page size
         write_uart(devp, (unsigned char*)&p->size, 2);
 
-		// crc
-		write_uart(devp, (unsigned char*)&p->crc,2);
+        // crc
+        write_uart(devp, (unsigned char*)&p->crc, 2);
 
         // payload
         write_uart(devp, p->buf, p->size);

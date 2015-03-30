@@ -1,15 +1,14 @@
 void enc28j60_init();
-uint8_t read_buffer_memory();
 
 // SPI Config
 #define PORT_SPI    PORTB
 #define DDR_SPI     DDRB
 
-#define DD_INT      PB2
-#define DD_CS       PB4
-#define DD_MOSI     PB5
-#define DD_MISO     PB6
-#define DD_SCK      PB7
+#define SPI_INT      PB2
+#define SPI_SS       PB4
+#define SPI_MOSI     PB5
+#define SPI_MISO     PB6
+#define SPI_SCK      PB7
 
 // SPI Commands
 #define CMD_RCR     0b00000000
@@ -30,6 +29,10 @@ uint8_t read_buffer_memory();
 #define DUMMY       0b10000000
 
 // Control Registers
+#define ERDPTL      (0x00|BANK0)
+#define ERDPTH      (0x01|BANK0)
+#define EWRPTL      (0x02|BANK0)
+#define EWRPTH      (0x03|BANK0)
 #define ETXSTL      (0x04|BANK0)
 #define ETXSTH      (0x05|BANK0)
 #define ETXNDL      (0x06|BANK0)
@@ -55,6 +58,7 @@ uint8_t read_buffer_memory();
 #define ECON2       (0x1e|BANK0)
 #define  AUTOINC    7
 #define ECON1       (0x1f|BANK0)
+#define  TXRTS      3
 #define  B_RXEN     2
 #define  BSEL1      1
 #define  BSEL0      0
@@ -70,16 +74,18 @@ uint8_t read_buffer_memory();
 #define  RXPAUS     2
 #define  PASALL     1
 #define  MARXEN     0
-#define MACON2      (0x01|BANK2|DUMMY)
 #define MACON3      (0x02|BANK2|DUMMY)
 #define  PADCFG2    7
 #define  PADCFG0    5
 #define  TXCRCEN    4
 #define  FRMLNEN    1
 #define  FULDPX     0
+#define MACON4      (0x03|BANK2|DUMMY)
 #define MABBIPG     (0x04|BANK2|DUMMY)
 #define MAIPGL      (0x06|BANK2|DUMMY)
 #define MAIPGH      (0x07|BANK2|DUMMY)
+#define MACLCON1    (0x08|BANK2|DUMMY)
+#define MACLCON2    (0x09|BANK2|DUMMY)
 #define MAMXFLL     (0x0a|BANK2|DUMMY)
 #define MAMXFLH     (0x0b|BANK2|DUMMY)
 #define MICMD       (0x12|BANK2|DUMMY)
@@ -99,22 +105,27 @@ uint8_t read_buffer_memory();
 #define MIRDH       (0x19|BANK3|DUMMY)
 #define MISTAT      (0x0a|BANK3|DUMMY)
 #define  BUSY       0
-
+#define ECOCON      (0x15|BANK3|DUMMY)
 #define PHCON1      0x00
 #define  PDPXMD     8
+#define PHSTAT1     0x01
+#define PHID1       0x02
+#define PHID2       0x03
 #define PHCON2      0x10
 #define  HDLDIS     8
+#define PHSTAT2     0x11
 #define PHIE        0x12
 #define  PLNKIE     4
 #define  PGEIE      1
+#define PHIR        0x13
 #define PHLCON      0x14
 #define  STRCH      1
 #define  LACFG3     11
 #define  LACFG2     10
 #define  LBCFG0     4
 
-#define MAC_REGS    { MAADR6, MAADR5, MAADR4, MAADR3, MAADR2, MAADR1 }
-#define MAC_ADDR    { 0xab, 0xbc, 0x6f, 0x55, 0x1c, 0xc2 }
+#define MAC_REGS    { MAADR1, MAADR2, MAADR3, MAADR4, MAADR5, MAADR6 }
+#define MAC_ADDR    { 0xc2, 0x1c, 0x55, 0x6f, 0xbc, 0xab }
 
 #define RX_START    0x0000
 #define RX_END      0x0FFF

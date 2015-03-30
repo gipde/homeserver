@@ -82,7 +82,7 @@ void usart_disable()
 }
 
 /**
- *  put character on USART 
+ *  put character on USART
  */
 int uart_putc(unsigned char c)
 {
@@ -93,7 +93,7 @@ int uart_putc(unsigned char c)
 }
 
 
-/* 
+/*
  * read from usart and exit, if not read len bytes in a specific time
  */
 uint8_t read_uart( uint8_t* buf, uint8_t len)
@@ -107,7 +107,7 @@ uint8_t read_uart( uint8_t* buf, uint8_t len)
 
     if (UCSRA & (1 << DOR)) {
         _log(ERR "Data Overrun!\n");
-		buf[ptr++] = UDR;
+        buf[ptr++] = UDR;
         return ERROR;
     }
 
@@ -128,11 +128,13 @@ uint8_t read_uart( uint8_t* buf, uint8_t len)
     debug("read uart (%d:%d): ", ptr, len);
 
 #ifdef DEB
+
     if (ptr == len) {
         for (int i = 0; i < len; i++) {
             _log("%02x ", buf[i]);
         }
     }
+
 #endif
 
     debug(" timeout: %ld\n", timeout);
@@ -181,17 +183,19 @@ uint8_t check_crc16(uint16_t crc16, uint8_t* page, uint8_t page_size)
  */
 uint8_t write_page(uint8_t* page, uint16_t page_num)
 {
-	uint16_t page_addr = page_num*SPM_PAGESIZE;
+    uint16_t page_addr = page_num * SPM_PAGESIZE;
 
-	_log(INFO "Write Page %04d at 0x%04x ... ",page_num,page_addr);
+    _log(INFO "Write Page %04d at 0x%04x ... ", page_num, page_addr);
 #ifdef DEB
-	for(int i=0;i<SPM_PAGESIZE;i++) {
-			_log("%02x ",page[i]);
-	}
-#endif
-	_log("\n");
 
-	uint8_t sreg = SREG;
+    for (int i = 0; i < SPM_PAGESIZE; i++) {
+        _log("%02x ", page[i]);
+    }
+
+#endif
+    _log("\n");
+
+    uint8_t sreg = SREG;
     cli();
     eeprom_busy_wait();
 
@@ -215,7 +219,7 @@ uint8_t write_page(uint8_t* page, uint16_t page_num)
 
     /* Re-enable interrupts (if they were ever enabled). */
     SREG = sreg;
-	sei();
+    sei();
 
     return OK;
 }
@@ -239,11 +243,11 @@ uint8_t receive_flash()
 
     while (page_count < pages_all) {
 
-		//clear page
-		for (int i=0;i<SPM_PAGESIZE;i++)
-				page[i]=0x0;
+        //clear page
+        for (int i = 0; i < SPM_PAGESIZE; i++)
+            page[i] = 0x0;
 
-		// receive page
+        // receive page
         check(!read_uart((uint8_t*)&page_num, 2), ERR "No Page num")
         check(!read_uart((uint8_t*)&page_size, 2),
               ERR "No Page size for Page %d", page_num)

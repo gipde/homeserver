@@ -27,7 +27,10 @@ int debug_printf (char const*, ...);
 #else
 #ifndef debug
 void debug_default(char const*, ...);
-#define debug(M,...) debug_default(M,##__VA_ARGS__)
+#define debug(M,...)
+#define debugn(M,...)
+#define debugc(M,...)
+#define debugnl(M,...)
 #endif
 #endif
 
