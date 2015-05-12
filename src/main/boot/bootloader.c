@@ -15,6 +15,8 @@
 #include <util/setbaud.h>
 #include <util/crc16.h>
 
+// Return Codes
+#define TIMEOUT     -1
 #define ERROR       0
 #define OK          1
 
@@ -27,26 +29,27 @@
 
 // Debugging
 //#define DEB
+//#define TRACE
 
 #ifdef DEB
-
 #define debug(...)   _log(DEBUG __VA_ARGS__)
 #else
 #define debug(...)
 #endif
 
-#define check(exp,text,...) if(exp) { _log(text "\n" ,##__VA_ARGS__); return ERROR; }
+#define check(exp,text,...) ret = exp; if(ret<1) { _log(text  ,##__VA_ARGS__); return ret; }
 
 /**
  * log string to uart
  */
-int _log(char const* s, ...)
+int _log(const char* s, ...)
 {
     int retval;
     va_list args;
     va_start(args, s);
 
     retval = vprintf(s, args);
+	printf("\n");
     va_end(args);
     return retval;
 }
@@ -71,6 +74,7 @@ void usart_init()
     // BAUD RATE
     UBRRH = UBRRH_VALUE;
     UBRRL = UBRRL_VALUE;
+	debug("USART inited :)");
 }
 
 /**
@@ -95,69 +99,102 @@ int uart_putc(unsigned char c)
 
 /*
  * read from usart and exit, if not read len bytes in a specific time
+ * returns only Return Codes
  */
-uint8_t read_uart( uint8_t* buf, uint8_t len)
+int8_t read_uart( uint8_t* buf, uint8_t len)
 {
     uint8_t ptr = 0;
+    int8_t retval = OK;
 
-    debug("Read from uart %d bytes\n", len);
+    debug("Read from uart %d bytes", len);
 
     uint32_t timeout = F_CPU / 5;
     cli();
 
-    if (UCSRA & (1 << DOR)) {
-        _log(ERR "Data Overrun!\n");
-        buf[ptr++] = UDR;
-        return ERROR;
-    }
-
     while (ptr < len) {
+
+        while (UCSRA & (1 << DOR)) {
+            buf[ptr] = UDR;
+            retval = ERROR;
+        }
+
+        if (retval == ERROR) {
+            _log(ERR "Data Overrun %d !", UCSRA & (1 << DOR));
+            break;
+        }
+
         if (UCSRA & (1 << RXC)) {
             buf[ptr++] = UDR;
         }
 
         timeout--;
 
-        if (! timeout) {
+        if (timeout < 1) {
+            retval = TIMEOUT;
+            debug("returning timeout exeeds %d -> %d", timeout,retval);
             break;
         }
     }
 
+	// check length
+    if (retval == OK) {
+		debug("check length %d-%d (%d)",ptr,len,retval);
+        if ( ptr != len) {
+            retval = ERROR;
+		}
+    }
+
     sei();
 
-    debug("read uart (%d:%d): ", ptr, len);
 
-#ifdef DEB
+#ifdef TRACE
+    debug("read uart (%d:%d): ", ptr, len);
 
     if (ptr == len) {
         for (int i = 0; i < len; i++) {
-            _log("%02x ", buf[i]);
+            debug(" %02x ", buf[i]);
         }
     }
 
+    debug(" timeout: %ld", timeout);
 #endif
 
-    debug(" timeout: %ld\n", timeout);
 
-    return ptr == len ? OK : ERROR;
+
+    debug("returning %d", retval);
+    return retval;
 
 }
 
 /**
  * read from usart and check, if read bytes equals to *bytes
  */
-uint8_t check_uart( uint8_t* bytes, uint8_t len)
+int8_t check_magic( uint8_t* bytes, uint8_t len)
 {
     uint8_t buf[len];
-    uint8_t retval = OK;
+	for(int i=0;i<len;i++)
+			buf[i]=0x0;
 
-    if (read_uart(buf, len) == OK) {
+	// read the magic string
+    int8_t retval = read_uart(buf, len);
+
+
+    if (retval > 0) {
+
+		debug("buf[0]=0x%x",buf[0]);
+		if (buf[0]=='x') {
+			// prefixed with x - we have to read one more
+			memcpy(buf,buf+1,len-1);
+			retval=read_uart(buf+len-1,1);
+		}
+
+		// compare		
+		debug("%d bytes : <<%16s>> <> <<%16s>>",len,buf,bytes);
         if (strncmp((char*)buf, (char*)bytes, len) != 0)
             retval = ERROR;
-    } else {
-        retval = ERROR;
     }
 
+    debug( "check_uart returning %d", retval);
     return retval;
 }
 
@@ -173,7 +210,7 @@ uint8_t check_crc16(uint16_t crc16, uint8_t* page, uint8_t page_size)
         own_crc16 = _crc16_update(own_crc16, page[i]);
     };
 
-    debug("Crc: %02x <> %02x Remote\n", own_crc16, crc16);
+    debug("Crc: %02x <> %02x Remote", own_crc16, crc16);
 
     return crc16 == own_crc16;
 }
@@ -185,15 +222,14 @@ uint8_t write_page(uint8_t* page, uint16_t page_num)
 {
     uint16_t page_addr = page_num * SPM_PAGESIZE;
 
-    _log(INFO "Write Page %04d at 0x%04x ... ", page_num, page_addr);
-#ifdef DEB
+    _log(INFO "Write Page %03d at 0x%04x... ", page_num, page_addr);
+#ifdef TRACE
 
     for (int i = 0; i < SPM_PAGESIZE; i++) {
-        _log("%02x ", page[i]);
+        debug("%02x ", page[i]);
     }
 
 #endif
-    _log("\n");
 
     uint8_t sreg = SREG;
     cli();
@@ -227,7 +263,7 @@ uint8_t write_page(uint8_t* page, uint16_t page_num)
 /**
  * receives the flash over usart
  */
-uint8_t receive_flash()
+int8_t receive_flash()
 {
     uint16_t pages_all;
     uint16_t page_count = 0;
@@ -236,10 +272,13 @@ uint8_t receive_flash()
     uint8_t page[SPM_PAGESIZE];
     uint16_t crc16;
 
+    int8_t ret;
+
     const char magic[] = MAGIC_START;
-    check(!check_uart((uint8_t*)magic, 16), ERR "No Begin found")
-    check(!read_uart((uint8_t*)&pages_all, 2),
-          ERR "No Page count transmitted")
+    check(check_magic((uint8_t*)magic, 16), ERR "No Begin found")
+    check(read_uart((uint8_t*)&pages_all, 2),
+          ERR "No Page count")
+	_log(INFO "Pages: %d",pages_all);
 
     while (page_count < pages_all) {
 
@@ -248,11 +287,17 @@ uint8_t receive_flash()
             page[i] = 0x0;
 
         // receive page
-        check(!read_uart((uint8_t*)&page_num, 2), ERR "No Page num")
-        check(!read_uart((uint8_t*)&page_size, 2),
-              ERR "No Page size for Page %d", page_num)
-        check(!read_uart((uint8_t*)&crc16, 2), ERR "Incomplete SHA received")
-        check(!read_uart(page, page_size), ERR "Incomplete Page received")
+        check(read_uart((uint8_t*)&page_num, 2), ERR "No Page num");
+		debug( "Page num: %d",page_num);
+
+        check(read_uart((uint8_t*)&page_size, 2),
+              ERR "No Page size for Page %d", page_num);
+		debug( "Page size: %d", page_size);
+
+        check(read_uart((uint8_t*)&crc16, 2), ERR "Incomplete SHA");
+		debug( "Page CRC16: %d",crc16);
+
+        check(read_uart(page, page_size), ERR "Incomplete Page");
 
         if (check_crc16(crc16, page, page_size)) {
             if (!write_page(page, page_num))
@@ -263,7 +308,7 @@ uint8_t receive_flash()
         page_count++;
     }
 
-    _log(INFO "Everything is ok - ending write-flash\n");
+    _log(INFO "Write Flash ok");
     return OK;
 
 }
@@ -272,18 +317,27 @@ uint8_t receive_flash()
  * bootloader main
  */
 int main(void)
+
 {
     usart_init();
-    _log(INFO "Bootloader! - lookout for flashing ...\n");
+    _log(INFO "BOOTLOADER");
 
-    receive_flash();
+    int8_t ret;
+    while ((ret = receive_flash()) == ERROR) {
+		usart_init();
+        _log(ERR "Error during receive, starting again ...");
+    }
 
-    _log(INFO "start main...\n");
+    void (*start)( void ) = 0x0;
+
+    if (ret == TIMEOUT ) {
+        _log(INFO "Timeout reached");
+    }
+
+    _log(INFO "starting main...");
 
     usart_disable();
 
-    // jmp to 0x0
-    void (*start)( void ) = 0x0;
     start();
 
     return 0;

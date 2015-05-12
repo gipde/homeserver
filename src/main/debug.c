@@ -12,7 +12,7 @@
 void usart_init()
 {
     /* Enable Transmitter */
-    UCSRB |= (1<<RXCIE) | (1<<RXEN) | (1 << TXEN);
+    UCSRB |= (1 << RXCIE) | (1 << RXEN) | (1 << TXEN);
     // 8N1
     UCSRC = (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0); // Asynchron 8N1
     // BAUD RATE

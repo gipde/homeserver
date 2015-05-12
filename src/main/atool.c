@@ -37,58 +37,83 @@ checksum        2 bytes
 #include <time.h>
 #include <signal.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #define PAGE_SIZE 128
 
 /**
- * generate head for log statements
+ * generate prefix for log statements
+ * buf have to be a length of 32
  */
-void gen_head(char* head, char* col, char* lev)
+void gen_prefix(char* buf, char* col, char* lev)
 {
     time_t t = time(NULL);
     struct tm* t2 = localtime(&t);
     struct timespec spec;
     clock_gettime(CLOCK_REALTIME, &spec);
 
-    sprintf(head, "%s%20s%03.0f %s", col, " ", spec.tv_nsec / 1.0e6, lev);
-    strftime(head + strlen(col), 20, "%d.%m.%Y %H:%M:%S", t2);
-    head[19 + strlen(col)] = '.';
+    sprintf(buf, "%s%20s%03.0f %s", col, " ", spec.tv_nsec / 1.0e6, lev);
+    strftime(buf + strlen(col), 20, "%d.%m.%Y %H:%M:%S", t2);
+    buf[19 + strlen(col)] = '.';
 }
 
 /**
  * log Mesage to console and to file
  */
-void log_msg(char* msg, FILE* f)
+void log_msg(const char* msg, FILE* f,...)
 {
+	
+		//TODO: What is int ind?
 
-    char head[36];
+    char prefix[36];
     int ind = 1;
 
     switch (msg[0]) {
     case '0':
-        gen_head(head, "\x1b[31;1m", "ERROR ");
+        gen_prefix(prefix, "\x1b[31;1m", "ERROR ");
         break;
 
     case '1':
-        gen_head(head, "\x1b[33;1m", "WARN  ");
+        gen_prefix(prefix, "\x1b[33;1m", "WARN  ");
         break;
 
     case '2':
-        gen_head(head, "", "INFO  ");
+        gen_prefix(prefix, "", "INFO  ");
         break;
 
     case '3':
-        gen_head(head, "", "DEBUG ");
+        gen_prefix(prefix, "", "DEBUG ");
         break;
 
     default:
         ind = 0;
-        gen_head(head, "", "INFO  ");
+        gen_prefix(prefix, "", "INFO  ");
     }
 
-    printf("%s %s \x1b[37;0m\n", head, msg + ind);
-    fprintf(f, "%s %s \x1b[37;0m\n", head, msg + ind);
+	const char* msg_ptr = msg + ind; // depends wether level is set or not
+
+	printf("%s",prefix);
+
+	va_list args;
+	va_start(args,f);
+	if(args!=NULL)
+		vprintf(msg_ptr,args);
+	else
+		printf("%s",msg_ptr);
+
+	printf("\x1b[37;0m\n");
+
+	if (f !=NULL)
+	    fprintf(f, "%s %s \x1b[37;0m\n", prefix, msg_ptr);
 }
+
+#define info(msg,...) log_msg(msg,NULL,##__VA_ARGS__)
+
+#ifdef deb
+#define debug(msg,...) log_msg("3" msg,NULL,##__VA_ARGS__)
+#else
+#define debug(...) 
+#endif
 
 /**
  * print program usage
@@ -118,7 +143,8 @@ int open_port(char* dev)
 {
     int fd;
 
-    printf("open Port %s... \n", dev);
+    info("open Port %s...",dev);
+	
 
     fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
 
@@ -132,7 +158,7 @@ int open_port(char* dev)
 
 int init_port(int fd, int baud)
 {
-    printf("init device with %d baud ...\n", baud);
+    info("init device with %d baud ...", baud);
 
     if (fd == 0)
         error_exit("invalid devie specified");
@@ -148,21 +174,21 @@ int init_port(int fd, int baud)
     cfsetospeed(&tty, baud);
     cfsetispeed(&tty, baud);
 
-	/* input modes */
+    /* input modes */
     tty.c_iflag &= ~(IGNBRK | BRKINT | ICRNL |
                      INLCR | PARMRK | INPCK | ISTRIP | IXON);
 
-	/* output modes */
+    /* output modes */
     tty.c_oflag = 0;
 
-	/* local modes */
+    /* local modes */
     tty.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
 
-	/* control modes */
+    /* control modes */
     tty.c_cflag &= ~(CSIZE | PARENB);
     tty.c_cflag |= CS8;
 
-	/* special character */
+    /* special character */
     tty.c_cc[VMIN]  = 1;
     tty.c_cc[VTIME] = 0;
 
@@ -183,7 +209,7 @@ void do_log(int devp)
     logfile = fopen("atool.log", "a");
     fprintf(logfile, "\n---starting---\n");
 
-    printf("Receiving ... \n");
+    info("Receiving ...");
     unsigned char buf;
 
     char line[1024];
@@ -237,20 +263,12 @@ uint16_t crc16_update(uint16_t crc, uint8_t a)
  */
 void write_uart(int devp, unsigned char* c, int len)
 {
-    /*
-    printf("%d: ", len);
-
-    for (int i = 0; i < len; i++)
-        printf("%x ", c[i]);
-
-    printf("\n");
-    */
     int b = write(devp, c, len);
 
     if (b != len)
         printf("Error transmitting %d bytes\n", len);
 
-    usleep(1000 * 30);
+    usleep(1000 * 50);
 }
 
 typedef struct page {
@@ -272,14 +290,23 @@ int do_program(int devp)
 {
 
     int buf[1];
-    printf("Sending ... \n");
+    info("Sending ... ");
 
-	// Transmit Character that forces soft-reset via USART_RXC intr 
-	write_uart(devp,"x",1);
-	sleep(1);	
+    // Transmit Character that forces soft-reset via USART_RXC intr
+    write_uart(devp, "x", 1);
 
+    info("sleep");
+	// we have to sleep, that is ensured that the controller has resetet USART
+	// so that there is no trailing x in TX
+
+	// TODO: alles ziemlich ekelig, gute lösung gefragt, wie man das x in jeder situation wegbekommt
+    sleep(1);
+    info("and go...");
+
+	info("Write magic ...");
     write_uart(devp, "BOOTLOADER_START", 16);
 
+	info("Write Pagecount %d ... ",pagescount);
     write_uart(devp, (unsigned char*)&pagescount, 2);
 
     page_t* p = start;
@@ -287,14 +314,17 @@ int do_program(int devp)
 
     do {
 
-        printf("Write page %d ... \n", p->no);
+        info("Write page %d ...", p->no);
         // page nr
+		debug("Write page no %d ..", p->no);
         write_uart(devp, (unsigned char*)&p->no, 2);
 
         // page size
+		debug("Write page size %d ..",p->size);
         write_uart(devp, (unsigned char*)&p->size, 2);
 
         // crc
+		debug("Write page crc %d ..",p->crc);
         write_uart(devp, (unsigned char*)&p->crc, 2);
 
         // payload
@@ -375,7 +405,7 @@ void parse(FILE* flashfile)
 
         // Invalid Line
         if (line[0] != ':') {
-            printf("invalid line\n");
+            info("invalid line");
             continue;
         }
 
@@ -385,7 +415,7 @@ void parse(FILE* flashfile)
 
         // EOF Record
         if (type == 1) {
-            printf("Writing %d bytes at end\n", bufptr + 1);
+            info("Writing %d bytes at end", bufptr + 1);
             add_page(++lastpage, buf, bufptr + 1);
             break;
         }
@@ -407,7 +437,7 @@ void parse(FILE* flashfile)
         check = (~(check & 0xff) + 1) & 0xff;
 
         if (check_given != check) {
-            printf("Invalid Checksum %02x<>%02x in line %d", check, check_given, 1);
+            info("Invalid Checksum %02x<>%02x in line %d", check, check_given, 1);
             exit(1);
         }
 
@@ -422,7 +452,7 @@ int main(int argc, char* argv[])
 {
 
     if (signal(SIGINT, sig_handler) == SIG_ERR)
-        printf("\ncan't catch SIGINT\n");
+        info("\ncan't catch SIGINT");
 
     int log = 0, flash = 0;
     int dev = 0, baud = 0;
@@ -443,7 +473,7 @@ int main(int argc, char* argv[])
             flashfile = fopen(optarg, "r");
 
             if (flashfile == NULL)  {
-                printf("could not open file: %d", errno);
+                info("could not open file: %d", errno);
                 exit(1);
             } else {
                 parse(flashfile);

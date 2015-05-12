@@ -1,4 +1,30 @@
+// Types
+typedef struct {
+    uint8_t state;
+#define BUFFER_ERROR    7
+#define LATE_COLLISION  6
+#define TRANSMIT_ABORT  5
+#define POWER_SAVE      4
+#define TRANSMIT_BUSY   3
+#define RECEIVE_BUSY    2
+#define CLOCK_READY     1
+#define LINK_STATE      0
+    uint8_t mac[6];
+    uint16_t tx_bytes;
+    uint16_t rx_bytes;
+    uint16_t tx_col_count;
+} enc28j60_info_t;
+
+// API
 void enc28j60_init();
+void set_mac_address(uint8_t* addr);
+uint8_t get_eir();
+enc28j60_info_t* enc28j60_get_status();
+uint8_t write_packet(uint8_t* dst, uint16_t type, uint8_t* data,
+                     uint16_t len);
+int16_t read_packet(uint8_t* data);
+void handle_intr();
+void enc28j60_power_save(uint8_t sleep);
 
 // SPI Config
 #define PORT_SPI    PORTB
@@ -50,13 +76,26 @@ void enc28j60_init();
 #define  PKTIE      6
 #define  LINKIE     4
 #define  TXIE       3
+#define  TXERIE     1
+#define  RXERIE     0
 #define EIR         (0x1c|BANK0)
+#define  PKTIF      6
+#define  DMAIF      5
+#define  LINKIF     4
+#define  TXIF       3
 #define  TXERIF     1
 #define  RXERIF     0
 #define ESTAT       (0x1d|BANK0)
+#define  BUFFER     6
+#define  LATECOL    4
+#define  RXBUSY     2
+#define  TXABRT     1
 #define  CLKRDY     0
 #define ECON2       (0x1e|BANK0)
 #define  AUTOINC    7
+#define  PKTDEC     6
+#define  PWRSV      5
+#define  VRPS       3
 #define ECON1       (0x1f|BANK0)
 #define  TXRTS      3
 #define  B_RXEN     2
@@ -91,6 +130,10 @@ void enc28j60_init();
 #define MICMD       (0x12|BANK2|DUMMY)
 #define  MIIRD      0
 #define MIREGADR    (0x14|BANK2|DUMMY)
+#define MIWRL       (0x16|BANK2|DUMMY)
+#define MIWRH       (0x17|BANK2|DUMMY)
+#define MIRDL       (0x18|BANK2|DUMMY)
+#define MIRDH       (0x19|BANK2|DUMMY)
 
 #define MAADR5      (0x00|BANK3|DUMMY)
 #define MAADR6      (0x01|BANK3|DUMMY)
@@ -99,10 +142,6 @@ void enc28j60_init();
 #define MAADR1      (0x04|BANK3|DUMMY)
 #define MAADR2      (0x05|BANK3|DUMMY)
 #define EREVID      (0x12|BANK3)
-#define MIWRL       (0x16|BANK3|DUMMY)
-#define MIWRH       (0x17|BANK3|DUMMY)
-#define MIRDL       (0x18|BANK3|DUMMY)
-#define MIRDH       (0x19|BANK3|DUMMY)
 #define MISTAT      (0x0a|BANK3|DUMMY)
 #define  BUSY       0
 #define ECOCON      (0x15|BANK3|DUMMY)
@@ -114,6 +153,7 @@ void enc28j60_init();
 #define PHCON2      0x10
 #define  HDLDIS     8
 #define PHSTAT2     0x11
+#define  LSTAT      10
 #define PHIE        0x12
 #define  PLNKIE     4
 #define  PGEIE      1
@@ -122,6 +162,11 @@ void enc28j60_init();
 #define  STRCH      1
 #define  LACFG3     11
 #define  LACFG2     10
+#define  LACFG1     9
+#define  LACFG0     8
+#define  LBCFG3     7
+#define  LBCFG2     6
+#define  LBCFG1     5
 #define  LBCFG0     4
 
 #define MAC_REGS    { MAADR1, MAADR2, MAADR3, MAADR4, MAADR5, MAADR6 }
@@ -132,4 +177,4 @@ void enc28j60_init();
 #define TX_START    0x1000
 #define TX_END      0x1FFF
 
-#define MAX_FRAMELEN    1518
+#define MAX_FRAMELEN    1500
