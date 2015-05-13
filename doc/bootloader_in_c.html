@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<!-- saved from url=(0085)http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung -->
+<html lang="de" class="client-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script async="" src="./bootloader_in_c_files/load.php"></script>
+    <script type="text/javascript" async="" src="./bootloader_in_c_files/ga.js"></script><script async="" type="text/javascript" src="./bootloader_in_c_files/gpt.js"></script><script type="text/javascript">
+      var wgBreakFrames = false;
+      var wgContentLanguage = false;
+    </script>
+    
+    <meta name="generator" content="MediaWiki 1.23.5">
+<link rel="alternate" type="application/x-wiki" title="Bearbeiten" href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit">
+<link rel="edit" title="Bearbeiten" href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit">
+<link rel="shortcut icon" href="http://www.mikrocontroller.net/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="http://www.mikrocontroller.net/wikisoftware/opensearch_desc.php" title="Uc-wiki (de)">
+<link rel="EditURI" type="application/rsd+xml" href="http://www.mikrocontroller.net/wikisoftware/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="Atom-Feed für „Uc-wiki“" href="http://www.mikrocontroller.net/wikisoftware/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=atom">    <title>AVR Bootloader in C - eine einfache Anleitung - Mikrocontroller.net</title>
+    
+        <!-- <script type="text/javascript" src="/wikisoftware/skins/common/wikibits.js"></script> -->
+            <script src="./bootloader_in_c_files/load(1).php"></script><style type="text/css"></style><script src="./bootloader_in_c_files/load(2).php"></script>
+<script>if(window.mw){
+mw.config.set({"wgCanonicalNamespace":"","wgCanonicalSpecialPageName":false,"wgNamespaceNumber":0,"wgPageName":"AVR_Bootloader_in_C_-_eine_einfache_Anleitung","wgTitle":"AVR Bootloader in C - eine einfache Anleitung","wgCurRevisionId":85794,"wgRevisionId":85794,"wgArticleId":5621,"wgIsArticle":true,"wgIsRedirect":false,"wgAction":"view","wgUserName":null,"wgUserGroups":["*"],"wgCategories":["AVR-Programmer und -Bootloader"],"wgBreakFrames":false,"wgPageContentLanguage":"de","wgPageContentModel":"wikitext","wgSeparatorTransformTable":[",\t.",".\t,"],"wgDigitTransformTable":["",""],"wgDefaultDateFormat":"dmy","wgMonthNames":["","Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],"wgMonthNamesShort":["","Jan.","Feb.","Mär.","Apr.","Mai","Jun.","Jul.","Aug.","Sep.","Okt.","Nov.","Dez."],"wgRelevantPageName":"AVR_Bootloader_in_C_-_eine_einfache_Anleitung","wgIsProbablyEditable":true,"wgRestrictionEdit":[],"wgRestrictionMove":[],"wgWikiEditorEnabledModules":{"toolbar":true,"dialogs":true,"hidesig":true,"preview":true,"previewDialog":false,"publish":true}});
+}</script><script>if(window.mw){
+mw.loader.implement("user.options",function($,jQuery){mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"editfont":"default","editondblclick":0,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":1,"extendwatchlist":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"imagesize":2,"math":0,"minordefault":0,"newpageshidepatrolled":0,"nickname":"","norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"rcdays":7,"rclimit":50,"rows":25,"showhiddencats":0,"shownumberswatching":1,"showtoolbar":1,"skin":"mikrocontroller","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":1,"watchdefault":1,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,
+"useeditwarning":1,"prefershttps":1,"usebetatoolbar":1,"usebetatoolbar-cgd":1,"wikieditor-preview":1,"wikieditor-publish":1,"language":"de","variant-gan":"gan","variant-iu":"iu","variant-kk":"kk","variant-ku":"ku","variant-shi":"shi","variant-sr":"sr","variant-tg":"tg","variant-uz":"uz","variant-zh":"zh","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false,"variant":"de"});},{},{});mw.loader.implement("user.tokens",function($,jQuery){mw.user.tokens.set({"editToken":"+\\","patrolToken":false,"watchToken":false});},{},{});
+/* cache key: uc_wiki:resourceloader:filter:minify-js:7:e744e8cbb1c07d55ee8cfeba6da4a900 */
+}</script>
+<script>if(window.mw){
+mw.loader.load(["mediawiki.page.startup","mediawiki.legacy.wikibits","mediawiki.legacy.ajax"]);
+}</script><script src="./bootloader_in_c_files/load(3).php"></script><style type="text/css">/*<![CDATA[*/
+.source-c {line-height: normal;}
+.source-c li, .source-c pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for c
+ * CSS class: source-c, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.c.source-c .de1, .c.source-c .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;font-family: monospace, monospace;}
+.c.source-c  {font-family:monospace;}
+.c.source-c .imp {font-weight: bold; color: red;}
+.c.source-c li, .c.source-c .li1 {font-weight: normal; vertical-align:top;}
+.c.source-c .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.c.source-c .li2 {font-weight: bold; vertical-align:top;}
+.c.source-c .kw1 {color: #b1b100;}
+.c.source-c .kw2 {color: #000000; font-weight: bold;}
+.c.source-c .kw3 {color: #000066;}
+.c.source-c .kw4 {color: #993333;}
+.c.source-c .co1 {color: #666666; font-style: italic;}
+.c.source-c .co2 {color: #339933;}
+.c.source-c .coMULTI {color: #808080; font-style: italic;}
+.c.source-c .es0 {color: #000099; font-weight: bold;}
+.c.source-c .es1 {color: #000099; font-weight: bold;}
+.c.source-c .es2 {color: #660099; font-weight: bold;}
+.c.source-c .es3 {color: #660099; font-weight: bold;}
+.c.source-c .es4 {color: #660099; font-weight: bold;}
+.c.source-c .es5 {color: #006699; font-weight: bold;}
+.c.source-c .br0 {color: #009900;}
+.c.source-c .sy0 {color: #339933;}
+.c.source-c .st0 {color: #ff0000;}
+.c.source-c .nu0 {color: #0000dd;}
+.c.source-c .nu6 {color: #208080;}
+.c.source-c .nu8 {color: #208080;}
+.c.source-c .nu12 {color: #208080;}
+.c.source-c .nu16 {color:#800080;}
+.c.source-c .nu17 {color:#800080;}
+.c.source-c .nu18 {color:#800080;}
+.c.source-c .nu19 {color:#800080;}
+.c.source-c .me1 {color: #202020;}
+.c.source-c .me2 {color: #202020;}
+.c.source-c .ln-xtra, .c.source-c li.ln-xtra, .c.source-c div.ln-xtra {background-color: #ffc;}
+.c.source-c span.xtra { display:block; }
+
+/*]]>*/
+</style><style type="text/css">/*<![CDATA[*/
+.source-dos {line-height: normal;}
+.source-dos li, .source-dos pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for dos
+ * CSS class: source-dos, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.dos.source-dos .de1, .dos.source-dos .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;font-family: monospace, monospace;}
+.dos.source-dos  {font-family:monospace;}
+.dos.source-dos .imp {font-weight: bold; color: red;}
+.dos.source-dos li, .dos.source-dos .li1 {font-weight: normal; vertical-align:top;}
+.dos.source-dos .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.dos.source-dos .li2 {font-weight: bold; vertical-align:top;}
+.dos.source-dos .kw1 {color: #00b100; font-weight: bold;}
+.dos.source-dos .kw2 {color: #000000; font-weight: bold;}
+.dos.source-dos .kw3 {color: #b1b100; font-weight: bold;}
+.dos.source-dos .kw4 {color: #0000ff; font-weight: bold;}
+.dos.source-dos .co1 {color: #808080; font-style: italic;}
+.dos.source-dos .co2 {color: #b100b1; font-style: italic;}
+.dos.source-dos .co3 {color: #33cc33;}
+.dos.source-dos .es0 {color: #ff0000; font-weight: bold;}
+.dos.source-dos .br0 {color: #66cc66;}
+.dos.source-dos .sy0 {color: #33cc33;}
+.dos.source-dos .sy1 {color: #33cc33;}
+.dos.source-dos .st0 {color: #ff0000;}
+.dos.source-dos .nu0 {color: #cc66cc;}
+.dos.source-dos .re0 {color: #b100b1; font-weight: bold;}
+.dos.source-dos .re1 {color: #448844;}
+.dos.source-dos .re2 {color: #448888;}
+.dos.source-dos .re3 {color: #448888;}
+.dos.source-dos .ln-xtra, .dos.source-dos li.ln-xtra, .dos.source-dos div.ln-xtra {background-color: #ffc;}
+.dos.source-dos span.xtra { display:block; }
+
+/*]]>*/
+</style>
+    <script src="./bootloader_in_c_files/application-2a2200701aa6f2b224d2c48a42c5d738.js"></script>
+<link rel="stylesheet" media="all" href="http://www.mikrocontroller.net/assets/screen-7503663d3813525661d54559fbe949d3.css">
+<link rel="stylesheet" media="print" href="http://www.mikrocontroller.net/assets/print-c21b24fc6d13ed4b3f37f96a5f5de8ba.css">
+
+    <!--<script src="/javascripts/highlightCurrentLink.js" type="text/javascript"></script>-->
+    <link rel="shortcut icon" type="image/x-icon" href="http://www.mikrocontroller.net/favicon.ico">
+    <link rel="stylesheet" type="text/css" media="screen" href="./bootloader_in_c_files/shared.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="./bootloader_in_c_files/main.css">
+    <style type="text/css">#nav-foren-sub {display: none;} </style>
+    <style type="text/css">#nav-tutorial-sub {display: none;} </style>
+
+    <!--
+    <style type="text/css">
+    <div id='catlinks' class='catlinks'><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="/articles/Spezial:Kategorien" title="Spezial:Kategorien">Kategorie</a>: <ul><li><a href="/articles/Kategorie:AVR-Programmer_und_-Bootloader" title="Kategorie:AVR-Programmer und -Bootloader">AVR-Programmer und -Bootloader</a></li></ul></div></div>    #nav-foren-sub {display: none;}
+    </style>
+    -->
+
+<link rel="stylesheet" href="http://www.mikrocontroller.net/wikisoftware/load.php?debug=false&lang=de&modules=mediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.ui.button&only=styles&skin=mikrocontroller&*">
+<style>
+.mw-collapsible-toggle{float:right;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none} caption .mw-collapsible-toggle{float:none} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+/* cache key: uc_wiki:resourceloader:filter:minify-css:7:6c1d24e90626cec584f0869483f983e7 */
+.suggestions{overflow:hidden;position:absolute;top:0;left:0;width:0;border:none;z-index:1099;padding:0;margin:-1px -1px 0 0} html > body .suggestions{margin:-1px 0 0 0}.suggestions-special{position:relative;background-color:white;cursor:pointer;border:solid 1px #aaaaaa;padding:0;margin:0;margin-top:-2px;display:none;padding:0.25em 0.25em;line-height:1.25em}.suggestions-results{background-color:white;cursor:pointer;border:solid 1px #aaaaaa;padding:0;margin:0}.suggestions-result{color:black;margin:0;line-height:1.5em;padding:0.01em 0.25em;text-align:left; overflow:hidden;-o-text-overflow:ellipsis; text-overflow:ellipsis;white-space:nowrap}.suggestions-result-current{background-color:#4C59A6;color:white}.suggestions-special .special-label{color:gray;text-align:left}.suggestions-special .special-query{color:black;font-style:italic;text-align:left}.suggestions-special .special-hover{background-color:silver}.suggestions-result-current .special-label,.suggestions-result-current .special-query{color:white}.highlight{font-weight:bold}
+/* cache key: uc_wiki:resourceloader:filter:minify-css:7:9f9511aa4ef920d34591113e825e6a1e */
+.postedit-container{margin:0 auto;position:fixed;top:0;height:0;left:50%;z-index:1000;font-size:13px}.postedit-container:hover{cursor:pointer}.postedit{position:relative;top:0.6em;left:-50%;padding:.6em 3.6em .6em 1.1em;line-height:1.5625em;color:#626465;background-color:#f4f4f4;border:1px solid #dcd9d9;text-shadow:0 0.0625em 0 rgba(255,255,255,0.5);border-radius:5px;-webkit-box-shadow:0 2px 5px 0 #ccc;box-shadow:0 2px 5px 0 #ccc;-webkit-transition:all 0.25s ease-in-out;-moz-transition:all 0.25s ease-in-out;-ms-transition:all 0.25s ease-in-out;-o-transition:all 0.25s ease-in-out;transition:all 0.25s ease-in-out}.skin-monobook .postedit{top:6em !important}.postedit-faded{opacity:0}.postedit-icon{padding-left:41px;  line-height:25px;background-repeat:no-repeat;background-position:8px 50%}.postedit-icon-checkmark{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAABblBMVEUAAAD///////9PfTf///80aRdTgjn///9Feij///////////9Rfzf///////////9PfjZRgDh1o1xOfTb///////+bwYqLtnj///////9PfTa82K////9WhT6YxIL///9QgDdTgzr////////j7uDl7eLq8efi693k7OH///////9UhjuBr2rp9uRUhjr///9YljVKgir///9WiTlYjT3////9/v57vFlbkT5PjC9dlD/5/fhuq09stUTs9uhxuElctCpfnT1huDFloEZloUZmpENmvDZpvDxpvTxqvjxrvT5rvT9rwTxsqktswD5uwkBvuUdxw0NztFBztU9ztVBzwkp0tlJ1xkd2t1R3uVR4w1F4xk54x014yE15uVZ5v1R5xVB6v1R7yFJ8wVh9xVl9yFR9yVd9ylN+xVh+yFd/x1l/yFeAylmEx1+Ny2uY0Hqe04Wj1Ymv3Ze33qLD47TJ5L3O6cPU7Mrq9eb2+/Q4j37OAAAAQHRSTlMAAQIEBAUFBQwPFB4fJCUoKiosQEhJS01RUlZZXmdydXaChYuSlJSWmJmoq6uur8LExcvM19fg5ejt8fX2+Pr7SljgewAAAKpJREFUGBkFwQNCAwAAAMDLtl3LtrG4rWXbtvX77gAgZ6grFwC0bhwNVgKgdPZx8b0dgLi+s7Wn0VoAqpfOI9+BNADZI7fLrz2pSEwGHZuH+78lSK8ZLkLezF3ooyUG3VPXq2USei9WngeyoG195yBYWDF3E/2pAhl1e9Gr8bGT+bfOFCC2fnvh4X7rcqIAQNNu+HT6sxkAjceTL/2ZAIhv+PorBwBJxfkA//dFHSCBy/UTAAAAAElFTkSuQmCC);background-image:url(http://www.mikrocontroller.net/wikisoftware/resources/src/mediawiki.action/images/green-checkmark.png?2015-03-11T07:58:20Z)!ie;background-position:left}.postedit-close{position:absolute;padding:0 .8em;right:0;top:0;font-size:1.25em;font-weight:bold;line-height:2.3em;color:black;text-shadow:0 0.0625em 0 white;text-decoration:none;opacity:0.2;filter:alpha(opacity=20)}.postedit-close:hover{color:black;text-decoration:none;opacity:0.4;filter:alpha(opacity=40)}
+/* cache key: uc_wiki:resourceloader:filter:minify-css:7:6a5592fac97179252130711d4bd2381f */</style><style>
+.suggestions a.mw-searchSuggest-link,.suggestions a.mw-searchSuggest-link:hover,.suggestions a.mw-searchSuggest-link:active,.suggestions a.mw-searchSuggest-link:focus{color:black;text-decoration:none}.suggestions-result-current a.mw-searchSuggest-link,.suggestions-result-current a.mw-searchSuggest-link:hover,.suggestions-result-current a.mw-searchSuggest-link:active,.suggestions-result-current a.mw-searchSuggest-link:focus{color:white}.suggestions a.mw-searchSuggest-link .special-query{ overflow:hidden;-o-text-overflow:ellipsis; text-overflow:ellipsis;white-space:nowrap}
+/* cache key: uc_wiki:resourceloader:filter:minify-css:7:ae3fa4570b5ac0c6cf7b3776c8ae4d6f */</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="http://www.mikrocontroller.net/wikisoftware/load.php?debug=false&lang=de&modules=site&only=styles&skin=mikrocontroller&*">
+<style>a:lang(ar),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}
+/* cache key: uc_wiki:resourceloader:filter:minify-css:7:54d5fe6622ad6975d261994c27a3259c */</style>
+
+<script type="text/javascript">
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+
+googletag.cmd.push(function() {
+  //googletag.pubads().enableSingleRequest();
+  googletag.pubads().setTargeting('pagetype', 'article');
+  googletag.pubads().setTargeting('section', 'article');
+  if ('https:' == document.location.protocol) {
+    googletag.pubads().setTargeting('ssl', '1');
+  } else {
+    googletag.pubads().setTargeting('ssl', '0');
+  }
+      googletag.pubads().setTargeting('site_id', '1');
+  });
+</script>
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-80574-1']);
+  
+  if (typeof googletag.pubads == 'function') {
+    _gaq.push(['_setCustomVar', 3, "GAM", "Yes", 1]);
+  } else {
+    _gaq.push(['_setCustomVar', 3, "GAM", "No", 1]);
+  }
+  _gaq.push(['_trackPageview']);
+  _gaq.push(['_trackPageLoadTime']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+</head>
+
+<body>
+	<div id="outer-container">
+    <div id="globalWrapper">
+    <div id="top"><h1><a href="http://www.mikrocontroller.net/">www.mikrocontroller.net</a></h1></div>
+  <table id="twocolumns">
+  <tbody><tr>
+  <td id="sidebar-left" class="sidebar">
+  <!-- begin nav -->
+<div class="nav-container">
+  <ul class="nav-first">
+    <li><b><a href="http://www.mikrocontroller.net/">Home</a></b></li>
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/AVR">AVR</a></b>
+      <ul>
+        <li><a href="http://www.mikrocontroller.net/articles/AVR-Tutorial">AVR-Tutorial</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/AVR-GCC-Tutorial">AVR-GCC-Tutorial</a></li>
+      </ul>
+    </li>
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/ARM">ARM</a></b>
+      <ul>
+        <li><a href="http://www.mikrocontroller.net/articles/LPC1xxx">LPC1xxx</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/STM32">STM32</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/Infineon_XMC">XMC</a></li>
+      </ul>
+    </li>
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/MSP430">MSP430</a></b>
+    </li>
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/Programmierbare_Logik">FPGA, CPLD &amp; Co.</a></b>
+      <ul>
+        <li><a href="http://www.mikrocontroller.net/articles/FPGA">Grundlagen zu FPGAs</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/Hardwarebeschreibungssprachen">VHDL &amp; Co.</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/Xilinx_ISE">Xilinx ISE</a></li>
+      </ul>
+    </li>
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/Digitale_Signalverarbeitung">DSP</a></b>
+    </li>
+
+    <li>
+      <b><a href="http://www.mikrocontroller.net/articles/Elektronik_Allgemein">Elektronik allgemein</a></b>
+      <ul>
+        <li><a href="http://www.mikrocontroller.net/articles/SMD_L%C3%B6ten">SMD Löten</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/Operationsverst%C3%A4rker-Grundschaltungen">Operationsverstärker</a></li>
+        <li><a href="http://www.mikrocontroller.net/articles/Oszilloskop">Oszilloskop</a></li>
+      </ul> 
+    </li>
+
+    <li>
+      <b><a href="http://www.mikrocontroller.net/forum/all">Forum</a></b>
+      <ul>
+        <li><a href="http://www.mikrocontroller.net/forum/mikrocontroller-elektronik">µC &amp; Elektronik</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/analogtechnik">Analogtechnik</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/fpga-vhdl-cpld">FPGA, VHDL &amp; Co.</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/dsp">DSP</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/gcc">GCC</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/codesammlung">Projekte &amp; Code</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/markt">Markt</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/platinen">Platinen</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/mechanik">Mechanik &amp; Werkzeug</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/hf">HF, Funk &amp; Felder</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/hausbus">Haus &amp; Smart Home</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/pc-programmierung">PC-Programmierung</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/pc-hardware-software">PC Hard- &amp; Software</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/ausbildung-studium-beruf">Ausbildung &amp; Beruf</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/offtopic">Offtopic</a></li>
+        <li><a href="http://www.mikrocontroller.net/forum/website">Webseite</a></li>
+       </ul>
+    </li>
+<!--    <li><b><a href="/buecher/">Buchtipps</a></b></li>-->
+<!--    <li><b><a href="http://shop.mikrocontroller.net/">Shop</a></b></li>-->
+<!--    <li><b><a href="/articles/Linksammlung">Linksammlung</a></b></li>-->
+    <li><b><a href="http://www.mikrocontroller.net/articles/Hauptseite">Artikelübersicht</a></b></li>
+    <li><b><a href="http://www.mikrocontroller.net/articles/Spezial:Recentchanges">Letzte Änderungen</a></b></li>
+  </ul>
+</div>
+<!-- end nav -->
+  <hr>
+  <!-- google_ad_section_start(weight=ignore) -->
+
+<script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+    }
+//-->
+</script>
+
+	<div id="p-cactions" class="portlet">
+	  <h5><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#toggle" onclick="javascript:toggle_visibility(&#39;p-cactions-box&#39;); return false;">▶ Dieser Artikel</a></h5>
+	  <div class="box" id="p-cactions-box">
+      <ul>
+	    <li id="ca-nstab-main" class="selected"><a href="./bootloader_in_c_files/bootloader_in_c.html" class="currentlink">Seite</a></li><li id="ca-talk" class="new"><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=Diskussion:AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&redlink=1">Diskussion</a></li><li id="ca-edit"><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit">Bearbeiten</a></li><li id="ca-history"><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=history">Versionsgeschichte</a></li>  	  </ul>
+    </div>
+	</div>
+	<div class="portlet" id="p-personal">
+	  <h5><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#toggle" onclick="javascript:toggle_visibility(&#39;p-personal-box&#39;); return false;">▶ Benutzer</a></h5>
+	  <div class="box" id="p-personal-box">
+	    <ul>
+	    <li id="pt-login"><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=Spezial:Anmelden&returnto=AVR+Bootloader+in+C+-+eine+einfache+Anleitung">Anmelden</a></li>	    </ul>
+	  </div>
+	</div>
+  <!-- LOGO
+	<div class="portlet" id="p-logo">
+	  <a style="background-image: url(/wikisoftware/skins/common/images/wiki.png);"
+	    href="/articles/Hauptseite"
+	    title="Hauptseite"></a>
+	</div>
+  -->
+	<div id="p-search" class="portlet">
+	  <h5><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#toggle" onclick="javascript:toggle_visibility(&#39;p-search-box&#39;); return false;">▶ Suche</a></h5>
+	  <div class="box" id="p-search-box">
+	    <form name="searchform" action="http://www.mikrocontroller.net/articles/Spezial:Suche" id="searchform">
+	      <input id="searchInputX" name="search" type="text" accesskey="f" value=""><br>
+	      <input type="submit" name="go" class="searchButton" value="Ausführen">&nbsp;<input type="submit" name="fulltext" class="searchButton" value="Suche">
+	    </form>
+	  </div>
+	</div>
+	<div class="portlet" id="p-tb">
+	  <h5><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#toggle" onclick="javascript:toggle_visibility(&#39;p-tb-box&#39;); return false;">▶ Werkzeuge</a></h5>
+	    <div class="box" id="p-tb-box">
+      <ul>
+		  		  <li id="t-whatlinkshere"><a href="http://www.mikrocontroller.net/articles/Spezial:Linkliste/AVR_Bootloader_in_C_-_eine_einfache_Anleitung">Links auf diese Seite</a></li>
+		  		  <li id="t-recentchangeslinked"><a href="http://www.mikrocontroller.net/articles/Spezial:%C3%84nderungen_an_verlinkten_Seiten/AVR_Bootloader_in_C_-_eine_einfache_Anleitung">Änderungen an verlinkten Seiten</a></li>
+		  	      	      	      	      	      	      	      	      	      <li id="t-specialpages"><a href="http://www.mikrocontroller.net/articles/Spezial:Spezialseiten">Spezialseiten</a></li>	      	    </ul>
+      </div>
+	</div>
+  <!-- google_ad_section_end -->
+  
+  <!-- start adsense -->
+    <!-- end adsense -->
+  
+      </td><!-- end of the left (by default at least) column -->
+  <td id="main">
+    <!-- google_ad_section_start -->
+    <a name="top" id="contentTop"></a>
+    		<div id="content">
+    <h1 class="firstHeading">AVR Bootloader in C - eine einfache Anleitung</h1>
+    <div id="bodyContent">
+
+						<!-- tagline -->
+			<!-- <div id="siteSub">Aus Uc-wiki</div> -->
+			<!-- /tagline -->
+						<!-- subtitle -->
+			<div id="contentSub"></div>
+			<!-- /subtitle -->
+												<!-- jumpto -->
+			<div id="jump-to-nav" class="mw-jump">
+				Wechseln zu:				<a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#mw-navigation">Navigation</a>, 				<a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#p-search">Suche</a>
+			</div>
+			<!-- /jumpto -->
+						<!-- bodycontent -->
+			<div id="mw-content-text" lang="de" dir="ltr" class="mw-content-ltr"><p>Dieser Artikel soll dazu dienen, das Thema <a href="http://www.mikrocontroller.net/articles/Bootloader" title="Bootloader">Bootloader</a> im AVR etwas zu demystifizieren.
+</p><p>Es gibt schon einige Artikel und Codebeispiele für verschiedene Bootloader in Assembler oder C (bzw. gemischt), aber kein Artikel beleuchtet das Thema von einer einfachen Seite aus Anwendungssicht. In diese Lücke zielt dieses Tutorial.
+Es soll anhand von Beispielen einen möglichst einfachen, verständlichen und nachvollziehbaren Weg zeigen, sich mit Hilfe der Hochsprache C in das Thema einzuarbeiten (dabei soll weder Assembler noch Inline-Assembler verwendet werden). 
+</p><p>Vielleicht werden einige meinen dass es nicht möglich ist das Thema ohne tieferen Einblick in die Hardware und die AVR-Register zu beleuchten, ich möchte es aber trotzdem versuchen.
+</p><p>Der Artikel wird sich auf das notwendige Wissen beschränken, um mit Booloadern arbeiten zu können. Es wird ein genereller Weg gezeigt, der sich leicht auf andere AVR-Devices (mit Bootloader Sektion) übertragen lässt.
+Die Codebeispiele wurden für den ATmega88 kompiliert und getestet.
+</p>
+<div id="toc" class="toc"><div id="toctitle"><h2>Inhaltsverzeichnis</h2><span class="toctoggle">&nbsp;[<a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#" class="internal" id="togglelink">Verbergen</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Einleitung"><span class="tocnumber">1</span> <span class="toctext">Einleitung</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Software"><span class="tocnumber">2</span> <span class="toctext">Software</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Hardware"><span class="tocnumber">3</span> <span class="toctext">Hardware</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Grundlagen"><span class="tocnumber">4</span> <span class="toctext">Grundlagen</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Der_.22Hallo_Welt.22_-_Bootloader"><span class="tocnumber">5</span> <span class="toctext">Der "Hallo Welt" - Bootloader</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_1_-_Konfiguration_der_Projekteinstellungen"><span class="tocnumber">5.1</span> <span class="toctext">Schritt 1 - Konfiguration der Projekteinstellungen</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_2_-_Einbinden_der_UART_Library_von_Peter_Fleury"><span class="tocnumber">5.2</span> <span class="toctext">Schritt 2 - Einbinden der UART Library von Peter Fleury</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_3_-_Programmieren_des_Bootloaders"><span class="tocnumber">5.3</span> <span class="toctext">Schritt 3 - Programmieren des Bootloaders</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_4_-_Flashen_und_Ausprobieren_des_Bootloaders"><span class="tocnumber">5.4</span> <span class="toctext">Schritt 4 - Flashen und Ausprobieren des Bootloaders</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Die_Test-Anwendung"><span class="tocnumber">6</span> <span class="toctext">Die Test-Anwendung</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_1_-_Erstellen_des_Projektes"><span class="tocnumber">6.1</span> <span class="toctext">Schritt 1 - Erstellen des Projektes</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_2_-_Einbinden_der_UART_Library"><span class="tocnumber">6.2</span> <span class="toctext">Schritt 2 - Einbinden der UART Library</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_3_-_Programmieren_der_Anwendung"><span class="tocnumber">6.3</span> <span class="toctext">Schritt 3 - Programmieren der Anwendung</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_4_-_Ausprobieren_der_Anwendung"><span class="tocnumber">6.4</span> <span class="toctext">Schritt 4 - Ausprobieren der Anwendung</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Der_.22echte.22_Bootloader"><span class="tocnumber">7</span> <span class="toctext">Der "echte" Bootloader</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_1_und_2_-_siehe_.22Hallo_Welt.22_Bootloader"><span class="tocnumber">7.1</span> <span class="toctext">Schritt 1 und 2 - siehe "Hallo Welt" Bootloader</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_3_-_Programmieren_des_Bootloaders_2"><span class="tocnumber">7.2</span> <span class="toctext">Schritt 3 - Programmieren des Bootloaders</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_4_-_Flashen_und_Ausprobieren_des_Bootloaders_2"><span class="tocnumber">7.3</span> <span class="toctext">Schritt 4 - Flashen und Ausprobieren des Bootloaders</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Der_.22echte.22_Bootloader_f.C3.BCr_Programme_.3E_64k"><span class="tocnumber">8</span> <span class="toctext">Der "echte" Bootloader für Programme &gt; 64k</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_1_und_2_-_siehe_.22Hallo_Welt.22_Bootloader_2"><span class="tocnumber">8.1</span> <span class="toctext">Schritt 1 und 2 - siehe "Hallo Welt" Bootloader</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Schritt_3_-_Programmieren_des_Bootloaders_3"><span class="tocnumber">8.2</span> <span class="toctext">Schritt 3 - Programmieren des Bootloaders</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Zusammenfassung"><span class="tocnumber">9</span> <span class="toctext">Zusammenfassung</span></a></li>
+<li class="toclevel-1 tocsection-23"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#FAQ"><span class="tocnumber">10</span> <span class="toctext">FAQ</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Wie_kann_man_Bootloader_und_Anwendungsprogramm_gemeinsam_flashen.3F"><span class="tocnumber">10.1</span> <span class="toctext">Wie kann man Bootloader und Anwendungsprogramm gemeinsam flashen?</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-25"><a href="http://www.mikrocontroller.net/articles/AVR_Bootloader_in_C_-_eine_einfache_Anleitung#Referenzen_.2F_Links"><span class="tocnumber">11</span> <span class="toctext">Referenzen / Links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Einleitung">Einleitung</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=1" title="Abschnitt bearbeiten: Einleitung">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Zu Beginn soll das notwendige Wissen über die Bootloaderunterstützung im AVR vermittelt werden, um eine Arbeitsgrundlage zu schaffen.
+</p><p>Im weiteren Verlauf des Artikels werden insgesamt drei Anwendungen programmiert: Zuerst ein einfacher Bootloader, welcher in der Bootloadersektion des Flashs ausgeführt wird, aber noch keine eigentliche Bootloader-Funktion hat, sozusagen ein "Hallo Welt"-Bootloader. Danach soll eine kleine Applikation programmiert werden, welche der spätere <i>echte</i> Bootloader ins Flash programmieren soll. Als großes Finale soll dann ein Bootloader entstehen, welcher in der Lage ist, Intel-HEX-Dateien über die serielle Schnittstelle zu laden, ins Flash zu programmieren und zu starten.
+</p><p>Der Leser sollte bereits Erfahrungen im Umgang mit dem AVR Studio und der Programmiersprache C gemacht haben und schon Anwendungen geschrieben haben. Für absolute Einsteiger ist der Artikel ungeeignet.
+</p><p>Den Thread zum Artikel gibt es hier: <a class="external free" href="http://www.mikrocontroller.net/topic/195102">http://www.mikrocontroller.net/topic/195102</a>
+</p>
+<h2><span class="mw-headline" id="Software">Software</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=2" title="Abschnitt bearbeiten: Software">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Für den Artikel werden folgende Software-Pakete benötigt:
+</p>
+<ul>
+<li> aktuelles <a rel="nofollow" class="external text" href="http://http//www.atmel.com/dyn/products/tools_card.asp?tool_id=2725">AVR Studio</a> (hier verwendet: AVR Studio v4.18) 
+</li>
+<li> aktuelles <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/winavr/files/">WinAVR</a> (hier verwendet: WinAVR20100110)
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY</a> als serielle Konsole (Version v0.6)
+</li>
+</ul>
+<p>Des Weiteren wurde auf der AVR-Seite für die serielle Kommunikation mit dem PC auf die beliebte UART-Library von <a rel="nofollow" class="external text" href="http://www.jump.to/fleury">Peter Fleury</a> zurückgegriffen, damit wir uns nicht um die gepufferte UART-Kommunikation kümmern müssen.
+</p>
+<h2><span class="mw-headline" id="Hardware">Hardware</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=3" title="Abschnitt bearbeiten: Hardware">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Für den Artikel wurde eine kleine Hardware bestehend aus einem <a rel="nofollow" class="external text" href="http://www.atmel.com/dyn/products/product_card.asp?part_id=3302">Atmega88</a> und einem <a rel="nofollow" class="external text" href="http://www.ftdichip.com/Products/ICs/FT232R.htm">FT232</a> als USB-Seriell-Wandler erstellt. Dies soll als Basis für die Experimente dienen. Der USB-Seriell-Wandler ist nicht zwingend notwendig und kann auch durch den üblichen Pegelwandler vom Typ <a rel="nofollow" class="external text" href="http://www.maxim-ic.com/datasheet/index.mvp/id/1798/ln/en">MAX232</a> ersetzt werden, wenn der PC noch eine serielle Schnittstelle besitzt. Entscheidend ist nur die Möglichkeit der seriellen Kommunikation mit dem Rechner.
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:Schaltplan-ATmega88-USB.png" class="image" title="Schaltplan"><img alt="Schaltplan" src="./bootloader_in_c_files/800px-Schaltplan-ATmega88-USB.png" width="800" height="566" srcset="/wikifiles/thumb/b/b3/Schaltplan-ATmega88-USB.png/1200px-Schaltplan-ATmega88-USB.png 1.5x, /wikifiles/thumb/b/b3/Schaltplan-ATmega88-USB.png/1600px-Schaltplan-ATmega88-USB.png 2x"></a>
+</p><p>Für die ISP-Programmierung wurde der <a rel="nofollow" class="external text" href="http://www.atmel.com/dyn/products/tools_card.asp?tool_id=3808">AVRISPmkII-In-System-Programmer</a> von Atmel verwendet. Es kann natürlich auch ein anderer Programmer (z.B. <a rel="nofollow" class="external text" href="http://www.atmel.com/dyn/products/tools_card.asp?tool_id=2735">STK500</a>) verwendet werden, welcher mit dem AVR Studio zusammenarbeitet. Prinzipiell kann natürlich auch ein selbstgebastelter Parallel-Programmer verwendet werden, dann kann aber nicht via AVR Studio programmiert werden, sondern mit <a rel="nofollow" class="external text" href="http://www.nongnu.org/avrdude/">AVRDude</a> oder <a rel="nofollow" class="external text" href="http://www.lancos.com/prog.html">PonyProg</a> o.ä. Der Artikel beschränkt sich auf die Verwendung vom AVR Studio.
+</p><p>Für das Verständis der Hardware und der seriellen Kommunikation sind folgende Artikel empfehlenswert:
+</p>
+<ul>
+<li> <a href="http://www.mikrocontroller.net/articles/AVR-Tutorial:_UART" title="AVR-Tutorial: UART">AVR-Tutorial: UART</a>
+</li>
+<li> <a href="http://www.mikrocontroller.net/articles/RS-232" title="RS-232">RS-232</a>
+</li>
+</ul>
+<h1><span class="mw-headline" id="Grundlagen">Grundlagen</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=4" title="Abschnitt bearbeiten: Grundlagen">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<div class="thumb tright"><div class="thumbinner" style="width:402px;"><a href="http://www.mikrocontroller.net/articles/Datei:AVR-Memory.png" class="image"><img alt="" src="./bootloader_in_c_files/400px-AVR-Memory.png" width="400" height="366" class="thumbimage" srcset="/wikifiles/7/78/AVR-Memory.png 1.5x, /wikifiles/7/78/AVR-Memory.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:AVR-Memory.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Flash Speicher Aufteilung</div></div></div>
+<p>Was ist eigentlich ein Bootloader und was macht er? Wofür sollte ich so etwas brauchen? Ist das nicht viel zu kompliziert? Ich bin eingefleischter AVR Studio-Benutzer, muss ich mich jetzt mit makefiles beschäftigen? Kann man im AVR Studio mit C überhaupt einen Bootloader schreiben? Vielleicht hat sich der eine oder andere schon einmal diese oder ähnliche Fragen gestellt. 
+</p><p>Der Programmcode des AVR steht in seinem Flashspeicher und wird von dort ausgeführt. Normalerweise kann während der Ausführung des Programms nicht auf den Flashspeicher geschrieben werden. Dies ist auch einleuchtend da sich das Programm ja sonst selbst überschreiben oder löschen könnte. Das Beschreiben des Flashs erfolgt beim AVR üblicherweise über die ISP-Schnittstelle, dabei befindet sich der Controller im Reset und es wird kein Programm ausgeführt. Dies ist für Prototyping und kleine Anwendungen hinnehmbar. Ist der Controller allerdings in einem größeren System oder in größerer räumlicher Entfernung verbaut und die ISP-Schnittstelle nicht mehr zugänglich, ist ein Update der Firmware nicht mehr ohne Weiteres möglich oder sehr teuer und aufwendig. Hier kann ein Bootloader Abhilfe schaffen, in dem er das Anwendungsprogramm auf einer definierten Schnittstelle entgegennimmt (UART, I2C, Wireless) und ins Flash transferiert. Ein Bootloader ist also in erster Linie ein kleines Programm, welches in einem besonderem Teil des Flash steht - der <b>Boot Loader Section</b>.  Durch die Lokalisierung des Bootloader-Programms in dieser besonderen Sektion des AVR ist es dem Programm möglich, auf Teile des Flashs - der sogenannten <b>Application Flash Section</b> - zu schreiben. Die eigentliche Anwendung wird ausschließlich in der <b>Application Flash Section</b> ausgeführt. Wenn man so will, können im Flash des AVR also zwei unabhängige Programme stehen. Der Flash ist in zwei Bereiche mit unterschiedlichen Merkmalen aufgeteilt (siehe Bild). Auf die RWW bzw. NRWW-Sektion möchte ich an dieser Stelle (noch) nicht eingehen.
+</p><p>Wie man unschwer erkennen kann, liegt der Bootloader-Bereich am Ende des Flash-Speichers. Normalerweise startet der Controller die Abarbeitung seiner Programmierung an der Stelle 0x0000. Ein Bootloader soll ja aber <b>vor</b> der Abarbeitung der eigentlichen Applikation ausgeführt werden. Woher weiß also der AVR-Controller nach dem Reset, dass er nicht von Adresse 0x0000 sondern einer anderen Adresse starten soll? Diese Konfiguration ist wie alle wichtigen und grundlegenden Konfigurationen über die Fuses des AVRs geregelt. Wir beginnen mit der folgende Tabelle, welche die Speicheraufteilung des Programmspeichers veranschaulicht.
+</p>
+<table border="1" class="wikitable">
+<caption> Boot Size Konfiguration, Tabelle 26-6 im Atmega88-Datenblatt S.280
+</caption>
+<tbody><tr>
+<th> BOOTSZ1 </th>
+<th> BOOTSZ0 </th>
+<th> Boot<br>Size </th>
+<th> Pages </th>
+<th> Application<br>Flash Section </th>
+<th> Boot Loader<br>Flash Section </th>
+<th> End<br>Application<br>Section </th>
+<th> Boot Reset<br>(Start Boot<br>Loader Section)
+</th></tr>
+<tr>
+<td> 1 </td>
+<td> 1 </td>
+<td> 128 words </td>
+<td> 4 </td>
+<td> 0x000 - 0xF7F </td>
+<td> 0xF80 - 0xFFF </td>
+<td> 0xF7F </td>
+<td> 0xF80
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 0 </td>
+<td> 256 words </td>
+<td> 8 </td>
+<td> 0x000 - 0xEFF </td>
+<td> 0xF00 - 0xFFF </td>
+<td> 0xEFF </td>
+<td> 0xF00
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 1 </td>
+<td> 512 words </td>
+<td> 16 </td>
+<td> 0x000 - 0xDFF </td>
+<td> 0xE00 - 0xFFF </td>
+<td> 0xDFF </td>
+<td> 0xE00
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 0 </td>
+<td> 1024 words </td>
+<td> 32 </td>
+<td> 0x000 - 0xBFF </td>
+<td> 0xC00 - 0xFFF </td>
+<td> 0xBFF </td>
+<td> 0xC00
+</td></tr></tbody></table>
+<p>Um die Tabelle zu verstehen muss man wissen, dass der Flash-Speicher intern in sogenannten <i>Pages</i> (Seiten) organisiert ist. Die Multiplikation der <i>Page</i>-Größe mit der Anzahl der <i>Pages</i> ergibt die Speichergröße. Die Größe einer <i>Page</i> steht im Datenblatt und ist in <i>Words</i> - also Datenworte - angegeben. Ein Datenwort entspricht zwei Bytes. <i><b>Hier offenbart sich eine Tücke des Datenblatts: Alle Speicherbezüge und Adressen sind in Datenworten  (also immer 2 Bytes) angegeben!</b></i>
+Aus der Tabelle erfahren wir auch, dass man mit den beiden Fuses <b>BOOTSZ0</b> und <b>BOOTSZ1</b> die Größe des Bootloaderbereichs einstellen kann. Eine weitere Tabelle aus dem Atmega88-Datenblatt gibt Auskunft über die Aufteilung der Pages und die Anzahl der Datenworte einer Page.
+</p>
+<table border="1" class="wikitable">
+<caption> No.of Words in a Page and No.of Pages in Flash, Tabelle 27-9 im Atmega88-Datenblatt S.288
+</caption>
+<tbody><tr>
+<th>  Device </th>
+<th> Flash Size </th>
+<th> Page Size </th>
+<th> PCWORD </th>
+<th> No. of Pages </th>
+<th> PCPAGE </th>
+<th> PCMSB
+</th></tr>
+<tr>
+<td> Atmega88 </td>
+<td> 4K words (8 Kbytes) </td>
+<td> 32 words </td>
+<td> PC[4:0] </td>
+<td> 128 </td>
+<td> PC[11:5] </td>
+<td> 11
+</td></tr></tbody></table>
+<p>Aus der Tabelle ergibt sich, dass die Größe einer <i>Page</i> des verwendeten Atmega88 32 <i>Words</i> - also 64 Byte sind. Insgesamt gibt es 128 <i>Pages</i>, damit ergibt sich nach Adam Riese 128 * 64 = 8192 Byte, also 8 Kbytes. In unserem späteren Codebeispiel soll die Größe des Bootloaderbereichs auf 1024 <i>words</i> - also 2048 Bytes gestellt werden (<b>BOOTSZ0=0</b> und <b>BOOTSZ1=0</b>). Nun können wir ausrechnen, in welcher Flash-<i>Page</i> bzw. an welcher Flash-Adresse der Bootloaderbereich beginnt: Er beginnt in der 96 <i>Page</i> (128 - 32) an <i>Word</i>-Adresse 0xC00, also Byteadresse 0xC00 * 2 = 0x1800. Dies ist die exakte Startadresse unseres Bootloaderbereiches.
+</p><p>Weiter oben wurde die Frage gestellt, woher der AVR weiß, an welcher Stelle (entweder 0x0000 oder in unserem Fall 0x1800) er nach dem Reset starten soll. Um dem AVR dies mitzuteilen, ist eine weitere Fuse nötig - die <b>BOOTRST</b>-Fuse. Eine weitere Tabelle aus dem Atmega88-Datenblatt gibt Auskunft über diese Fuse.
+</p>
+<table border="1" class="wikitable">
+<caption> Reset and Interrupt Vectors Placement in Atmega88, Tabelle 11-3 im Atmega88-Datenblatt S.58
+</caption>
+<tbody><tr>
+<th>  BOOTRST</th>
+<th> IVSEL </th>
+<th> Reset Adress </th>
+<th> Interrupt Vectors Start Adress
+</th></tr>
+<tr>
+<td> 1 </td>
+<td> 0 </td>
+<td> 0x000 </td>
+<td> 0x001
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 1 </td>
+<td> 0x000 </td>
+<td> Boot Reset Address + 0x001
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 0 </td>
+<td> Boot Reset Address </td>
+<td> 0x001
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 1 </td>
+<td> Boot Reset Address </td>
+<td> Boot Reset Address + 0x001
+</td></tr></tbody></table>
+<p>Mit der <b>BOOTRST</b>-Fuse wird festgelegt, dass der AVR nach dem Reset an die Startadresse der Bootloader Sektion im Flash springt. Auf das <b>IVSEL</b>-Bit (keine Fuse) möchte ich erst an späterer Stelle - wenn es um Interrupts geht - zurückkommen.
+</p><p><b>Noch ein wichtiger Hinweis für die Werte der Fuses im Datenblatt:</b> <i><b>Der Wert "0" bedeutet, dass die Fuse programmiert ist, es entspicht dem Häkchen im AVR Studio!</b></i>
+</p>
+<h1><span class="mw-headline" id="Der_.22Hallo_Welt.22_-_Bootloader">Der "Hallo Welt" - Bootloader</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=5" title="Abschnitt bearbeiten: Der &quot;Hallo Welt&quot; - Bootloader">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<p>Wie oben erwähnt, wird für die Erstellung des Codes die kostenlose IDE von Atmel - das AVRStudio - benutzt. Ergänzt wird es durch C-Compiler und Tools des WinAVR Projektes. Des weiteren wird zur seriellen Kommunikation das Terminalprogramm benötigt. Im Tutorial wird PuTTY verwendet und sollte installiert sein. Die Hardware ist aufgebaut und via AVRISPmkII-Programmer an den PC angeschlossen - nun kann es losgehen!
+</p><p>Zu Beginn wird ein neues AVRStudio-Projekt erstellt. Danach werden folgende Schritte abgearbeitet:
+</p>
+<h2><span class="mw-headline" id="Schritt_1_-_Konfiguration_der_Projekteinstellungen">Schritt 1 - Konfiguration der Projekteinstellungen</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=6" title="Abschnitt bearbeiten: Schritt 1 - Konfiguration der Projekteinstellungen">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Projekt.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-Projekt.png" width="200" height="124" class="thumbimage" srcset="/wikifiles/thumb/9/99/Bootloader-Projekt.png/300px-Bootloader-Projekt.png 1.5x, /wikifiles/thumb/9/99/Bootloader-Projekt.png/400px-Bootloader-Projekt.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Projekt.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Erstellen des Projekts</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-General.PNG" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-Config-General.PNG" width="200" height="152" class="thumbimage" srcset="/wikifiles/thumb/2/2c/Bootloader-Config-General.PNG/300px-Bootloader-Config-General.PNG 1.5x, /wikifiles/thumb/2/2c/Bootloader-Config-General.PNG/400px-Bootloader-Config-General.PNG 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-General.PNG" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Generelle Optionen - setzten der Taktfrequenz</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-Linker.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-Config-Linker.png" width="200" height="152" class="thumbimage" srcset="/wikifiles/thumb/4/45/Bootloader-Config-Linker.png/300px-Bootloader-Config-Linker.png 1.5x, /wikifiles/thumb/4/45/Bootloader-Config-Linker.png/400px-Bootloader-Config-Linker.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-Linker.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Linker Option eingeben</div></div></div>
+<p>Als erstes öffnen wir die Projekteinstellungen (Menü <i>Project/Configuration Options</i>) und tragen die richtige Taktfrequenz ein (Im Beispiel nutzen wir den internen Oszillator mit 8 Mhz). Danach gehen wir zum Reiter <b>Custom Options</b>. Dort klicken wir auf <b>Linker Options</b> und geben dann im Textfeld daneben <b>-Ttext=0x1800</b> ein. Danach drücken wir auf <b>Add</b>. 
+</p><p>Was bewirkt dieser Linker-Parameter? Dafür muß wieder etwas weiter ausgeholt werden. Nach dem Kompilieren der Programmquellen <i>linkt</i> der Linker den Programmcode an bestimmte Stellen in den drei verschiedenen Speichern Flash, EEPROM und SRAM des AVR. In der vom Compiler verwendeten <a rel="nofollow" class="external text" href="http://www.nongnu.org/avr-libc/user-manual/mem_sections.html">AVR Libc</a> ist der Speicher in verschiedene Sektionen aufgeteilt. Dem Linker muss mitgeteilt werden, in welche Speicher er den Programmcode linken soll. Die Lokalisierung des Speichers sind die Sektionen. Die Sektion <i>.text</i> ist dem ausführbaren Programmcode - also den Befehlen - vorbehalten und liegt im Flash des AVR, des weiteren gibt es auch noch die Sektionen <i>.data</i> und <i>.bss</i> für die statischen und dynamischen Variablen im SRAM und eine Sektion <i>.eeprom</i> für den EEPROM und noch ein paar spezielle (Flash-)Sektionen.
+</p><p>Nun gibt es verschiedene Methoden, dem Linker mitzuteilen, dass man den Programmcode an die Stelle des Bootloaderbereichs haben möchte. Eine sehr einfache Methode ist <b>die Verschiebung der Sektion </b> <i><b>.text</b></i>, welche normalerweise ab Adresse 0x0000 beginnt. Eben dies geschieht mit dem Linker Parameter <b>-Ttext=0x1800</b>. Die Adresse des Beginns der <i>.text</i> Sektion wird auf die (Byte-)Adresse 0x1800 gesetzt.
+</p>
+<h2><span class="mw-headline" id="Schritt_2_-_Einbinden_der_UART_Library_von_Peter_Fleury">Schritt 2 - Einbinden der UART Library von Peter Fleury</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=7" title="Abschnitt bearbeiten: Schritt 2 - Einbinden der UART Library von Peter Fleury">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Wie bereits erwähnt, wird für die serielle Kommunikation auf der AVR-Seite die <a rel="nofollow" class="external text" href="http://homepage.hispeed.ch/peterfleury/avr-software.html">UART-Library</a>  von <a rel="nofollow" class="external text" href="http://www.jump.to/fleury">Peter Fleury</a> verwendet. Nach dem Download werden die uart.c und uart.h in das Projekt eingebunden (für die uart.c im AVR Studio rechte Maustaste auf <i>Source Files</i> und dann <i>Add Existing Source File(s)...</i> und für die uart.h die rechte Maustaste auf <i>Header Files</i> und dann <i>Add Existing Header File(s)...</i>)
+</p>
+<h2><span class="mw-headline" id="Schritt_3_-_Programmieren_des_Bootloaders">Schritt 3 - Programmieren des Bootloaders</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=8" title="Abschnitt bearbeiten: Schritt 3 - Programmieren des Bootloaders">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-Linker-ok.PNG" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-Config-Linker-ok.PNG" width="200" height="152" class="thumbimage" srcset="/wikifiles/thumb/f/ff/Bootloader-Config-Linker-ok.PNG/300px-Bootloader-Config-Linker-ok.PNG 1.5x, /wikifiles/thumb/f/ff/Bootloader-Config-Linker-ok.PNG/400px-Bootloader-Config-Linker-ok.PNG 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-Config-Linker-ok.PNG" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Linker Option nach Add</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-AVRStudio.PNG" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-AVRStudio.PNG" width="200" height="119" class="thumbimage" srcset="/wikifiles/thumb/5/51/Bootloader-AVRStudio.PNG/300px-Bootloader-AVRStudio.PNG 1.5x, /wikifiles/thumb/5/51/Bootloader-AVRStudio.PNG/400px-Bootloader-AVRStudio.PNG 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-AVRStudio.PNG" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Kompilieren des Bootloaders</div></div></div>
+<p>Nun soll eine kleine Applikation geschrieben werden. Keine Angst, unser erstes Ziel ist es, eine kleine Anwendung in dem Bootloaderbereich zu positionieren, welche serielle Ein-und Ausgaben behandelt. Die eigentliche Bootloaderfunktionalität kommt später dazu. Also schreiben wir die Datei <i>main.c</i> wie folgt:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="co2">#include &lt;avr/io.h&gt;</span>
+<span class="co2">#include &lt;avr/interrupt.h&gt;</span>
+<span class="co2">#include &lt;avr/boot.h&gt;</span>
+<span class="co2">#include &lt;util/delay.h&gt;</span>
+<span class="co2">#include "uart.h"</span>
+&nbsp;
+<span class="co2">#define BOOT_UART_BAUD_RATE     9600     /* Baudrate */</span>
+<span class="co2">#define XON                     17       /* XON Zeichen */</span>
+<span class="co2">#define XOFF                    19       /* XOFF Zeichen */</span>
+&nbsp;
+<span class="kw4">int</span> main<span class="br0">(</span><span class="br0">)</span>
+<span class="br0">{</span>
+    <span class="kw4">unsigned</span> <span class="kw4">int</span> 	c<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>               <span class="coMULTI">/* Empfangenes Zeichen + Statuscode */</span>
+    <span class="kw4">unsigned</span> <span class="kw4">char</span>	temp<span class="sy0">,</span>              <span class="coMULTI">/* Variable */</span>
+                        flag<span class="sy0">=</span><span class="nu0">1</span><span class="sy0">,</span>            <span class="coMULTI">/* Flag zum steuern der Endlosschleife */</span>
+			p_mode<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>	   <span class="coMULTI">/* Flag zum steuern des Programmiermodus */</span>
+    <span class="kw4">void</span> <span class="br0">(</span><span class="sy0">*</span>start<span class="br0">)</span><span class="br0">(</span> <span class="kw4">void</span> <span class="br0">)</span> <span class="sy0">=</span> <span class="nu12">0x0000</span><span class="sy0">;</span>        <span class="coMULTI">/* Funktionspointer auf 0x0000 */</span>
+&nbsp;
+    <span class="coMULTI">/* Interrupt Vektoren verbiegen */</span>
+&nbsp;
+    <span class="kw4">char</span> sregtemp <span class="sy0">=</span> SREG<span class="sy0">;</span>
+    cli<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+    temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+    SREG <span class="sy0">=</span> sregtemp<span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Einstellen der Baudrate und aktivieren der Interrupts */</span>
+    uart_init<span class="br0">(</span> UART_BAUD_SELECT<span class="br0">(</span>BOOT_UART_BAUD_RATE<span class="sy0">,</span>F_CPU<span class="br0">)</span> <span class="br0">)</span><span class="sy0">;</span> 
+    sei<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    uart_puts<span class="br0">(</span><span class="st0">"Hallo hier ist der Bootloader<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+    _delay_ms<span class="br0">(</span><span class="nu0">1000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="kw1">do</span>
+    <span class="br0">{</span>
+        c <span class="sy0">=</span> uart_getc<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+        <span class="kw1">if</span><span class="br0">(</span> <span class="sy0">!</span><span class="br0">(</span>c <span class="sy0">&amp;</span> UART_NO_DATA<span class="br0">)</span> <span class="br0">)</span>
+        <span class="br0">{</span>
+            <span class="kw1">switch</span><span class="br0">(</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span>
+            <span class="br0">{</span>
+                 <span class="kw1">case</span> <span class="st0">'q'</span><span class="sy0">:</span> 
+		     flag<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+                     uart_puts<span class="br0">(</span><span class="st0">"Verlasse den Bootloader!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                     <span class="kw2">break</span><span class="sy0">;</span>
+                  <span class="kw1">default</span><span class="sy0">:</span>
+                     uart_puts<span class="br0">(</span><span class="st0">"Du hast folgendes Zeichen gesendet: "</span><span class="br0">)</span><span class="sy0">;</span>
+                     uart_putc<span class="br0">(</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span><span class="sy0">;</span>
+                     uart_puts<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                     <span class="kw2">break</span><span class="sy0">;</span>
+            <span class="br0">}</span>
+        <span class="br0">}</span>
+    <span class="br0">}</span>
+    <span class="kw1">while</span><span class="br0">(</span>flag<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    uart_puts<span class="br0">(</span><span class="st0">"Springe zur Adresse 0x0000!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+    _delay_ms<span class="br0">(</span><span class="nu0">1000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* vor Rücksprung eventuell benutzte Hardware deaktivieren
+       und Interrupts global deaktivieren, da kein "echter" Reset erfolgt */</span>
+&nbsp;
+    <span class="coMULTI">/* Interrupt Vektoren wieder gerade biegen */</span>
+    cli<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+    temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">&amp;</span> ~<span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Rücksprung zur Adresse 0x0000 */</span>
+    start<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span> 
+    <span class="kw1">return</span> <span class="nu0">0</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p><i><b>Erklärung des Codes</b></i>
+</p><p>Beginnen wir mit den Defines: Die Baudrate erklärt sich von selbst. Die Defines XON und XOFF werden später, wenn die Bootloader-Funktionalität dazukommt, zur Flusssteuerung gebraucht. Wir werden also die XON/XOFF-Flussteuerung nutzen (merken für die Einstellung von PuTTY). 
+</p>
+Bei den Variablen ist nur eine interessant: Der Funktionspointer <pre>void (*start)( void ) = 0x0000;</pre> ist ein einfacher Trick, um mit dem Programmcounter (PC) zur Adresse 0x0000 zu springen. Wir definieren einfach eine (fiktive) Funktion an der Stelle 0x0000. Beim Aufruf der Funktion mit <pre>start();</pre> springt der Programmcounter und damit das Programm an Adresse 0x0000 und das Anwendungsprogramm - wenn es eins gibt - kann starten.
+Eine Besonderheit ist zu beachten, wenn der verfügbare Flash-Speicher größer als 128kB ist. In der Regel wird der Bootloader im oberen Teil des Speichers liegen und daher ist ein einfacher Rücksprung mit normaler 2Byte Wordadressierung nicht möglich. Leider hat gcc hier einen Bug und verwendet das vom Controller zusätzlich herangezogene Register EIND nicht. Dieses Register muß daher explizit vor dem Rücksprung auf 0 gesetzt werden. Also <pre>EIND = 0;
+start();</pre>Ohne diesen Zusatz kann der Bootloader im Normalfall nicht mehr verlassen werden.
+<p>Nun folgt ein sehr wichtiger Teil, auf den ich noch eingehen muss - die Interrupt-Vektoren. Interrupt-Vektoren sind Einsprungpunkte der Interrupts, welche normalerweise fest ab Adresse 0x0001 im Flash liegen. Wird ein Interrupt ausgelöst, springt der AVR automatisch zu der festen Flash-Adresse. Von dort aus - wenn eine ISR programmiert ist - springt der Controller zur ISR (<b>I</b>nterrupt <b>S</b>ervice <b>R</b>outine). Nun haben wir folgendes Problem: Wenn wir den Bootloadercode ab der Adresse 0x1800 ausführen, nützt es uns gar nichts, wenn der AVR nach Auslösen eines Interrupts an die Stelle 0x0001 + X springt, da dieser Speicherbereich ja im Zweifelsfalle sogar von uns überschrieben wird. Unser Code soll nur ab Adresse 0x1800 stehen! Wir müssen also die Sprungtabelle "verbiegen", d.h. den AVR veranlassen, bei Auslösung eines Interrupts an Adresse 0x1801 + X zu springen und dann zur ISR. Das Verbiegen der Sprungtabelle passiert mit dem Setzen des <b>IVSEL</b>-Bits im <b>MCUCR</b> (ACHTUNG: beim Atmega8 <b>GICR</b>), also
+</p><p>beim Atmega88:
+</p>
+<pre>temp = MCUCR;
+MCUCR = temp | (1&lt;&lt;IVCE);
+MCUCR = temp | (1&lt;&lt;IVSEL);
+</pre>
+<p>bzw. beim Atmega8:
+</p>
+<pre>temp = GICR;
+GICR = temp | (1&lt;&lt;IVCE);
+GICR = temp | (1&lt;&lt;IVSEL);
+</pre>
+<p><br>
+Das <b>IVCE</b>-Bit wird nur benötigt, um dem Mikrocontroller zu sagen, dass wir als nächstes den Parameter <b>IVSEL</b> setzen wollen, das Bit wird nachher vom Controller wieder gelöscht. Um versehentliches verstellen der Interrupttabelle zu vermeiden muss das setzen von <b>IVCE</b> und <b>IVSEL</b> innerhalb von 4 Taktzyklen erfolgen. Um dies zu gewährleisten müssen alle interrupts während des Setzens deaktiviert sein. ACHTUNG Stolperfalle: Die Variable temp wird benötigt, da beim Setzen von <b>IVSEL</b> gleichzeitig <b>IVCE</b> gelöscht werden muss:
+</p><p>bei Atmega8/16:
+</p>
+<pre>GICR |= (1&lt;&lt;IVCE);   // noch richtig. IVCE wird gesetzt
+GICR |= (1&lt;&lt;IVSEL);  // falsch! IVSEL wird zwar gesetzt, 
+                        IVCE bleibt jedoch in diesem Prozessortakt gesetzt.
+</pre>
+<p><br>
+In der Hauptschleife wird lediglich gepollt, ob ein neues Zeichen von der Konsole kommt. Nach dem Empfang eines Zeichens wird es ausgewertet (switch). Nach dem Drücken von <i>"q"</i> verlässt der Bootloader die Hauptschleife, setzt die Interrupt-Vektoren wieder zurück und startet die Hauptanwendung - wenn eine da ist.
+</p><p>Nach dem Kompilieren sagt uns der Linker, dass 754 Byte Programmspeicher und 265 Byte Datenspeicher verbraucht wurde. 754 Byte ist weit unter den 2048 Byte, welche uns ab der Adresse 0x1800 zur Verfügung stehen, wir haben also alles richtig gemacht.
+</p><p>Nun kontrollieren wir noch schnell, ob das Programm an der richtigen Stelle im Flash steht. Mit dem Hex-File (Bootloader.hex) wird auch ein List-File (Bootloader.lss) erzeugt. Im List-File findet sich das disassemblierte Programm und die Speicherzuordnungen. Hier ein Auszug der Datei:
+</p>
+<pre>Bootloader.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000080  00800100  00001a68  000002fc  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000268  00001800  00001800  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          00000085  00800180  00800180  0000037c  2**0
+                  ALLOC
+  3 .debug_aranges 00000040  00000000  00000000  0000037c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_pubnames 00000095  00000000  00000000  000003bc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000459  00000000  00000000  00000451  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000238  00000000  00000000  000008aa  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000003eb  00000000  00000000  00000ae2  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  000000a0  00000000  00000000  00000ed0  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000001cf  00000000  00000000  00000f70  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    0000024a  00000000  00000000  0000113f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000048  00000000  00000000  00001389  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00001800 &lt;__vectors&gt;:
+    1800:	19 c0       	rjmp	.+50     	; 0x1834 &lt;__ctors_end&gt;
+    1802:	33 c0       	rjmp	.+102    	; 0x186a &lt;__bad_interrupt&gt;
+    1804:	32 c0       	rjmp	.+100    	; 0x186a &lt;__bad_interrupt&gt;
+    1806:	31 c0       	rjmp	.+98     	; 0x186a &lt;__bad_interrupt&gt;
+    1808:	30 c0       	rjmp	.+96     	; 0x186a &lt;__bad_interrupt&gt;
+    180a:	2f c0       	rjmp	.+94     	; 0x186a &lt;__bad_interrupt&gt;
+    180c:	2e c0       	rjmp	.+92     	; 0x186a 
+
+...
+(viele Zeilen)
+...
+
+0000186c &lt;main&gt;:
+#define BOOT_UART_BAUD_RATE     9600     /* Baudrate */
+#define XON                     17       /* XON Zeichen */
+#define XOFF                    19       /* XOFF Zeichen */
+ 
+int main()
+{
+    186c:	cf 93       	push	r28
+    186e:	df 93       	push	r29
+    unsigned char	temp,            /* Variable */
+                        flag=1;          /* Flag zum steuern der Endlosschleife */
+    void (*start)( void ) = 0x0000;    /* Funktionspointer auf 0x0000 */
+ 
+    /* Interrupt Vektoren verbiegen */
+    temp = MCUCR;
+    1870:	85 b7       	in	r24, 0x35	; 53
+    MCUCR = temp | (1&lt;&lt;IVCE);
+    1872:	98 2f       	mov	r25, r24
+    1874:	91 60       	ori	r25, 0x01	; 1
+    1876:	95 bf       	out	0x35, r25	; 53
+    MCUCR = temp | (1&lt;&lt;IVSEL);
+    1878:	82 60       	ori	r24, 0x02	; 2
+    187a:	85 bf       	out	0x35, r24	; 53
+
+...
+(noch mehr Zeilen)
+</pre>
+<p>Wir erkennen, dass die Sektion <i>.text</i> ab der Adresse (VMA) 0x1800 beginnt. Weiter sehen wir im Disassembly der Sektion <i>.text</i>, dass unser Programm mit der Interrupt-Einsprungstabelle ab Adresse 0x1800 beginnt. Unsere <i>main()</i> beginnt ab Adresse 0x186C. Super. Das hat geklappt. Aber nun schnell zu Schritt 4 - dem Flashen und Ausprobieren des Programms...
+</p>
+<h2><span class="mw-headline" id="Schritt_4_-_Flashen_und_Ausprobieren_des_Bootloaders">Schritt 4 - Flashen und Ausprobieren des Bootloaders</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=9" title="Abschnitt bearbeiten: Schritt 4 - Flashen und Ausprobieren des Bootloaders">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-AVRStudio-Fuses.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Bootloader-AVRStudio-Fuses.png" width="200" height="212" class="thumbimage" srcset="/wikifiles/thumb/7/72/Bootloader-AVRStudio-Fuses.png/300px-Bootloader-AVRStudio-Fuses.png 1.5x, /wikifiles/thumb/7/72/Bootloader-AVRStudio-Fuses.png/400px-Bootloader-AVRStudio-Fuses.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Bootloader-AVRStudio-Fuses.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Setzen der Fuses</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Serconfig.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-PuTTY-Serconfig.png" width="200" height="192" class="thumbimage" srcset="/wikifiles/thumb/f/fc/PuTTY-Serconfig.png/300px-PuTTY-Serconfig.png 1.5x, /wikifiles/thumb/f/fc/PuTTY-Serconfig.png/400px-PuTTY-Serconfig.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Serconfig.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Serielle Konfiguration von PuTTY</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Serconfig-xon.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-PuTTY-Serconfig-xon.png" width="200" height="192" class="thumbimage" srcset="/wikifiles/thumb/f/fa/PuTTY-Serconfig-xon.png/300px-PuTTY-Serconfig-xon.png 1.5x, /wikifiles/thumb/f/fa/PuTTY-Serconfig-xon.png/400px-PuTTY-Serconfig-xon.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Serconfig-xon.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Serielle Konfiguration von PuTTY</div></div></div>
+<p>Nach dem Start des AVRISPmkII-In-System-Programmers aus dem AVRStudio werden zunächst die Einstellungen geprüft. Die Signatur des AVRs muss stimmen und die ISP-Frequenz. Im Reiter Program muss unter <i>Flash</i> die richtige Datei angegeben sein (<i>Bootloader.hex</i>). Danach können wir uns an das setzen der Fuses machen. <b>CKDIV8</b> sollte ausgeschalten werden, der interne Takt von 8 Mhz sollte genutzt werden (<b>SUT_CKSEL</b>) und <i>BOOTSZ</i> auf 1024 words gestellt werden. Zusätzlich muß die <b>BOOTRST</b>-Fuse gesetzt werden, damit der Bootloader an der richtigen Adresse anfängt. Für alle, die einen anderen Programmer benutzen (z.B. avrdude), hier die exakten Werte der Fuses:
+</p>
+<ul>
+<li> Low Fuse: <b>0xE2</b>
+</li>
+<li> High Fuse: <b>0xD2</b>
+</li>
+<li> Extended Fuse: <b>0xF8</b>
+</li>
+</ul>
+<p>Jetzt kann PuTTY gestartet und konfiguriert werden. Der <i>Connection type</i> muss auf <b>Serial</b> gestellt werden. Die Baudrate beträgt 9600 Baud. Unter <i>Connection/Serial</i> muss der <i>Flow control</i> auf <b>XON/XOFF</b> gestellt werden. Nach dem Konfigurieren kann die Konsole mit <i>Open</i> geöffnet werden.
+</p><p>Jetzt kann wieder in das AVR Studio gewechselt werden. Mit einem beherztem Druck auf <i>Program</i> wird das Flash im ATmega88 programmiert. Nach dem Wechsel auf die Konsole erscheint folgendes Bild:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Bootloader-start.png" class="image" title="Bootloader in PuTTY"><img alt="Bootloader in PuTTY" src="./bootloader_in_c_files/600px-PuTTY-Bootloader-start.png" width="600" height="374" srcset="/wikifiles/3/3a/PuTTY-Bootloader-start.png 1.5x, /wikifiles/3/3a/PuTTY-Bootloader-start.png 2x"></a>
+</p><p>Nach dem Drücken von ein paar Tasten erscheint folgendes:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Bootloader-taste.png" class="image" title="Bootloader nach Tastendruck in PuTTY"><img alt="Bootloader nach Tastendruck in PuTTY" src="./bootloader_in_c_files/600px-PuTTY-Bootloader-taste.png" width="600" height="374" srcset="/wikifiles/4/40/PuTTY-Bootloader-taste.png 1.5x, /wikifiles/4/40/PuTTY-Bootloader-taste.png 2x"></a>
+</p><p>Nach dem Drücken von <b>q</b> erscheint folgendes Bild:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Bootloader-restart.png" class="image" title="Bootloader nach Tastendruck in PuTTY"><img alt="Bootloader nach Tastendruck in PuTTY" src="./bootloader_in_c_files/600px-PuTTY-Bootloader-restart.png" width="600" height="374" srcset="/wikifiles/f/f0/PuTTY-Bootloader-restart.png 1.5x, /wikifiles/f/f0/PuTTY-Bootloader-restart.png 2x"></a>
+</p><p>Der Bootloader versucht, zur Adresse 0x0000 zu springen, wo er allerdings keinen Programmcode findet. Wie auch? Wir haben ja den ganzen Flash des AVR gerade gelöscht und mit dem Bootloader gefüllt. Nun muss man wissen, dass in einem gelöschten Flash <i>0xFF</i> in jeder Speicherzelle steht. <i>0xFF</i> ist für den AVR kein gültiger Opcode. Der Programmzähler zählt nur um eins nach oben. Damit hopst er sozusagen durch den gesamten Flash bis er wieder beim Bootloader landet.
+</p><p><i><b><a rel="nofollow" class="external text" href="http://de.wikipedia.org/wiki/Heureka">Heureka</a></b></i> wir haben es geschafft! Ein Programm wird im Bootloaderbereich des Flashs ausgeführt! Es <i>bootet</i> zwar schon schön, aber es <i>loadet</i> noch nichts in den Flash. Aber die halbe Miete haben wir damit schon. Nun schreiben wir erst einmal eine kleine Anwendung, welche wir nach der Erweiterung unseres Bootloaders in den Flash-Speicher laden.
+</p>
+<h1><span class="mw-headline" id="Die_Test-Anwendung">Die Test-Anwendung</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=10" title="Abschnitt bearbeiten: Die Test-Anwendung">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Anwendung-AVRStudio.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Anwendung-AVRStudio.png" width="200" height="124" class="thumbimage" srcset="/wikifiles/thumb/d/dc/Anwendung-AVRStudio.png/300px-Anwendung-AVRStudio.png 1.5x, /wikifiles/thumb/d/dc/Anwendung-AVRStudio.png/400px-Anwendung-AVRStudio.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Anwendung-AVRStudio.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Erstellen des Projektes</div></div></div>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Anwendung-AVRStudio-Code.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Anwendung-AVRStudio-Code.png" width="200" height="119" class="thumbimage" srcset="/wikifiles/thumb/8/8c/Anwendung-AVRStudio-Code.png/300px-Anwendung-AVRStudio-Code.png 1.5x, /wikifiles/thumb/8/8c/Anwendung-AVRStudio-Code.png/400px-Anwendung-AVRStudio-Code.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Anwendung-AVRStudio-Code.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Sourcecode im AVRStudio</div></div></div>
+<p>Die Kategorie Anwendung möchte ich möglichst kurz halten. Ziel ist es, eine kleine Anwendung zu schreiben, welche dann mit dem (echten) Bootloader ins Flash gespeichert wird. 
+</p>
+<h2><span class="mw-headline" id="Schritt_1_-_Erstellen_des_Projektes">Schritt 1 - Erstellen des Projektes</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=11" title="Abschnitt bearbeiten: Schritt 1 - Erstellen des Projektes">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Nach dem Erstellen eines neuen Projektes muss in den Projekt-Einstellungen des AVR Studios nur die Taktfrequenz eingetragen werden. Die Linker-Optionen werden nicht verändert, also bleibt wie es ist.
+</p>
+<h2><span class="mw-headline" id="Schritt_2_-_Einbinden_der_UART_Library">Schritt 2 - Einbinden der UART Library</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=12" title="Abschnitt bearbeiten: Schritt 2 - Einbinden der UART Library">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Dieser Schritt kann vom Bootloader übernommen werden. Es wird wieder die UART-Bibliothek von Peter Fleury verwendet.
+</p>
+<h2><span class="mw-headline" id="Schritt_3_-_Programmieren_der_Anwendung">Schritt 3 - Programmieren der Anwendung</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=13" title="Abschnitt bearbeiten: Schritt 3 - Programmieren der Anwendung">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Wir starten also ein neues AVR Studio und legen ein neues Projekt an, konfigurieren die Taktfrequenz (8 MHz) und laden die <i>uart.c</i> und <i>uart.h</i> dazu. Nun schreiben wir in die <i>main.c</i> folgende Zeilen:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="co2">#include &lt;avr/io.h&gt;</span>
+<span class="co2">#include &lt;avr/interrupt.h&gt;</span>
+<span class="co2">#include &lt;avr/pgmspace.h&gt;</span>
+<span class="co2">#include &lt;util/delay.h&gt;</span>
+<span class="co2">#include "uart.h"</span>
+&nbsp;
+<span class="co2">#define UART_BAUD_RATE	9600</span>
+&nbsp;
+<span class="kw4">int</span> main<span class="br0">(</span><span class="br0">)</span>
+<span class="br0">{</span>
+   <span class="kw4">unsigned</span> <span class="kw4">int</span> 	c<span class="sy0">;</span>
+   <span class="kw4">void</span> <span class="br0">(</span><span class="sy0">*</span>bootloader<span class="br0">)</span><span class="br0">(</span> <span class="kw4">void</span> <span class="br0">)</span> <span class="sy0">=</span> <span class="nu12">0x0C00</span><span class="sy0">;</span>  <span class="co1">// Achtung Falle: Hier Word-Adresse</span>
+&nbsp;
+   uart_init<span class="br0">(</span> UART_BAUD_SELECT<span class="br0">(</span>UART_BAUD_RATE<span class="sy0">,</span>F_CPU<span class="br0">)</span> <span class="br0">)</span><span class="sy0">;</span> 
+   sei<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   uart_puts_P<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>Hier ist das Anwendungsprogramm..."</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   <span class="kw1">for</span><span class="br0">(</span><span class="sy0">;;</span><span class="br0">)</span>
+   <span class="br0">{</span>
+       c <span class="sy0">=</span> uart_getc<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+       <span class="kw1">if</span><span class="br0">(</span><span class="sy0">!</span><span class="br0">(</span>c <span class="sy0">&amp;</span> UART_NO_DATA<span class="br0">)</span><span class="br0">)</span>
+       <span class="br0">{</span>
+	   <span class="kw1">switch</span><span class="br0">(</span> <span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span>
+	   <span class="br0">{</span>
+	       <span class="kw1">case</span> <span class="st0">'b'</span><span class="sy0">:</span>
+		   uart_puts<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>Springe zum Bootloader..."</span><span class="br0">)</span><span class="sy0">;</span>
+		   _delay_ms<span class="br0">(</span><span class="nu0">1000</span><span class="br0">)</span><span class="sy0">;</span>
+		    bootloader<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+		    <span class="kw2">break</span><span class="sy0">;</span>
+		<span class="kw1">default</span><span class="sy0">:</span>
+                    uart_puts<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>Du hast folgendes Zeichen gesendet: "</span><span class="br0">)</span><span class="sy0">;</span>
+		    uart_putc<span class="br0">(</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span><span class="sy0">;</span>
+		    <span class="kw2">break</span><span class="sy0">;</span>
+	    <span class="br0">}</span>
+        <span class="br0">}</span>
+    <span class="br0">}</span>
+    <span class="kw1">return</span> <span class="nu0">0</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p><i><b>Erklärung des Codes</b></i>
+</p>
+Viel interessantes ist nicht an diesem Code. Es gibt wie immer die berühmte Endlosschleife. Wir definieren wieder einen fiktiven Funktionspointer auf die <b>Word</b>-Adresse des Bootloaders. (Hier verhält sich der AVR-GCC leider etwas inkonsistent, da sonst bei Flash-Adressen mit Bytes gearbeitet wird. Gibt man hier versehentlich die Byteadresse an, kann es sein, dass der Sprung in den Bootloader klappt, es muss aber nicht funktionieren, da das Sprungziel undefiniert ist. Verwendet man stattdessen einen JMP befehl im Inline-Assembler, so ist die Byte-Adresse für das Sprungziel anzugeben.) <pre>void (*bootloader)( void ) = 0x0C00;</pre>
+<p>Nach drücken der Taste <b>b</b> soll das Programm wieder zum Bootloader springen.
+Leider haben wir auch hier ein Problem, wenn der verfügbare Flash-Speicher größer als 128kB ist. Denn selbst wenn man dem Funktionspointer z.B. 0x1F000 (kleinste Bootloader Startadresse bei 256kB Devices) als Adresswert zuweist, werden nur die unteren zwei Bytes verwendet. Der Sprung in den Bootloader würde also nach 0xF000 gehen und man würde bei Applikationen, die größer sind als 120kB, irgendwo mitten im Code landen. Um sicher zu sein, daß an die korrekte Startadresse gesprungen wird, muß vor dem Sprung das EIND Register explizit auf 1 gesetzt werden. (Im Gegensatz zum Rücksprung mit EIND = 0) Also 
+</p>
+<pre>EIND = 1;
+bootloader();</pre>
+<p>Das EIND Register wird vom Controller bei extended calls oder jumps als höchstwertigstes Adressbyte verwendet, aber leider vom gcc Compiler in der aktuellen Version nicht unterstützt. Siehe <a rel="nofollow" class="external autonumber" href="http://gcc.gnu.org/onlinedocs/gcc-4.6.2/gcc/AVR-Options.html">[1]</a>
+</p><p><br>
+Nach dem Kompilieren des Programms sehen wir, dass der Programmspeicher mit 686 Byte belegt ist, der Datenspeicher mit 201 Bytes.
+</p>
+<h2><span class="mw-headline" id="Schritt_4_-_Ausprobieren_der_Anwendung">Schritt 4 - Ausprobieren der Anwendung</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=14" title="Abschnitt bearbeiten: Schritt 4 - Ausprobieren der Anwendung">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Wer möchte kann die Anwendung auf den AVR flashen und ausprobieren. Die Funktion sollte sich von selbst erschließen.
+</p><p><b>Achtung:</b> Es muss darauf geachtet werden, dass beim flashen der Anwendung nicht der Bootloader überschrieben wird.<br>Bei Verwendung von avrdude muss dazu die Option "-D" angegeben werden (Flash-Speicher nicht automatisch löschen).
+</p><p>Nun wollen wir uns der Erweiterung des Bootloaders widmen.
+</p>
+<h1><span class="mw-headline" id="Der_.22echte.22_Bootloader">Der "echte" Bootloader</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=15" title="Abschnitt bearbeiten: Der &quot;echte&quot; Bootloader">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="http://www.mikrocontroller.net/articles/Datei:Real-Bootloader-AVRStudio.png" class="image"><img alt="" src="./bootloader_in_c_files/200px-Real-Bootloader-AVRStudio.png" width="200" height="119" class="thumbimage" srcset="/wikifiles/thumb/4/47/Real-Bootloader-AVRStudio.png/300px-Real-Bootloader-AVRStudio.png 1.5x, /wikifiles/thumb/4/47/Real-Bootloader-AVRStudio.png/400px-Real-Bootloader-AVRStudio.png 2x"></a>  <div class="thumbcaption"><div class="magnify"><a href="http://www.mikrocontroller.net/articles/Datei:Real-Bootloader-AVRStudio.png" class="internal" title="vergrößern"><img src="./bootloader_in_c_files/magnify-clip.png" width="15" height="11" alt=""></a></div>Programmieren des Bootloaders</div></div></div>
+<p>Zum Erstellen des Bootloaders wird wieder Schrittweise vorgegangen. Folgende Schritte sind zu befolgen:
+</p>
+<h2><span class="mw-headline" id="Schritt_1_und_2_-_siehe_.22Hallo_Welt.22_Bootloader">Schritt 1 und 2 - siehe "Hallo Welt" Bootloader</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=16" title="Abschnitt bearbeiten: Schritt 1 und 2 - siehe &quot;Hallo Welt&quot; Bootloader">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Schritt 1 und 2 können vom "Hallo Welt" Bootloader übernommen werden. Es sind wieder die korrekte Taktfrequenz und die Verschiebung der Sektion <b>.text</b> auf die Bootresetadresse einzustellen.
+</p>
+<h2><span class="mw-headline" id="Schritt_3_-_Programmieren_des_Bootloaders_2">Schritt 3 - Programmieren des Bootloaders</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=17" title="Abschnitt bearbeiten: Schritt 3 - Programmieren des Bootloaders">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Nun soll der Bootloader erweitert werden. Nach dem Kompilieren des Anwendungsprogramms erhalten wir eine Datei <i>Anwendung.hex</i> im <a rel="nofollow" class="external text" href="http://de.wikipedia.org/wiki/Intel_HEX">Intel-HEX-Format</a>. Da wir im Bootloader diese Daten auswerten müssen, wollen wir uns kurz mit dem Format beschäftigen. Das Intel-HEX-Format ist geschaffen worden, um Binärdaten als ASCII-Daten zu übertragen. Jedes Byte ist in Form von zwei ASCII-Zeichen gespeichert, d.h. aus der Zahl <i>0x4A</i> wird die ASCII-Zeichenfolge <i>"4A"</i>. Das bedeutet aber auch, dass aus den Binärdaten die doppelte Anzahl von Zeichen wird, welche übertragen werden müssen, hinzu kommen noch Steuerzeichen und Zusatzinformationen. Jede Zeile in der Intel-HEX-Datei folgt einem bestimmten Schema, in dem u.a. die Anzahl der Bytes, die Zieladresse und Checksumme stehen.
+</p><p>Für weiterführende Erklärungen zum Thema HEX-Datei-Format empfehle ich folgende Lektüre:
+</p>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Intel_HEX">Wikipedia Artikel über HEX-Files</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.rn-wissen.de/index.php/HEX-Datei">RN-Wissen-Artikel über HEX-Files</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.schulz-koengen.de/biblio/intelhex.htm">Artikel von Wolfgang R.Schulz</a>
+</li>
+</ul>
+<p>Unser Bootloader muss in der Lage sein, dieses Format zu interpretieren. Wir müssen also einen Parser schreiben. <i>Oje</i> werden manche denken, das ist ja wieder ein Thema für sich. Das stimmt prinzipiell auch. Allerdings kommt uns hier das einfache Format der Intel-Hex-Datei zugute, welches den Aufwand in Grenzen hält.
+</p><p>Als erstes brauchen wir also Funktionen, um die ASCII-Zeichenfolgen wieder in Binärdaten umzuwandeln. Normalerweise könnte man dafür die C-Funktion <a rel="nofollow" class="external text" href="http://www.nongnu.org/avr-libc/user-manual/group__avr__stdlib.html#gaf8ce3b8dae3d45c34c3b172de503f7b3">strtol</a> aus der stdlib.h nehmen. Allerdings würde das Benutzen dieses Befehls das Linken der Standardbibliothek nach sich ziehen und damit den Code unnötig aufblähen. Daher werden wir uns eine einfache eigene Funktion schreiben, um die Zeichenfolgen umzuwandeln. In der HEX-Datei kommen 2 Byte und 4 Byte Hex-Zahlen im ASCII-Format vor. Wir brauchen also eine Funktion, welche die ASCII-Zeichenfolgen in Zahlen umwandelt, hier ist sie:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="kw4">static</span> <span class="kw4">uint16_t</span> hex2num<span class="br0">(</span><span class="kw4">const</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span> ascii<span class="sy0">,</span> <span class="kw4">uint8_t</span> num<span class="br0">)</span>
+<span class="br0">{</span>
+    <span class="kw4">uint8_t</span>  i<span class="sy0">;</span>
+    <span class="kw4">uint16_t</span> val <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+&nbsp;
+    <span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>num<span class="sy0">;</span> i<span class="sy0">++</span><span class="br0">)</span>
+    <span class="br0">{</span>
+        <span class="kw4">uint8_t</span> c <span class="sy0">=</span> ascii<span class="br0">[</span>i<span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+        <span class="coMULTI">/* Hex-Ziffer auf ihren Wert abbilden */</span>
+        <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'0'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'9'</span><span class="br0">)</span>            c <span class="sy0">-=</span> <span class="st0">'0'</span><span class="sy0">;</span>  
+        <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'A'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'F'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'A'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+        <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'a'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'f'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'a'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+&nbsp;
+        val <span class="sy0">=</span> <span class="nu0">16</span> <span class="sy0">*</span> val <span class="sy0">+</span> c<span class="sy0">;</span>
+    <span class="br0">}</span>
+&nbsp;
+    <span class="kw1">return</span> val<span class="sy0">;</span>  
+<span class="br0">}</span></pre></div></div>
+<p>Wir benutzen hier einen sehr einfachen Ansatz, um die Zahlen zu generieren. Die Funktionen wandeln die ASCII-Zeichen entsprechend ihrer Wertigkeit in Zahlen um. Soll z.B. das ASCII-Zeichen '1' umgewandelt werden, wird vom ASCII-Code '1', also dezimal 49, 48='0' abgezogen: 49 - 48 = 1, somit haben wir ein ASCII-Zeichen in eine Zahl umgewandelt. Wenn das ASCII-Zeichen 'C' ist (Dezimal: 67), werden 'A' - 10 = 65 -10 = 55 abgezogen, um 12 zu erhalten, den Wert der hex-Ziffer C. Näher möchte an dieser Stelle nicht darauf eingehen, wir wollen schnell weiter zum Beschreiben des Flashs kommen.
+</p><p>Um in den Flash zu schreiben, werden wir Makros aus der <i><a rel="nofollow" class="external text" href="http://www.nongnu.org/avr-libc/user-manual/group__avr__boot.html">boot.h</a></i> der avr-libc verwenden. Hier findet man alle Werkzeuge, die wir brauchen. Dabei sollte vor allen das <i>API Usage Example</i> in der <a rel="nofollow" class="external text" href="http://www.nongnu.org/avr-libc/user-manual/group__avr__boot.html">Online Doku</a> näher betrachtet werden. Dieses Beispiel soll weitestgehend übernommen werden, da es die nötige Funktionalität beinhaltet. Hier ist die Funktion:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="kw4">void</span> boot_program_page <span class="br0">(</span><span class="kw4">uint32_t</span> page<span class="sy0">,</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span>buf<span class="br0">)</span>
+<span class="br0">{</span>
+    <span class="kw4">uint16_t</span> i<span class="sy0">;</span>
+    <span class="kw4">uint8_t</span> sreg<span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Disable interrupts.*/</span>
+    sreg <span class="sy0">=</span> SREG<span class="sy0">;</span>
+    cli<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    eeprom_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    boot_page_erase <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>
+    boot_spm_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>      <span class="coMULTI">/* Wait until the memory is erased. */</span>
+&nbsp;
+    <span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>SPM_PAGESIZE<span class="sy0">;</span> i<span class="sy0">+=</span><span class="nu0">2</span><span class="br0">)</span>
+    <span class="br0">{</span>
+        <span class="coMULTI">/* Set up little-endian word. */</span>
+        <span class="kw4">uint16_t</span> w <span class="sy0">=</span> <span class="sy0">*</span>buf<span class="sy0">++;</span>
+        w <span class="sy0">+=</span> <span class="br0">(</span><span class="sy0">*</span>buf<span class="sy0">++</span><span class="br0">)</span> <span class="sy0">&lt;&lt;</span> <span class="nu0">8</span><span class="sy0">;</span>
+&nbsp;
+        boot_page_fill <span class="br0">(</span>page <span class="sy0">+</span> i<span class="sy0">,</span> w<span class="br0">)</span><span class="sy0">;</span>
+    <span class="br0">}</span>
+    boot_page_write <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>     <span class="coMULTI">/* Store buffer in flash page.		*/</span>
+    boot_spm_busy_wait<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>       <span class="coMULTI">/* Wait until the memory is written.*/</span>
+&nbsp;
+    <span class="coMULTI">/* Reenable RWW-section again. We need this if we want to jump back */</span>
+    <span class="coMULTI">/* to the application after bootloading. */</span>
+    boot_rww_enable <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Re-enable interrupts (if they were ever enabled). */</span>
+    SREG <span class="sy0">=</span> sreg<span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p>Als erstes fällt auf, dass man der Funktion die <i>Page</i>-Adresse übergibt. Es wird also immer seitenweise geschrieben. Dies ist eine Spezialität des Flash-Speichers. Es <b>muss</b> immer die gesamte Seite geschrieben werden, dafür gibt es einen <i>Page</i>-Puffer, welcher die Daten enthält, welche mit der nächsten Schreiboperation in die entsprechende Page geschrieben werden. Dabei werden die Daten Wortweise in den <i>Page</i>-Puffer geschrieben. Die wesentlichen Funktionen der Routine sind <i>boot_page_erase(page)</i>, <i>boot_page_fill(page + i, w)</i> und <i>boot_page_write(page)</i>. Nicht zu vergessen auch <i>boot_spm_busy_wait()</i>. Die Bedeutung der Funktionen (naja es sind eher Makros) findet man in der Dokumentation der AVR Libc. Im wesentlichen läuft das Schreiben einer <i>Page</i> so ab:
+</p>
+<ul>
+<li> <i>Page</i> löschen
+</li>
+<li> <i>Page</i>-Puffer befüllen (aus der Variable <i>buf</i>)
+</li>
+<li> <i>Page</i> schreiben
+</li>
+</ul>
+<p>So einfach, so gut. Für den Bootloader bedeutet das, dass er die Daten sammeln muß, bis er genügend Daten für eine <i>Page</i> hat. Dann wird eine <i>Page</i> geschrieben und der Spaß fängt von vorn an.
+</p><p>Mit diesen beiden Funktionen sind wir nun in der Lage, den Parser zu schreiben. Die <i>main.c</i> sieht folgt aus:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="co2">#include &lt;string.h&gt;</span>
+<span class="co2">#include &lt;avr/io.h&gt;</span>
+<span class="co2">#include &lt;avr/interrupt.h&gt;</span>
+<span class="co2">#include &lt;avr/boot.h&gt;</span>
+<span class="co2">#include &lt;util/delay.h&gt;</span>
+<span class="co2">#include "uart.h"</span>
+&nbsp;
+<span class="co2">#define BOOT_UART_BAUD_RATE     9600     /* Baudrate */</span>
+<span class="co2">#define XON                     17       /* XON Zeichen */</span>
+<span class="co2">#define XOFF                    19       /* XOFF Zeichen */</span>
+<span class="co2">#define START_SIGN              ':'      /* Hex-Datei Zeilenstartzeichen */</span>
+&nbsp;
+<span class="coMULTI">/* Zustände des Bootloader-Programms */</span>
+<span class="co2">#define BOOT_STATE_EXIT	        0        </span>
+<span class="co2">#define BOOT_STATE_PARSER       1</span>
+&nbsp;
+<span class="coMULTI">/* Zustände des Hex-File-Parsers */</span>
+<span class="co2">#define PARSER_STATE_START      0</span>
+<span class="co2">#define PARSER_STATE_SIZE       1</span>
+<span class="co2">#define PARSER_STATE_ADDRESS    2</span>
+<span class="co2">#define PARSER_STATE_TYPE       3</span>
+<span class="co2">#define PARSER_STATE_DATA       4</span>
+<span class="co2">#define PARSER_STATE_CHECKSUM   5</span>
+<span class="co2">#define PARSER_STATE_ERROR      6</span>
+&nbsp;
+<span class="kw4">void</span> program_page <span class="br0">(</span><span class="kw4">uint32_t</span> page<span class="sy0">,</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span>buf<span class="br0">)</span>
+<span class="br0">{</span>
+    <span class="kw4">uint16_t</span> i<span class="sy0">;</span>
+    <span class="kw4">uint8_t</span> sreg<span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Disable interrupts */</span>
+    sreg <span class="sy0">=</span> SREG<span class="sy0">;</span>
+    cli<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    eeprom_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    boot_page_erase <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>
+    boot_spm_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>      <span class="coMULTI">/* Wait until the memory is erased. */</span>
+&nbsp;
+    <span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>SPM_PAGESIZE<span class="sy0">;</span> i<span class="sy0">+=</span><span class="nu0">2</span><span class="br0">)</span>
+    <span class="br0">{</span>
+        <span class="coMULTI">/* Set up little-endian word. */</span>
+        <span class="kw4">uint16_t</span> w <span class="sy0">=</span> <span class="sy0">*</span>buf<span class="sy0">++;</span>
+        w <span class="sy0">+=</span> <span class="br0">(</span><span class="sy0">*</span>buf<span class="sy0">++</span><span class="br0">)</span> <span class="sy0">&lt;&lt;</span> <span class="nu0">8</span><span class="sy0">;</span>
+&nbsp;
+        boot_page_fill <span class="br0">(</span>page <span class="sy0">+</span> i<span class="sy0">,</span> w<span class="br0">)</span><span class="sy0">;</span>
+    <span class="br0">}</span>
+&nbsp;
+    boot_page_write <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>     <span class="coMULTI">/* Store buffer in flash page.		*/</span>
+    boot_spm_busy_wait<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>       <span class="coMULTI">/* Wait until the memory is written.*/</span>
+&nbsp;
+    <span class="coMULTI">/* Reenable RWW-section again. We need this if we want to jump back */</span>
+    <span class="coMULTI">/* to the application after bootloading. */</span>
+    boot_rww_enable <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Re-enable interrupts (if they were ever enabled). */</span>
+    SREG <span class="sy0">=</span> sreg<span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">static</span> <span class="kw4">uint16_t</span> hex2num <span class="br0">(</span><span class="kw4">const</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span> ascii<span class="sy0">,</span> <span class="kw4">uint8_t</span> num<span class="br0">)</span>
+<span class="br0">{</span>
+    <span class="kw4">uint8_t</span>  i<span class="sy0">;</span>
+    <span class="kw4">uint16_t</span> val <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+&nbsp;
+    <span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>num<span class="sy0">;</span> i<span class="sy0">++</span><span class="br0">)</span>
+    <span class="br0">{</span>
+        <span class="kw4">uint8_t</span> c <span class="sy0">=</span> ascii<span class="br0">[</span>i<span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+        <span class="coMULTI">/* Hex-Ziffer auf ihren Wert abbilden */</span>
+        <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'0'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'9'</span><span class="br0">)</span>            c <span class="sy0">-=</span> <span class="st0">'0'</span><span class="sy0">;</span>  
+        <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'A'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'F'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'A'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+        <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'a'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'f'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'a'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+&nbsp;
+        val <span class="sy0">=</span> <span class="nu0">16</span> <span class="sy0">*</span> val <span class="sy0">+</span> c<span class="sy0">;</span>
+    <span class="br0">}</span>
+&nbsp;
+    <span class="kw1">return</span> val<span class="sy0">;</span>  
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">int</span> main<span class="br0">(</span><span class="br0">)</span>
+<span class="br0">{</span>
+                    <span class="coMULTI">/* Empfangenes Zeichen + Statuscode */</span>
+    <span class="kw4">uint16_t</span>        c <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* Intel-HEX Zieladresse */</span>
+           	    hex_addr <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+                    <span class="coMULTI">/* Zu schreibende Flash-Page */</span>
+                    flash_page <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>                    
+                    <span class="coMULTI">/* Intel-HEX Checksumme zum Überprüfen des Daten */</span>
+                    hex_check <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+                    <span class="coMULTI">/* Positions zum Schreiben in der Datenpuffer */</span>
+                    flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                    <span class="coMULTI">/* temporäre Variable */</span>
+    <span class="kw4">uint8_t</span>         temp<span class="sy0">,</span>
+                    <span class="coMULTI">/* Flag zum steuern des Programmiermodus */</span>
+                    boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">,</span>
+                    <span class="coMULTI">/* Empfangszustandssteuerung */</span>
+                    parser_state <span class="sy0">=</span> PARSER_STATE_START<span class="sy0">,</span>
+                    <span class="coMULTI">/* Flag zum ermitteln einer neuen Flash-Page */</span>
+                    flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">,</span>
+                    <span class="coMULTI">/* Datenpuffer für die Hexdaten*/</span>
+                    flash_data<span class="br0">[</span>SPM_PAGESIZE<span class="br0">]</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* Position zum Schreiben in den HEX-Puffer */</span>
+                    hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* Puffer für die Umwandlung der ASCII in Binärdaten */</span>
+                    hex_buffer<span class="br0">[</span><span class="nu0">5</span><span class="br0">]</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* Intel-HEX Datenlänge */</span>
+                    hex_size <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+                    <span class="coMULTI">/* Zähler für die empfangenen HEX-Daten einer Zeile */</span>
+                    hex_data_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* Intel-HEX Recordtype */</span>
+                    hex_type <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span> 
+                    <span class="coMULTI">/* empfangene HEX-Checksumme */</span>
+                    hex_checksum<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+                    <span class="coMULTI">/* Funktionspointer auf 0x0000 */</span>
+    <span class="kw4">void</span>            <span class="br0">(</span><span class="sy0">*</span>start<span class="br0">)</span><span class="br0">(</span> <span class="kw4">void</span> <span class="br0">)</span> <span class="sy0">=</span> <span class="nu12">0x0000</span><span class="sy0">;</span> 
+&nbsp;
+    <span class="coMULTI">/* Füllen der Puffer mit definierten Werten */</span>
+    <span class="kw3">memset</span><span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu12">0x00</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>hex_buffer<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+    <span class="kw3">memset</span><span class="br0">(</span>flash_data<span class="sy0">,</span> <span class="nu12">0xFF</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>flash_data<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Interrupt Vektoren verbiegen */</span>
+    temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Einstellen der Baudrate und aktivieren der Interrupts */</span>
+    uart_init<span class="br0">(</span> UART_BAUD_SELECT<span class="br0">(</span>BOOT_UART_BAUD_RATE<span class="sy0">,</span>F_CPU<span class="br0">)</span> <span class="br0">)</span><span class="sy0">;</span> 
+    sei<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    uart_puts<span class="br0">(</span><span class="st0">"Hallo hier ist der echte Bootloader<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+    _delay_ms<span class="br0">(</span><span class="nu0">2000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="kw1">do</span>
+    <span class="br0">{</span>
+        c <span class="sy0">=</span> uart_getc<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+        <span class="kw1">if</span><span class="br0">(</span> <span class="sy0">!</span><span class="br0">(</span>c <span class="sy0">&amp;</span> UART_NO_DATA<span class="br0">)</span> <span class="br0">)</span>
+        <span class="br0">{</span>
+             <span class="coMULTI">/* Programmzustand: Parser */</span>
+             <span class="kw1">if</span><span class="br0">(</span>boot_state <span class="sy0">==</span> BOOT_STATE_PARSER<span class="br0">)</span>
+             <span class="br0">{</span>
+                  <span class="kw1">switch</span><span class="br0">(</span>parser_state<span class="br0">)</span>
+                  <span class="br0">{</span>
+                      <span class="coMULTI">/* Warte auf Zeilen-Startzeichen */</span>
+                      <span class="kw1">case</span> PARSER_STATE_START<span class="sy0">:</span>			
+                          <span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c <span class="sy0">==</span> START_SIGN<span class="br0">)</span> 
+                          <span class="br0">{</span>
+                              uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                              parser_state <span class="sy0">=</span> PARSER_STATE_SIZE<span class="sy0">;</span>
+                              hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              hex_check <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                          <span class="br0">}</span>
+                          <span class="kw2">break</span><span class="sy0">;</span>
+                      <span class="coMULTI">/* Parse Datengröße */</span>
+                      <span class="kw1">case</span> PARSER_STATE_SIZE<span class="sy0">:</span>	
+                          hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+                          <span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+                          <span class="br0">{</span>
+                              uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                              parser_state <span class="sy0">=</span> PARSER_STATE_ADDRESS<span class="sy0">;</span>
+                              hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              hex_size <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+                              hex_check <span class="sy0">+=</span> hex_size<span class="sy0">;</span>
+                              uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                           <span class="br0">}</span>
+                           <span class="kw2">break</span><span class="sy0">;</span>
+                      <span class="coMULTI">/* Parse Zieladresse */</span>
+                      <span class="kw1">case</span> PARSER_STATE_ADDRESS<span class="sy0">:</span>
+                          hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+                          <span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">4</span><span class="br0">)</span>
+                          <span class="br0">{</span>
+                              uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                              parser_state <span class="sy0">=</span> PARSER_STATE_TYPE<span class="sy0">;</span>
+                              hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              hex_addr <span class="sy0">=</span> hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">4</span><span class="br0">)</span><span class="sy0">;</span>
+                              hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> hex_addr<span class="sy0">;</span>
+                              hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> <span class="br0">(</span>hex_addr <span class="sy0">&gt;&gt;</span> <span class="nu0">8</span><span class="br0">)</span><span class="sy0">;</span>
+                              <span class="kw1">if</span><span class="br0">(</span>flash_page_flag<span class="br0">)</span> 
+                              <span class="br0">{</span>
+                                  flash_page <span class="sy0">=</span> hex_addr <span class="sy0">-</span> hex_addr <span class="sy0">%</span> SPM_PAGESIZE<span class="sy0">;</span>
+                                  flash_page_flag <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              <span class="br0">}</span>
+                              uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                           <span class="br0">}</span>
+                           <span class="kw2">break</span><span class="sy0">;</span>
+                      <span class="coMULTI">/* Parse Zeilentyp */</span>
+                      <span class="kw1">case</span> PARSER_STATE_TYPE<span class="sy0">:</span>	
+                           hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+                           <span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+                           <span class="br0">{</span>
+                               uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                               hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                               hex_data_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                               hex_type <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+                               hex_check <span class="sy0">+=</span> hex_type<span class="sy0">;</span>
+                               <span class="kw1">switch</span><span class="br0">(</span>hex_type<span class="br0">)</span>
+                               <span class="br0">{</span>
+                                   <span class="kw1">case</span> <span class="nu0">0</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_DATA<span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+                                   <span class="kw1">case</span> <span class="nu0">1</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_CHECKSUM<span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+                                   <span class="kw1">default</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_DATA<span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+                               <span class="br0">}</span>
+                               uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                           <span class="br0">}</span>
+                           <span class="kw2">break</span><span class="sy0">;</span>
+                      <span class="coMULTI">/* Parse Flash-Daten */</span>
+                      <span class="kw1">case</span> PARSER_STATE_DATA<span class="sy0">:</span>
+                          hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+                          <span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+                          <span class="br0">{</span>
+                              uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                              uart_putc<span class="br0">(</span><span class="st0">'.'</span><span class="br0">)</span><span class="sy0">;</span>
+                              hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              flash_data<span class="br0">[</span>flash_cnt<span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+                              hex_check <span class="sy0">+=</span> flash_data<span class="br0">[</span>flash_cnt<span class="br0">]</span><span class="sy0">;</span>
+                              flash_cnt<span class="sy0">++;</span>
+                              hex_data_cnt<span class="sy0">++;</span>
+                              <span class="kw1">if</span><span class="br0">(</span>hex_data_cnt <span class="sy0">==</span> hex_size<span class="br0">)</span>
+                              <span class="br0">{</span>
+                                  parser_state <span class="sy0">=</span> PARSER_STATE_CHECKSUM<span class="sy0">;</span>
+                                  hex_data_cnt<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+                                  hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                              <span class="br0">}</span>
+                              <span class="coMULTI">/* Puffer voll -&gt; schreibe Page */</span>
+                              <span class="kw1">if</span><span class="br0">(</span>flash_cnt <span class="sy0">==</span> SPM_PAGESIZE<span class="br0">)</span>
+                              <span class="br0">{</span>
+                                  uart_puts<span class="br0">(</span><span class="st0">"P<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                                  _delay_ms<span class="br0">(</span><span class="nu0">100</span><span class="br0">)</span><span class="sy0">;</span>
+                                  program_page<span class="br0">(</span><span class="br0">(</span><span class="kw4">uint16_t</span><span class="br0">)</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+                                  <span class="kw3">memset</span><span class="br0">(</span>flash_data<span class="sy0">,</span> <span class="nu12">0xFF</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>flash_data<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+                                  flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+                                  flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span>
+                              <span class="br0">}</span>
+                              uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                          <span class="br0">}</span>
+                          <span class="kw2">break</span><span class="sy0">;</span>
+                      <span class="coMULTI">/* Parse Checksumme */</span>                             
+                      <span class="kw1">case</span> PARSER_STATE_CHECKSUM<span class="sy0">:</span>
+                          hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+                          <span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+                          <span class="br0">{</span>
+                              uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+                              hex_checksum <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+                              hex_check <span class="sy0">+=</span> hex_checksum<span class="sy0">;</span>
+                              hex_check <span class="sy0">&amp;=</span> <span class="nu12">0x00FF</span><span class="sy0">;</span>
+                              <span class="coMULTI">/* Dateiende -&gt; schreibe Restdaten */</span> 
+                              <span class="kw1">if</span><span class="br0">(</span>hex_type <span class="sy0">==</span> <span class="nu0">1</span><span class="br0">)</span>
+                              <span class="br0">{</span>
+                                  uart_puts<span class="br0">(</span><span class="st0">"P<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                                  _delay_ms<span class="br0">(</span><span class="nu0">100</span><span class="br0">)</span><span class="sy0">;</span>
+                                  program_page<span class="br0">(</span><span class="br0">(</span><span class="kw4">uint16_t</span><span class="br0">)</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+                                  boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">;</span>
+                              <span class="br0">}</span>
+                              <span class="coMULTI">/* Überprüfe Checksumme -&gt; muss '0' sein */</span>
+                              <span class="kw1">if</span><span class="br0">(</span>hex_check <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span> parser_state <span class="sy0">=</span> PARSER_STATE_START<span class="sy0">;</span>
+                              <span class="kw1">else</span> parser_state <span class="sy0">=</span> PARSER_STATE_ERROR<span class="sy0">;</span>
+                              uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+                          <span class="br0">}</span>
+                          <span class="kw2">break</span><span class="sy0">;</span>			
+                      <span class="coMULTI">/* Parserfehler (falsche Checksumme) */</span>
+                      <span class="kw1">case</span> PARSER_STATE_ERROR<span class="sy0">:</span>
+                          uart_putc<span class="br0">(</span><span class="st0">'#'</span><span class="br0">)</span><span class="sy0">;</span>
+                          <span class="kw2">break</span><span class="sy0">;</span>			
+                      <span class="kw1">default</span><span class="sy0">:</span>
+                          <span class="kw2">break</span><span class="sy0">;</span>
+                  <span class="br0">}</span>
+             <span class="br0">}</span>
+             <span class="coMULTI">/* Programmzustand: UART Kommunikation */</span>               
+             <span class="kw1">else</span> <span class="kw1">if</span><span class="br0">(</span>boot_state <span class="sy0">!=</span> BOOT_STATE_PARSER<span class="br0">)</span>
+             <span class="br0">{</span>
+                 <span class="kw1">switch</span><span class="br0">(</span><span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="br0">)</span>
+                 <span class="br0">{</span>
+                     <span class="kw1">case</span> <span class="st0">'p'</span><span class="sy0">:</span> 
+                         boot_state <span class="sy0">=</span> BOOT_STATE_PARSER<span class="sy0">;</span>
+                         uart_puts<span class="br0">(</span><span class="st0">"Programmiere den Flash!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                         uart_puts<span class="br0">(</span><span class="st0">"Kopiere die Hex-Datei und füge sie"</span>
+                                   <span class="st0">" hier ein (rechte Maustaste)<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                         <span class="kw2">break</span><span class="sy0">;</span>
+                     <span class="kw1">case</span> <span class="st0">'q'</span><span class="sy0">:</span> 
+                         boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">;</span>
+                         uart_puts<span class="br0">(</span><span class="st0">"Verlasse den Bootloader!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                         <span class="kw2">break</span><span class="sy0">;</span>
+                     <span class="kw1">default</span><span class="sy0">:</span>
+                         uart_puts<span class="br0">(</span><span class="st0">"Du hast folgendes Zeichen gesendet: "</span><span class="br0">)</span><span class="sy0">;</span>
+                         uart_putc<span class="br0">(</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span><span class="sy0">;</span>
+                         uart_puts<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+                         <span class="kw2">break</span><span class="sy0">;</span>
+                 <span class="br0">}</span>
+             <span class="br0">}</span>
+        <span class="br0">}</span>
+    <span class="br0">}</span>
+    <span class="kw1">while</span><span class="br0">(</span>boot_state<span class="sy0">!=</span>BOOT_STATE_EXIT<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    uart_puts<span class="br0">(</span><span class="st0">"Reset AVR!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+    _delay_ms<span class="br0">(</span><span class="nu0">1000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Interrupt Vektoren wieder gerade biegen */</span>
+    temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+    MCUCR <span class="sy0">=</span> temp <span class="sy0">&amp;</span> ~<span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="coMULTI">/* Reset */</span>
+    start<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+    <span class="kw1">return</span> <span class="nu0">0</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p><i><b>Erklärung des Codes</b></i>
+</p><p>Der Bootloader wird als <i>Zustandsmaschine</i> programmiert. Die Variable <i>boot_state</i> beinhaltet den aktuelle Programmzustand. Für den Parser gibt es eine eigene Zustandsvariable <i>parser_state</i>, welche die einzelne Zustände des Parsers hält. Mit jeder HEX-Datei-Zeile läuft der Parser einmal durch alle Zustände. Nach Abarbeiten des aktuellen Zustands und Auswertung der empfangenen Daten wird der nächste Zustand aktiviert usw. Für das Verarbeiten der Datei wird jedes Mal die Kommunikation angehalten und ein <i>XOFF</i> gesendet. Nach Abarbeitung der Daten gibt der Parser den seriellen Empfang wieder frei (<i>XON</i>). <i><b>Es ist also wichtig, dass in PuTTY die XON/XOFF-Flußkontrolle aktiviert wird!</b></i> Durch den interruptgesteuerten Empfang mit einem 32 Byte tiefen Empfangspuffer geht kein Byte verloren. Am Ende einer HEX-Datei-Zeile wird die Checksumme ausgewertet. Bei falscher Checksumme springt der Parser in den <i>PARSER_STATE_ERROR</i>, aus dem er nicht mehr rauskommt. Somit wird kein weiteres Byte in den Flash geschrieben. Zusätzlich könnte man noch implementieren, dass der Flash wieder gelöscht wird, wenn falsche Daten empfangen wurden, damit kein unvollständiges Programm im Flash steht.
+Einschränkend muss noch festgehalten werden, das der Bootloader in dieser Fassung einen Adressraum bis 64K unterstützt (HEX-Zeilentyp 1). Die erweiterten Adressräume (HEX-Zeilentyp 2 bis 5) werden noch nicht unterstützt. Für ATmega-Devices mit &gt; 64K Flash muss der Bootloader noch erweitert werden.
+</p><p>Nach dem Kompilieren beträgt die Größe des Bootloaders 1796 Byte, wir sind also unterhalb der 2048 Byte die wir "verbraten" können. Der Datenspeicher wird mit 283 Byte belastet.
+</p><p>Die Funktion des Bootloaders sieht wie folgt aus: Nach dem Reset wartet der Bootloader 2 Sekunden auf Eingaben (<i>_delay_ms(2000);</i>). Falls keine Eingaben von der Konsole kommen, springt der Bootloader zur Anwendung. Damit ist gewährleiset, dass die Anwendung später automatisch startet, auch wenn wir keine Taste drücken. Wird ein <i>p</i> gedrückt, springt der Bootloader in den <i>BOOT_STATE_PARSER</i> und erwartet eine HEX-Datei auf der Konsole. Dies ist der Zeitpunkt, die HEX-Datei der Anwendung mit Copy &amp; Paste in die Konsole zu schreiben. Zum Einfügen von Daten aus dem Zwischenspeicher in die Konsole wird bei PuTTY die rechte Maustaste verwendet.
+</p><p><i><b>WICHTIGER HINWEIS: </b></i> Es hat sich gezeigt, das die Flußkontrolle durch XON/XOFF nicht immer funktioniert, da es eine Software-Flußsteuerung ist und u.U. der (UART-Sende-)Interrupt zu spät (oder gar nicht) ausgeführt wird. Bei Problemen beim Übertragen des HEX-Files sollte man als erstes versuchen die Baudrate zu senken (oder die Taktrate des Controllers erhöhen) um dem Controller mehr Zeit zum Verarbeiten und schnellerem Reagieren auf Interrupts zu geben. Eine andere Möglichkeit ist, eine Verzögerung zu aktivieren. z.B. kann mit dem Programm CoolTerm einen "Transmit Character delay" eingestellt werden. Dies funktioniert dann ab 2ms, wenn die Flusssteuerung versagt.
+</p>
+<h2><span class="mw-headline" id="Schritt_4_-_Flashen_und_Ausprobieren_des_Bootloaders_2">Schritt 4 - Flashen und Ausprobieren des Bootloaders</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=18" title="Abschnitt bearbeiten: Schritt 4 - Flashen und Ausprobieren des Bootloaders">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Nach dem Flashen via AVRISPmkII startet der Bootloader in der Konsole. Da noch kein Anwendungsprogramm im Flash liegt, startet der Bootloader nach 2 Sekunden immer wieder neu. Nach Drücken der Taste <i>p</i> erwartet der Bootlader die HEX-Datei der Anwendung. Nach dem Einfügen der Datei in Konsole erscheint für jedes empfangene Byte ein Punkt ("."). Das Beschreiben einer Flash-<i>Page</i> kenzeichnet ein <i>P</i>. Nach dem erfolgreichen Flashen startet die Anwendung automatisch.
+</p><p>Nach erfolgreichem Flashen des Bootloaders via AVRISPmkII erscheint nach dem Reset folgendes Bild:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Real-Bootloader-start.png" class="image" title="PuTTY: Bootloader nach dem Reset"><img alt="PuTTY: Bootloader nach dem Reset" src="./bootloader_in_c_files/PuTTY-Real-Bootloader-start.png" width="668" height="416"></a>
+</p><p>Drückt man die Taste <b>p</b>, springt ist der Bootloader bereit zum Empfang der HEX-Datei:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Real-Bootloader-wait.png" class="image" title="PuTTY: Warten auf die HEX-Datei &quot;Anwendung.hex&quot;"><img alt="PuTTY: Warten auf die HEX-Datei &quot;Anwendung.hex&quot;" src="./bootloader_in_c_files/PuTTY-Real-Bootloader-wait.png" width="668" height="416"></a>
+</p><p>Nach Kopieren &amp; Einfügen der HEX-Datei der vorher kompilierten Anwendung, hier die Intel-HEX-Datei "Anwendung.hex":
+</p>
+<pre>:100000002CC046C045C044C043C042C041C040C0EF
+:100010003FC03EC03DC03CC03BC03AC039C038C004
+:1000200037C036C064C08FC033C032C031C030C0AA
+:100030002FC02EC048696572206973742064617393
+:1000400020416E77656E64756E677370726F67724C
+:10005000616D6D2E2E2E0D0A000011241FBECFEFF4
+:10006000D4E0DEBFCDBF11E0A0E0B1E0EAE6F2E00F
+:1000700002C005900D92A434B107D9F711E0A4E4B1
+:10008000B1E001C01D92A938B107E1F702D0EBC081
+:10009000B7CFEF92FF920F931F93CF93DF9383E33A
+:1000A00090E07BD0789484E390E0D0D088ECE82E88
+:1000B000F12C00E018E18BD0EC0190FDFCCF8236F2
+:1000C00069F480E091E0B6D080E197E2F7013197E2
+:1000D000F1F70197D9F7F8010995EDCF8CE191E09F
+:1000E000A9D08C2F91D081E491E0A4D0E4CF1F92CD
+:1000F0000F920FB60F9211242F938F939F93EF932C
+:10010000FF939091C0002091C600E0918601EF5FBF
+:10011000EF7180918701E81711F482E008C0892F00
+:100120008871E0938601F0E0EC59FE4F20838093C4
+:100130008801FF91EF919F918F912F910F900FBEAA
+:100140000F901F9018951F920F920FB60F921124C7
+:100150008F939F93EF93FF939091840180918501FA
+:10016000981769F0E0918501EF5FEF71E0938501E9
+:10017000F0E0EC5BFE4F80818093C60005C080916B
+:10018000C1008F7D8093C100FF91EF919F918F916E
+:100190000F900FBE0F901F9018959C011092840134
+:1001A00010928501109286011092870197FF04C07A
+:1001B00082E08093C0003F773093C5002093C40055
+:1001C00088E98093C10086E08093C20008959091F1
+:1001D000860180918701981719F420E031E012C060
+:1001E000E0918701EF5FEF71E0938701F0E0EC5958
+:1001F000FE4F308120918801922F80E0AC01430FA7
+:10020000511D9A01C9010895282F909184019F5F83
+:100210009F71809185019817E1F3E92FF0E0EC5B85
+:10022000FE4F2083909384018091C100806280936F
+:10023000C1000895CF93DF93EC0102C02196E4DF63
+:1002400088818823D9F7DF91CF910895CF93DF93E9
+:10025000EC0101C0D9DFFE01219684918823D1F7FA
+:0A026000DF91CF910895F894FFCFCD
+:10026A00537072696E6765207A756D20426F6F747C
+:10027A006C6F616465722E2E2E0D0A00447520681B
+:10028A0061737420666F6C67656E646573205A6566
+:10029A00696368656E20676573656E6465743A2084
+:0402AA00000A0D0039
+:00000001FF
+</pre>
+<p>erscheinen folgende Ausgaben in PuTTY:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Real-Bootloader-prog.png" class="image" title="PuTTY: Flashen der HEX-Datei &quot;Anwendung.hex&quot;"><img alt="PuTTY: Flashen der HEX-Datei &quot;Anwendung.hex&quot;" src="./bootloader_in_c_files/PuTTY-Real-Bootloader-prog.png" width="668" height="416"></a>
+</p><p>Nach erfolgreichem Flashen startet die Anwendung und meldet sich mit der Zeile
+</p>
+<pre>Hier ist das Anwendungsprogramm...
+</pre>
+<p>Jetzt können nach belieben Tasten gedrückt werden, was die Anwendung jedesmal quittiert:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Real-Bootloader-anwend.png" class="image" title="PuTTY: Ausprobieren der Anwendung"><img alt="PuTTY: Ausprobieren der Anwendung" src="./bootloader_in_c_files/PuTTY-Real-Bootloader-anwend.png" width="668" height="416"></a>
+</p><p>Nach Drücken der Taste <b>b</b> springt die Anwendung wieder zur Startadresse des Bootloaders, also zur Adresse <i>0x1800</i> im Flash-Speicher. Nun hat man wieder 2 Sekunden Zeit, um die Taste <b>p</b> zu drücken, sonst startet die Anwendung wieder:
+</p><p><a href="http://www.mikrocontroller.net/articles/Datei:PuTTY-Real-Bootloader-reset.png" class="image" title="PuTTY: Rücksprung zum Bootloader auf Adresse 0x1800"><img alt="PuTTY: Rücksprung zum Bootloader auf Adresse 0x1800" src="./bootloader_in_c_files/PuTTY-Real-Bootloader-reset.png" width="668" height="416"></a>
+</p><p>Damit ist das Tutorial abgeschlossen.
+</p><p><i><b>Viel Spass beim Ausprobieren und Weiterentwickeln!</b></i>
+</p>
+<h1><span class="mw-headline" id="Der_.22echte.22_Bootloader_f.C3.BCr_Programme_.3E_64k">Der "echte" Bootloader für Programme &gt; 64k</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=19" title="Abschnitt bearbeiten: Der &quot;echte&quot; Bootloader für Programme &gt; 64k">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<p>Der Bootloader für AVRs mit mehr als 64K Flash-Speicher wird direkt Bootloader im vorherigen Kapitel abgeleitet.+
+</p><p><i><b>ACHTUNG:  Der Abschnitt befindet sich zur Zeit in Bearbeitung!! </b></i>
+</p>
+<h2><span class="mw-headline" id="Schritt_1_und_2_-_siehe_.22Hallo_Welt.22_Bootloader_2">Schritt 1 und 2 - siehe "Hallo Welt" Bootloader</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=20" title="Abschnitt bearbeiten: Schritt 1 und 2 - siehe &quot;Hallo Welt&quot; Bootloader">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Schritt 1 und 2 können vom "Hallo Welt" Bootloader übernommen werden. Es sind wieder die korrekte Taktfrequenz und die Verschiebung der Sektion <b>.text</b> auf die Bootresetadresse einzustellen.
+</p>
+<h2><span class="mw-headline" id="Schritt_3_-_Programmieren_des_Bootloaders_3">Schritt 3 - Programmieren des Bootloaders</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=21" title="Abschnitt bearbeiten: Schritt 3 - Programmieren des Bootloaders">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Das Adresse eines Type 0 - Records im HEX86 - Format ist auf 16 Bit und somit auf 65535 Adressen beschränkt. Um den Adressbereich zu erweitern wurden die Record - Typen 2 bis 5 definert, wobei für uns nur Typ 2 und 4 relevant sind. Im Record-Typ 2 wird eine Offset- bzw Segmentadresse definiert. Sie wird mit 16 multipliziert und bei allen folgenden Schreiboperationen zur Adresse hinzuaddiert. Typ 4 sind die oberen 16 Bit einer 32 Bitadresse, die unteren 16 Bit sind in diesem Fall die im Record-Typ 0 angegebenen Adresse. Die Zustandsmaschine muß nun entsprechend erweitert werden:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="c source-c"><pre class="de1"><span class="co2">#include &lt;string.h&gt;</span>
+<span class="co2">#include &lt;avr/io.h&gt;</span>
+<span class="co2">#include &lt;avr/interrupt.h&gt;</span>
+<span class="co2">#include &lt;avr/pgmspace.h&gt;</span>
+<span class="co2">#include &lt;avr/boot.h&gt;</span>
+<span class="co2">#include &lt;util/delay.h&gt;</span>
+<span class="co2">#include "uart.h"</span>
+&nbsp;
+<span class="co2">#define BOOT_UART_BAUD_RATE     9600     /* Baudrate */</span>
+<span class="co2">#define XON                     17       /* XON Zeichen */</span>
+<span class="co2">#define XOFF                    19       /* XOFF Zeichen */</span>
+<span class="co2">#define START_SIGN              ':'      /* Hex-Datei Zeilenstartzeichen */</span>
+&nbsp;
+<span class="coMULTI">/* Zustände des Bootloader-Programms */</span>
+<span class="co2">#define BOOT_STATE_EXIT	        0</span>
+<span class="co2">#define BOOT_STATE_PARSER       1</span>
+&nbsp;
+<span class="coMULTI">/* Zustände des Hex-File-Parsers */</span>
+<span class="co2">#define PARSER_STATE_START      0</span>
+<span class="co2">#define PARSER_STATE_SIZE       1</span>
+<span class="co2">#define PARSER_STATE_ADDRESS    2</span>
+<span class="co2">#define PARSER_STATE_TYPE       3</span>
+<span class="co2">#define PARSER_STATE_DATA       4</span>
+<span class="co2">#define PARSER_STATE_CHECKSUM   5</span>
+<span class="co2">#define PARSER_STATE_ERROR      6</span>
+&nbsp;
+<span class="kw4">void</span> program_page <span class="br0">(</span><span class="kw4">uint32_t</span> page<span class="sy0">,</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span>buf<span class="br0">)</span>
+<span class="br0">{</span>
+	<span class="kw4">uint16_t</span> i<span class="sy0">;</span>
+	<span class="kw4">uint8_t</span> sreg<span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Disable interrupts */</span>
+	sreg <span class="sy0">=</span> SREG<span class="sy0">;</span>
+	cli<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	eeprom_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	boot_page_erase <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>
+	boot_spm_busy_wait <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>      <span class="coMULTI">/* Wait until the memory is erased. */</span>
+&nbsp;
+	<span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>SPM_PAGESIZE<span class="sy0">;</span> i<span class="sy0">+=</span><span class="nu0">2</span><span class="br0">)</span>
+	<span class="br0">{</span>
+		<span class="coMULTI">/* Set up little-endian word. */</span>
+		<span class="kw4">uint16_t</span> w <span class="sy0">=</span> <span class="sy0">*</span>buf<span class="sy0">++;</span>
+		w <span class="sy0">+=</span> <span class="br0">(</span><span class="sy0">*</span>buf<span class="sy0">++</span><span class="br0">)</span> <span class="sy0">&lt;&lt;</span> <span class="nu0">8</span><span class="sy0">;</span>
+&nbsp;
+		boot_page_fill <span class="br0">(</span>page <span class="sy0">+</span> i<span class="sy0">,</span> w<span class="br0">)</span><span class="sy0">;</span>
+	<span class="br0">}</span>
+&nbsp;
+	boot_page_write <span class="br0">(</span>page<span class="br0">)</span><span class="sy0">;</span>     <span class="coMULTI">/* Store buffer in flash page.		*/</span>
+	boot_spm_busy_wait<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>       <span class="coMULTI">/* Wait until the memory is written.*/</span>
+&nbsp;
+	<span class="coMULTI">/* Reenable RWW-section again. We need this if we want to jump back */</span>
+	<span class="coMULTI">/* to the application after bootloading. */</span>
+	boot_rww_enable <span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Re-enable interrupts (if they were ever enabled). */</span>
+	SREG <span class="sy0">=</span> sreg<span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">static</span> <span class="kw4">uint16_t</span> hex2num <span class="br0">(</span><span class="kw4">const</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span> ascii<span class="sy0">,</span> <span class="kw4">uint8_t</span> num<span class="br0">)</span>
+<span class="br0">{</span>
+	<span class="kw4">uint8_t</span>  i<span class="sy0">;</span>
+	<span class="kw4">uint16_t</span> val <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+&nbsp;
+	<span class="kw1">for</span> <span class="br0">(</span>i<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span> i<span class="sy0">&lt;</span>num<span class="sy0">;</span> i<span class="sy0">++</span><span class="br0">)</span>
+	<span class="br0">{</span>
+		<span class="kw4">uint8_t</span> c <span class="sy0">=</span> ascii<span class="br0">[</span>i<span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+		<span class="coMULTI">/* Hex-Ziffer auf ihren Wert abbilden */</span>
+		<span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'0'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'9'</span><span class="br0">)</span>            c <span class="sy0">-=</span> <span class="st0">'0'</span><span class="sy0">;</span>
+		<span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'A'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'F'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'A'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+		<span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>c <span class="sy0">&gt;=</span> <span class="st0">'a'</span> <span class="sy0">&amp;&amp;</span> c <span class="sy0">&lt;=</span> <span class="st0">'f'</span><span class="br0">)</span>       c <span class="sy0">-=</span> <span class="st0">'a'</span> <span class="sy0">-</span> <span class="nu0">10</span><span class="sy0">;</span>
+&nbsp;
+		val <span class="sy0">=</span> <span class="nu0">16</span> <span class="sy0">*</span> val <span class="sy0">+</span> c<span class="sy0">;</span>
+	<span class="br0">}</span>
+&nbsp;
+	<span class="kw1">return</span> val<span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">void</span> write_page<span class="br0">(</span><span class="kw4">uint32_t</span> page<span class="sy0">,</span> <span class="kw4">uint8_t</span> <span class="sy0">*</span>buf<span class="br0">)</span>
+<span class="br0">{</span>
+	uart_puts<span class="br0">(</span><span class="st0">"P<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+	_delay_ms<span class="br0">(</span><span class="nu0">100</span><span class="br0">)</span><span class="sy0">;</span>
+	program_page<span class="br0">(</span>page<span class="sy0">,</span> buf<span class="br0">)</span><span class="sy0">;</span>
+	<span class="kw3">memset</span><span class="br0">(</span>buf<span class="sy0">,</span> <span class="nu12">0xFF</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>SPM_PAGESIZE<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">int</span> main<span class="br0">(</span><span class="br0">)</span>
+<span class="br0">{</span>
+        <span class="coMULTI">/* Intel-HEX Zieladresse */</span>
+	<span class="kw4">uint32_t</span>        hex_addr <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+        <span class="coMULTI">/* Intel-HEX Zieladress-Offset */</span>
+	hex_addr_offset <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Zu schreibende Flash-Page */</span>
+	flash_page <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+	<span class="coMULTI">/* Empfangenes Zeichen + Statuscode */</span>
+	<span class="kw4">uint16_t</span>        c <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Intel-HEX Checksumme zum Überprüfen des Daten */</span>
+	hex_check <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Positions zum Schreiben in der Datenpuffer */</span>
+	flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+	<span class="coMULTI">/* temporäre Variable */</span>
+	<span class="kw4">uint8_t</span>         temp<span class="sy0">,</span>
+	<span class="coMULTI">/* Flag zum steuern des Programmiermodus */</span>
+	boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">,</span>
+	<span class="coMULTI">/* Empfangszustandssteuerung */</span>
+	parser_state <span class="sy0">=</span> PARSER_STATE_START<span class="sy0">,</span>
+	<span class="coMULTI">/* Flag zum ermitteln einer neuen Flash-Page */</span>
+	flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Datenpuffer für die Hexdaten*/</span>
+	flash_data<span class="br0">[</span>SPM_PAGESIZE<span class="br0">]</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Position zum Schreiben in den HEX-Puffer */</span>
+	hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Puffer für die Umwandlung der ASCII in Binärdaten */</span>
+	hex_buffer<span class="br0">[</span><span class="nu0">5</span><span class="br0">]</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Intel-HEX Datenlänge */</span>
+	hex_size <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Zähler für die empfangenen HEX-Daten einer Zeile */</span>
+	hex_data_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* Intel-HEX Recordtype */</span>
+	hex_type <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">,</span>
+	<span class="coMULTI">/* empfangene HEX-Checksumme */</span>
+	hex_checksum<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+	<span class="coMULTI">/* Funktionspointer auf 0x0000 */</span>
+	<span class="kw4">void</span>            <span class="br0">(</span><span class="sy0">*</span>start<span class="br0">)</span><span class="br0">(</span> <span class="kw4">void</span> <span class="br0">)</span> <span class="sy0">=</span> <span class="nu12">0x0000</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Füllen der Puffer mit definierten Werten */</span>
+	<span class="kw3">memset</span><span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu12">0x00</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>hex_buffer<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+	<span class="kw3">memset</span><span class="br0">(</span>flash_data<span class="sy0">,</span> <span class="nu12">0xFF</span><span class="sy0">,</span> <span class="kw4">sizeof</span><span class="br0">(</span>flash_data<span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Interrupt Vektoren verbiegen */</span>
+	temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+	MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+	MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Einstellen der Baudrate und aktivieren der Interrupts */</span>
+	uart_init<span class="br0">(</span> UART_BAUD_SELECT<span class="br0">(</span>BOOT_UART_BAUD_RATE<span class="sy0">,</span>F_CPU<span class="br0">)</span> <span class="br0">)</span><span class="sy0">;</span>
+	sei<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	uart_puts<span class="br0">(</span><span class="st0">"Hallo hier ist der echte Bootloader<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+	_delay_ms<span class="br0">(</span><span class="nu0">2000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="kw1">do</span>
+	<span class="br0">{</span>
+		c <span class="sy0">=</span> uart_getc<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+		<span class="kw1">if</span><span class="br0">(</span> <span class="sy0">!</span><span class="br0">(</span>c <span class="sy0">&amp;</span> UART_NO_DATA<span class="br0">)</span> <span class="br0">)</span>
+		<span class="br0">{</span>
+			<span class="coMULTI">/* Programmzustand: Parser */</span>
+			<span class="kw1">if</span><span class="br0">(</span>boot_state <span class="sy0">==</span> BOOT_STATE_PARSER<span class="br0">)</span>
+			<span class="br0">{</span>
+				<span class="kw1">switch</span><span class="br0">(</span>parser_state<span class="br0">)</span>
+				<span class="br0">{</span>
+					<span class="coMULTI">/* Warte auf Zeilen-Startzeichen */</span>
+					<span class="kw1">case</span> PARSER_STATE_START<span class="sy0">:</span>
+						<span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c <span class="sy0">==</span> START_SIGN<span class="br0">)</span>
+						<span class="br0">{</span>
+							uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+							parser_state <span class="sy0">=</span> PARSER_STATE_SIZE<span class="sy0">;</span>
+							hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							hex_check <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+						<span class="coMULTI">/* Parse Datengröße */</span>
+					<span class="kw1">case</span> PARSER_STATE_SIZE<span class="sy0">:</span>
+						hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+						<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+						<span class="br0">{</span>
+							uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+							parser_state <span class="sy0">=</span> PARSER_STATE_ADDRESS<span class="sy0">;</span>
+							hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							hex_size <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+							hex_check <span class="sy0">+=</span> hex_size<span class="sy0">;</span>
+							uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="coMULTI">/* Parse Zieladresse */</span>
+					<span class="kw1">case</span> PARSER_STATE_ADDRESS<span class="sy0">:</span>
+						hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+						<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">4</span><span class="br0">)</span>
+						<span class="br0">{</span>
+							uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+							parser_state <span class="sy0">=</span> PARSER_STATE_TYPE<span class="sy0">;</span>
+							hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							hex_addr <span class="sy0">=</span> hex_addr_offset<span class="sy0">;</span>
+							hex_addr <span class="sy0">+=</span> hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">4</span><span class="br0">)</span><span class="sy0">;</span>
+							hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> hex_addr<span class="sy0">;</span>
+							hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> <span class="br0">(</span>hex_addr <span class="sy0">&gt;&gt;</span> <span class="nu0">8</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+							uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="coMULTI">/* Parse Zeilentyp */</span>
+					<span class="kw1">case</span> PARSER_STATE_TYPE<span class="sy0">:</span>
+						hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+						<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+						<span class="br0">{</span>
+							uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+							hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							hex_data_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+							hex_type <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+							hex_check <span class="sy0">+=</span> hex_type<span class="sy0">;</span>
+							<span class="kw1">switch</span><span class="br0">(</span>hex_type<span class="br0">)</span>
+							<span class="br0">{</span>
+								<span class="kw1">case</span> <span class="nu0">1</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_CHECKSUM<span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+								<span class="kw1">case</span> <span class="nu0">0</span><span class="sy0">:</span> 
+								<span class="kw1">case</span> <span class="nu0">2</span><span class="sy0">:</span> 
+								<span class="kw1">case</span> <span class="nu0">4</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_DATA<span class="sy0">;</span> 
+&nbsp;
+									   <span class="coMULTI">/* Berechnen der neue Flash-Page (abhängig von hex_type) */</span>
+									   <span class="coMULTI">/* Liegen die Daten noch in der aktuellen Flash-Page? */</span>
+				                       <span class="kw1">if</span><span class="br0">(</span><span class="sy0">!</span>flash_page_flag <span class="sy0">&amp;&amp;</span> <span class="br0">(</span>flash_page <span class="sy0">!=</span> <span class="br0">(</span>hex_addr <span class="sy0">-</span> hex_addr <span class="sy0">%</span> SPM_PAGESIZE<span class="br0">)</span><span class="br0">)</span> <span class="br0">)</span>
+				                       <span class="br0">{</span>
+					                       <span class="coMULTI">/* Wenn die Daten nicht in der aktuellen Flash-Page liegen, */</span>
+					                       <span class="coMULTI">/* wird die aktuelle Page geschrieben und ein Flag          */</span>
+					                       <span class="coMULTI">/* zum berechnen der neuen Page-Startadresse gesetzt        */</span>
+					                       write_page<span class="br0">(</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+					                       flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+					                       flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span>
+				                       <span class="br0">}</span>
+&nbsp;
+				                      <span class="coMULTI">/* Muss die Page-Startadresse neu berechnet werden? */</span>
+				                      <span class="kw1">if</span><span class="br0">(</span>flash_page_flag<span class="br0">)</span>
+				                      <span class="br0">{</span>
+					                      <span class="coMULTI">/* Berechnen der neuen Page-Startadresse */</span>
+					                      flash_page <span class="sy0">=</span> hex_addr <span class="sy0">-</span> hex_addr <span class="sy0">%</span> SPM_PAGESIZE<span class="sy0">;</span>
+&nbsp;
+                                          <span class="coMULTI">/* Füllen des Flash-Puffers mit dem "alten" Inhalt der Page */</span>
+					                      memcpy_PF<span class="br0">(</span>flash_data<span class="sy0">,</span> flash_page<span class="sy0">,</span> SPM_PAGESIZE<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+                                          <span class="coMULTI">/* Flag setzen um anzuzeigen das eine neue Adresse da ist */</span>
+				 	                      flash_page_flag <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+				                      <span class="br0">}</span>  								
+								      <span class="kw2">break</span><span class="sy0">;</span>
+								<span class="kw1">default</span><span class="sy0">:</span> parser_state <span class="sy0">=</span> PARSER_STATE_DATA<span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+							<span class="br0">}</span>
+							uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="coMULTI">/* Parse Flash-Daten */</span>
+					<span class="kw1">case</span> PARSER_STATE_DATA<span class="sy0">:</span>
+						hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+						<span class="kw1">switch</span><span class="br0">(</span>hex_type<span class="br0">)</span>
+						<span class="br0">{</span>
+							<span class="kw1">case</span> <span class="nu0">0</span><span class="sy0">:</span>  <span class="coMULTI">/* Record Typ 00 - Data Record auswerten */</span>
+								<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+								<span class="br0">{</span>
+									uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+									uart_putc<span class="br0">(</span><span class="st0">'.'</span><span class="br0">)</span><span class="sy0">;</span>
+									hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+									flash_data<span class="br0">[</span>flash_cnt<span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+									hex_check <span class="sy0">+=</span> flash_data<span class="br0">[</span>flash_cnt<span class="br0">]</span><span class="sy0">;</span>
+									flash_cnt<span class="sy0">++;</span>
+									hex_data_cnt<span class="sy0">++;</span>
+									<span class="kw1">if</span><span class="br0">(</span>hex_data_cnt <span class="sy0">==</span> hex_size<span class="br0">)</span>
+									<span class="br0">{</span>
+										parser_state <span class="sy0">=</span> PARSER_STATE_CHECKSUM<span class="sy0">;</span>
+										hex_data_cnt<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+										hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+									<span class="br0">}</span>
+									<span class="coMULTI">/* Puffer voll -&gt; schreibe Page */</span>
+									<span class="kw1">if</span><span class="br0">(</span>flash_cnt <span class="sy0">==</span> SPM_PAGESIZE<span class="br0">)</span>
+									<span class="br0">{</span>
+										write_page<span class="br0">(</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+										flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+										flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span>
+									<span class="br0">}</span>
+									uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+								<span class="br0">}</span>
+								<span class="kw2">break</span><span class="sy0">;</span>
+							<span class="kw1">case</span> <span class="nu0">2</span><span class="sy0">:</span>   <span class="coMULTI">/* Record Typ 02 - Extended Segment Address auswerten */</span>
+							<span class="kw1">case</span> <span class="nu0">4</span><span class="sy0">:</span>   <span class="coMULTI">/* Record Typ 04 - Extended Linear Address auswerten */</span>
+								<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">4</span><span class="br0">)</span>
+								<span class="br0">{</span>
+									uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+									uart_putc<span class="br0">(</span><span class="st0">'J'</span><span class="br0">)</span><span class="sy0">;</span>
+									hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+&nbsp;
+									<span class="coMULTI">/* Schreibe angfangene Flash-Page vor Segment-Sprung */</span>
+									write_page<span class="br0">(</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+									flash_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+									flash_page_flag <span class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span>
+&nbsp;
+									<span class="coMULTI">/* Berechnen der Offsetadresse */</span>
+									<span class="kw1">switch</span><span class="br0">(</span>hex_type<span class="br0">)</span>
+									<span class="br0">{</span>
+										<span class="kw1">case</span> <span class="nu0">2</span><span class="sy0">:</span> hex_addr_offset <span class="sy0">=</span> <span class="br0">(</span><span class="br0">(</span><span class="kw4">uint32_t</span><span class="br0">)</span><span class="br0">(</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">4</span><span class="br0">)</span><span class="br0">)</span> <span class="sy0">&lt;&lt;</span> <span class="nu0">4</span><span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+										<span class="kw1">case</span> <span class="nu0">4</span><span class="sy0">:</span> hex_addr_offset <span class="sy0">=</span> <span class="br0">(</span><span class="br0">(</span><span class="kw4">uint32_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">4</span><span class="br0">)</span><span class="br0">)</span> <span class="sy0">&lt;&lt;</span> <span class="nu0">16</span><span class="sy0">;</span> <span class="kw2">break</span><span class="sy0">;</span>
+									<span class="br0">}</span>
+&nbsp;
+									<span class="coMULTI">/* Addieren der empfangenen Werte für die Checksumme */</span>
+									hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+									hex_check <span class="sy0">+=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span> hex2num<span class="br0">(</span>hex_buffer <span class="sy0">+</span> <span class="nu0">2</span><span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+									parser_state <span class="sy0">=</span> PARSER_STATE_CHECKSUM<span class="sy0">;</span>
+									hex_data_cnt<span class="sy0">=</span><span class="nu0">0</span><span class="sy0">;</span>
+									hex_cnt <span class="sy0">=</span> <span class="nu0">0</span><span class="sy0">;</span>
+								<span class="br0">}</span>
+								<span class="kw2">break</span><span class="sy0">;</span>
+							<span class="kw1">default</span><span class="sy0">:</span>
+								<span class="kw2">break</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="coMULTI">/* Parse Checksumme */</span>
+					<span class="kw1">case</span> PARSER_STATE_CHECKSUM<span class="sy0">:</span>
+						hex_buffer<span class="br0">[</span>hex_cnt<span class="sy0">++</span><span class="br0">]</span> <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="sy0">;</span>
+						<span class="kw1">if</span><span class="br0">(</span>hex_cnt <span class="sy0">==</span> <span class="nu0">2</span><span class="br0">)</span>
+						<span class="br0">{</span>
+							uart_putc<span class="br0">(</span>XOFF<span class="br0">)</span><span class="sy0">;</span>
+							hex_checksum <span class="sy0">=</span> <span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>hex2num<span class="br0">(</span>hex_buffer<span class="sy0">,</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+							hex_check <span class="sy0">+=</span> hex_checksum<span class="sy0">;</span>
+							hex_check <span class="sy0">&amp;=</span> <span class="nu12">0x00FF</span><span class="sy0">;</span>
+							<span class="coMULTI">/* Dateiende -&gt; schreibe Restdaten */</span>
+							<span class="kw1">if</span><span class="br0">(</span>hex_type <span class="sy0">==</span> <span class="nu0">1</span><span class="br0">)</span>
+							<span class="br0">{</span>
+								write_page<span class="br0">(</span>flash_page<span class="sy0">,</span> flash_data<span class="br0">)</span><span class="sy0">;</span>
+								boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">;</span>
+							<span class="br0">}</span>
+							<span class="coMULTI">/* Überprüfe Checksumme -&gt; muss '0' sein */</span>
+							<span class="kw1">if</span><span class="br0">(</span>hex_check <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span> parser_state <span class="sy0">=</span> PARSER_STATE_START<span class="sy0">;</span>
+							<span class="kw1">else</span> parser_state <span class="sy0">=</span> PARSER_STATE_ERROR<span class="sy0">;</span>
+							uart_putc<span class="br0">(</span>XON<span class="br0">)</span><span class="sy0">;</span>
+						<span class="br0">}</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+						<span class="coMULTI">/* Parserfehler (falsche Checksumme) */</span>
+					<span class="kw1">case</span> PARSER_STATE_ERROR<span class="sy0">:</span>
+						uart_putc<span class="br0">(</span><span class="st0">'#'</span><span class="br0">)</span><span class="sy0">;</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="kw1">default</span><span class="sy0">:</span>
+						<span class="kw2">break</span><span class="sy0">;</span>
+				<span class="br0">}</span>
+			<span class="br0">}</span>
+			<span class="coMULTI">/* Programmzustand: UART Kommunikation */</span>
+			<span class="kw1">else</span> <span class="kw1">if</span><span class="br0">(</span>boot_state <span class="sy0">!=</span> BOOT_STATE_PARSER<span class="br0">)</span>
+			<span class="br0">{</span>
+				<span class="kw1">switch</span><span class="br0">(</span><span class="br0">(</span><span class="kw4">uint8_t</span><span class="br0">)</span>c<span class="br0">)</span>
+				<span class="br0">{</span>
+					<span class="kw1">case</span> <span class="st0">'p'</span><span class="sy0">:</span>
+					boot_state <span class="sy0">=</span> BOOT_STATE_PARSER<span class="sy0">;</span>
+					uart_puts<span class="br0">(</span><span class="st0">"Kopiere die Hex-Datei und füge sie hier ein<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+					<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="kw1">case</span> <span class="st0">'q'</span><span class="sy0">:</span>
+					boot_state <span class="sy0">=</span> BOOT_STATE_EXIT<span class="sy0">;</span>
+					uart_puts<span class="br0">(</span><span class="st0">"Verlasse den Bootloader!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+					<span class="kw2">break</span><span class="sy0">;</span>
+					<span class="kw1">default</span><span class="sy0">:</span>
+   					uart_putc<span class="br0">(</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">char</span><span class="br0">)</span>c<span class="br0">)</span><span class="sy0">;</span>
+					uart_puts<span class="br0">(</span><span class="st0">"<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+					<span class="kw2">break</span><span class="sy0">;</span>
+				<span class="br0">}</span>
+			<span class="br0">}</span>
+		<span class="br0">}</span>
+	<span class="br0">}</span>
+	<span class="kw1">while</span><span class="br0">(</span>boot_state<span class="sy0">!=</span>BOOT_STATE_EXIT<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	uart_puts<span class="br0">(</span><span class="st0">"Reset AVR!<span class="es1">\n</span><span class="es1">\r</span>"</span><span class="br0">)</span><span class="sy0">;</span>
+	_delay_ms<span class="br0">(</span><span class="nu0">1000</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Interrupt Vektoren wieder gerade biegen */</span>
+	temp <span class="sy0">=</span> MCUCR<span class="sy0">;</span>
+	MCUCR <span class="sy0">=</span> temp <span class="sy0">|</span> <span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVCE<span class="br0">)</span><span class="sy0">;</span>
+	MCUCR <span class="sy0">=</span> temp <span class="sy0">&amp;</span> ~<span class="br0">(</span><span class="nu0">1</span><span class="sy0">&lt;&lt;</span>IVSEL<span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="coMULTI">/* Reset */</span>
+	start<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+	<span class="kw1">return</span> <span class="nu0">0</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p><br>
+</p>
+<h1><span class="mw-headline" id="Zusammenfassung">Zusammenfassung</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=22" title="Abschnitt bearbeiten: Zusammenfassung">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<p>Wer den Artikel bis hier hin nachvollzogen hat, ist jetzt in der Lage einen Bootloader selbst zu schreiben. Dabei kann der Bootloader an jede in Frage kommende ATmega-Plattform angepaßt werden. Dazu muss
+</p>
+<ul>
+<li> die Linkereinstellung für das Verschieben der Sektion <i>.text</i> angepasst werden und (<b>-Ttext = 0xXXXXX</b>)
+</li>
+<li> evtl. der virtuelle Funktionspointer in der Anwendung geändert werden (falls ein Rücksprung zum Bootloader gewünscht ist <b>void (*bootloader)(void) = 0xYYYYY</b>).
+</li>
+</ul>
+<p>Um dies zu erleichtern, habe ich hier die Sprungadressen für ausgewählte AVRs tabellarisch zusammengetragen. Dabei wurde immer die maximale Größe des Bootloader betrachtet, also <b>BOOTSZ0=0</b> und <b>BOOTSZ1=0</b>:
+</p>
+<table border="1" class="wikitable">
+<caption> Größe und Startadresse der Bootloader Sektion für ausgewählte AVR-Devices
+</caption>
+<tbody><tr>
+<th> Device </th>
+<th> Flash-Größe<br>für Applikation </th>
+<th> Flash-Größe<br>des Bootloaders </th>
+<th> Startadresse des Bootloaders<br>(Byteadresse) 0xXXXXX </th>
+<th> Startadresse des Bootloaders<br>(Wordadresse) 0xYYYYY
+</th></tr>
+<tr>
+<td> ATmega8/88 </td>
+<td> 6144 Byte </td>
+<td> 2048 Byte </td>
+<td> 0x1800 </td>
+<td> 0xC00
+</td></tr>
+<tr>
+<td> ATmega16/164/168 </td>
+<td> 14336 Byte </td>
+<td> 2048 Byte </td>
+<td> 0x3800 </td>
+<td> 0x1C00
+</td></tr>
+<tr>
+<td> ATmega32/324/328 </td>
+<td> 28672 Byte </td>
+<td> 4096 Byte </td>
+<td> 0x7000 </td>
+<td> 0x3800
+</td></tr>
+<tr>
+<td> ATmega64/644/640 </td>
+<td> 57344 Byte </td>
+<td> 8192 Byte </td>
+<td> 0xE000 </td>
+<td> 0x7000
+</td></tr>
+<tr>
+<td> ATmega128/1284/1280/1281 </td>
+<td> 122880 Byte </td>
+<td> 8192 Byte </td>
+<td> 0x1E000 </td>
+<td> 0xF000
+</td></tr>
+<tr>
+<td> ATmega2560/2561 </td>
+<td>  253952 Byte </td>
+<td> 8192 Byte </td>
+<td> 0x3E000 </td>
+<td> 0x1F000
+</td></tr></tbody></table>
+<p>Damit kann jeder den Bootloader nach seinen Wünschen anpassen. Eine gängige Praxis ist auch, ein kleines PC-Programm zu schreiben, welches dem Bootloader die Flash-Daten gleich Binär übergibt. Das geht schneller und spart das aufwendige interpretieren der Daten (Parsen). Eine weitere Idee ist es, den Bootloader so anzupassen, das er sich wie ein STK500 an der seriellen Schnittstelle verhält. Dazu muss man die Application Note <a rel="nofollow" class="external text" href="http://www.atmel.com/images/doc2591.pdf">AVR068</a> von Atmel umsetzen. Auch dies sollte nach dem Studium des Tutorial kein Problem mehr sein&nbsp;:)
+</p><p><a class="external text" href="http://www.mikrocontroller.net/user/show/mario">Nachricht an den Autor</a>
+</p>
+<h1><span class="mw-headline" id="FAQ">FAQ</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=23" title="Abschnitt bearbeiten: FAQ">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<h2><span class="mw-headline" id="Wie_kann_man_Bootloader_und_Anwendungsprogramm_gemeinsam_flashen.3F">Wie kann man Bootloader und Anwendungsprogramm gemeinsam flashen?</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=24" title="Abschnitt bearbeiten: Wie kann man Bootloader und Anwendungsprogramm gemeinsam flashen?">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h2>
+<p>Es ist in C ohne weiteres nicht möglich ein gemeinsames Hexfile aus Bootloader und Anwendungsprogramm zu kompilieren. Aber man kann das getrennt erstellte Hexfile des Bootloaders und das getrennt erstellte Hexfile des Anwendungsprogramms zusammenfügen und so gemeinsam mit ISP flashen. Dazu die letzte Zeile des 1. Hexfiles entfernen und dahinter das 2. Hexfile anfügen <a class="external autonumber" href="http://www.mikrocontroller.net/topic/199241#1955092">[2]</a>, <a class="external autonumber" href="http://www.mikrocontroller.net/topic/198428#1949164">[3]</a>.
+</p><p>Mit Atmel Studio 6 lässt sich das Vorgehen sehr leicht über die Post-Build Events automatisieren. Benötigt wird hierzu ein kleines Batch-Script, welches z.B. als "hexjoin.bat" im Solution Directory abgelegt wird.
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="dos source-dos"><pre class="de1">type <span class="sy0">%</span><span class="re3">1</span> <span class="sy0">|</span> findstr /v&nbsp;:<span class="re0">00000001FF</span> <span class="sy0">&gt;</span> tmp.hex
+type <span class="sy0">%</span><span class="re3">2</span> <span class="sy0">&gt;&gt;</span> tmp.hex
+type tmp.hex <span class="sy0">&gt;</span> <span class="sy0">%</span><span class="re3">1</span></pre></div></div>
+<p>Unter "Project-&gt;Properties-&gt;Build Events-&gt;Post-build event command line" kann nun das Script nach jedem Build ausgeführt werden und erzeugt eine kombinierte HEX-Datei. Im folgenden Beispiel wird davon ausgegangen, dass sowohl die Datei mit dem Bootloader, als auch das Batch-Script im Solution Directory liegen:
+</p>
+<div dir="ltr" class="mw-geshi mw-code mw-content-ltr"><div class="dos source-dos"><pre class="de1">$<span class="sy0">(</span>SolutionDir<span class="sy0">)</span>hexjoin.bat "$<span class="sy0">(</span>OutputDirectory<span class="sy0">)</span>\$<span class="sy0">(</span>OutputFileName<span class="sy0">)</span>.hex" "$<span class="sy0">(</span>SolutionDir<span class="sy0">)</span>bootloader.hex"</pre></div></div>
+<h1><span class="mw-headline" id="Referenzen_.2F_Links">Referenzen / Links</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&action=edit&section=25" title="Abschnitt bearbeiten: Referenzen / Links">Bearbeiten</a><span class="mw-editsection-bracket">]</span></span></h1>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://github.com/arduino/Arduino/blob/master/hardware/arduino/bootloaders/atmega/ATmegaBOOT_168.c">Arduino Bootloader (simuliert den AVR ISP)</a>
+</li>
+</ul>
+<ul>
+<li> <a class="external text" href="http://www.mikrocontroller.net/articles/AVR_Bootloader_FastBoot_von_Peter_Dannegger">FastBoot von Peter Dannegger </a>
+</li>
+</ul>
+<ul>
+<li> <a class="external text" href="http://www.mikrocontroller.net/articles/Bootloader">allgemeines zu Bootloadern </a>
+</li>
+</ul>
+
+<!-- 
+NewPP limit report
+CPU time usage: 0.364 seconds
+Real time usage: 0.396 seconds
+Preprocessor visited node count: 270/1000000
+Preprocessor generated node count: 484/1000000
+Post‐expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Highest expansion depth: 2/40
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key uc_wiki:pcache:idhash:5621-0!*!0!!de!2!* and timestamp 20150317092037 and revision id 85794
+ -->
+</div>			<!-- /bodycontent -->
+						<!-- printfooter -->
+			<div class="printfooter">
+			Von „<a href="http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&oldid=85794">http://www.mikrocontroller.net/wikisoftware/index.php?title=AVR_Bootloader_in_C_-_eine_einfache_Anleitung&amp;oldid=85794</a>“			</div>
+			<!-- /printfooter -->
+									<!-- catlinks -->
+			<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="http://www.mikrocontroller.net/articles/Spezial:Kategorien" title="Spezial:Kategorien">Kategorie</a>: <ul><li><a href="http://www.mikrocontroller.net/articles/Kategorie:AVR-Programmer_und_-Bootloader" title="Kategorie:AVR-Programmer und -Bootloader">AVR-Programmer und -Bootloader</a></li></ul></div></div>			<!-- /catlinks -->
+									<div class="visualClear"></div>
+			<!-- debughtml -->
+						<!-- /debughtml -->
+
+      <!-- start adsense -->
+            <!-- end adsense -->
+      
+      <div class="visualClear"></div>
+    </div>
+	</div>
+  </td>
+  <!-- google_ad_section_end -->
+      </tr>
+      </tbody></table>
+      <!--
+      <div class="visualClear"></div>
+      <div id="footer" style="clear:both">
+    <div id="f-poweredbyico"><a href="//www.mediawiki.org/"><img src="/wikisoftware/skins/common/images/poweredby_mediawiki_88x31.png" height="31" width="88" alt="Powered by MediaWiki" /></a></div>		<ul id="f-list">
+	  <li id="f-lastmod"> Diese Seite wurde zuletzt am 18. November 2014 um 16:06 Uhr geändert.</li>	  <li id="f-viewcount">Diese Seite wurde bisher 108.261 mal abgerufen.</li>	  	  	  <li id="f-about"><a href="/articles/Uc-wiki:%C3%9Cber_Uc-wiki" title="Uc-wiki:Über Uc-wiki">Über Uc-wiki</a></li>	  <li id="f-disclaimer"><a href="/articles/Uc-wiki:Impressum" title="Uc-wiki:Impressum">Impressum</a></li>	</ul>
+      </div>-->
+    </div>
+<div id="bottom">
+  <div id="impress">
+    <a href="mailto:webmaster@mikrocontroller.net?subject=Mikrocontroller.net">webmaster@mikrocontroller.net</a> – <a href="http://www.mikrocontroller.net/contact">Impressum</a> – <a href="http://www.mikrocontroller.net/user/conditions">Nutzungsbedingungen</a> – <a href="http://www.mikrocontroller.net/about/ads">Werbung auf Mikrocontroller.net</a>
+  </div>
+  <div id="powered">
+<!--    powered by Ruby on Rails -->
+  </div>
+ <a href="http://www.mikrocontroller.net/util/rb"><!-- nothing --></a>
+ <!-- <a href="http://www.mikrocontroller.net/hp/curlews.php">nothing to see here</a> -->
+</div>
+
+<script>/*<![CDATA[*/window.jQuery && jQuery.ready();/*]]>*/</script><script>if(window.mw){
+mw.loader.state({"site":"loading","user":"ready","user.groups":"ready"});
+}</script>
+<script>if(window.mw){
+mw.loader.load(["mediawiki.action.view.postEdit","mediawiki.user","mediawiki.hidpi","mediawiki.page.ready","mediawiki.searchSuggest"],null,true);
+}</script>
+<script src="./bootloader_in_c_files/load(4).php"></script>
+<script>if(window.mw){
+mw.config.set({"wgBackendResponseTime":84});
+}</script><iframe src="about:blank" width="0" height="0" style="visibility: hidden !important; display: none !important; opacity: 0 !important;"></iframe></div>
+  
+
+<div class="highslide-container" style="padding: 0px; border: none; margin: 0px; position: absolute; left: 0px; top: 0px; width: 100%; z-index: 1001; direction: ltr;"><a class="highslide-loading" title="Klick zum Abbrechen" href="javascript:;" style="position: absolute; top: -9999px; opacity: 0.75; z-index: 1;">Lade...</a><div style="display: none;"></div><table cellspacing="0" style="padding: 0px; border: none; margin: 0px; visibility: hidden; position: absolute; border-collapse: collapse; width: 0px;"><tbody style="padding: 0px; border: none; margin: 0px;"><tr style="padding: 0px; border: none; margin: 0px; height: auto;"><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) 0px 0px;"></td><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) 0px -40px;"></td><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) -20px 0px;"></td></tr><tr style="padding: 0px; border: none; margin: 0px; height: auto;"><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) 0px -80px;"></td><td class="drop-shadow highslide-outline" style="padding: 0px; border: none; margin: 0px; position: relative;"></td><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) -20px -80px;"></td></tr><tr style="padding: 0px; border: none; margin: 0px; height: auto;"><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) 0px -20px;"></td><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) 0px -60px;"></td><td style="padding: 0px; border: none; margin: 0px; line-height: 0; font-size: 0px; height: 20px; width: 20px; background: url(http://www.mikrocontroller.net/highslide/graphics/outlines/drop-shadow.png) -20px -20px;"></td></tr></tbody></table></div></body></html>
