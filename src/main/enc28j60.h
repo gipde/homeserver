@@ -16,14 +16,9 @@ typedef struct {
 } enc28j60_info_t;
 
 // API
-void enc28j60_init();
 void set_mac_address(uint8_t* addr);
 uint8_t get_eir();
 enc28j60_info_t* enc28j60_get_status();
-uint8_t write_packet(uint8_t* dst, uint16_t type, uint8_t* data,
-                     uint16_t len);
-int16_t read_packet(uint8_t* data);
-void handle_intr();
 void enc28j60_power_save(uint8_t sleep);
 
 // SPI Config

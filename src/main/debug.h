@@ -17,7 +17,10 @@
 
 #ifdef DEBUG
 
+void debug_c(unsigned char);
 int debug_printf (char const*, ...);
+#define error(M,...) debug_printf("0 %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
+#define warn(M,...) debug_printf("1 %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
 #define info(M,...) debug_printf("2 %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
 #define debug(M,...) debug_printf("3 %s:%d: " M "\n\r",__FILE__,__LINE__,##__VA_ARGS__)
 #define debugn(M,...) debug_printf("3 %s:%d: " M,__FILE__,__LINE__,##__VA_ARGS__)

@@ -217,6 +217,7 @@ void do_log(int devp)
 
     for (;;) { //endless
         int c = read(devp, &buf, 1);
+		//printf("char %c\n",buf);
 
         // maxline = 1024 chars
         if (buf == 0x0a || lineptr == 1024) {

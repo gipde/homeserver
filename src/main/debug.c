@@ -66,6 +66,11 @@ int debug_printf (char const* s, ...)
     return retval;
 }
 
+inline void debug_c(unsigned char str) {
+		uart_putc(str);
+		uart_putc(0x0a);
+}
+
 
 // dummy Impl -> Warning: it also produces asm code !
 void debug_default(char const* s, ...)

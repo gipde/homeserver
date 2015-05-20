@@ -27,8 +27,9 @@ extern "C" {
 #include "ds18x20lib.h"
 #include "delay.h"
 #include "debug.h"
-#include "enc28j60.h"
+#include "eth-driver.h"
 #include "hello-world.h"
+#include "nip.h"
 }
 
 
@@ -55,13 +56,20 @@ void write_test_packet()
 
 }
 
+inline void deb_c(uint8_t c)
+{
+	while ( !( UCSRA & (1<<UDRE)));
+	UDR = c;
+	while ( !( UCSRA & (1<<UDRE)));
+	UDR = 0x0a;
+}
 
 int main(void)
 {
+
     debug("Starting Programm..");
 
 //    hello_world_init();
-
 
     sei();
 
@@ -74,10 +82,14 @@ int main(void)
     GICR |= (1 << INTF2);
     MCUCSR &= ~(1 << ISC2); //activate on falling edge
 
-    enc28j60_init();
+	// Initialize ETH Hardware + IP-Stack
+	eth_init_drv();
+	ip_init();
+
 
 	debug("Entering Endless While");
-    while (1);
+    while (1) {	}
+
 
     /*
     for (int i = 0; i < 8192; i++) {
@@ -138,13 +150,8 @@ ISR(TIMER0_OVF_vect)
     if (!++c) {
         debug("--MARK--");
 
-        // check missed Interrupt
-        uint8_t eir = get_eir();
-
-        if (eir) {
-            debug("We missed some Interrupt: 0x%d", eir);
-            handle_intr();
-        }
+        // check missed Interrupts
+		eth_handle_intr();
 
     }
 
@@ -159,9 +166,8 @@ ISR(USART_RXC_vect)
         for (;;) { }
     } while (0);
 }
-/*
+
 ISR(INT2_vect)
 {
-    handle_intr();
+    eth_handle_intr();
 }
-*/

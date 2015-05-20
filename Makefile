@@ -19,7 +19,7 @@ FUSES = -U lfuse:w:0xcf:m -U hfuse:w:0xc0:m
 NAME = homeserver
 
 # explizit List objects and bootobjects here
-SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o 
+SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o nip.o
 
 
 # Achtung, die Bootstart Adresse ist häufig in Words angegeben
