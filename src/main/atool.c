@@ -60,10 +60,10 @@ void gen_prefix(char* buf, char* col, char* lev)
 /**
  * log Mesage to console and to file
  */
-void log_msg(const char* msg, FILE* f,...)
+void log_msg(const char* msg, FILE* f, ...)
 {
-	
-		//TODO: What is int ind?
+
+    //TODO: What is int ind?
 
     char prefix[36];
     int ind = 1;
@@ -90,21 +90,22 @@ void log_msg(const char* msg, FILE* f,...)
         gen_prefix(prefix, "", "INFO  ");
     }
 
-	const char* msg_ptr = msg + ind; // depends wether level is set or not
+    const char* msg_ptr = msg + ind; // depends wether level is set or not
 
-	printf("%s",prefix);
+    printf("%s", prefix);
 
-	va_list args;
-	va_start(args,f);
-	if(args!=NULL)
-		vprintf(msg_ptr,args);
-	else
-		printf("%s",msg_ptr);
+    va_list args;
+    va_start(args, f);
 
-	printf("\x1b[37;0m\n");
+    if (args != NULL)
+        vprintf(msg_ptr, args);
+    else
+        printf("%s", msg_ptr);
 
-	if (f !=NULL)
-	    fprintf(f, "%s %s \x1b[37;0m\n", prefix, msg_ptr);
+    printf("\x1b[37;0m\n");
+
+    if (f != NULL)
+        fprintf(f, "%s %s \x1b[37;0m\n", prefix, msg_ptr);
 }
 
 #define info(msg,...) log_msg(msg,NULL,##__VA_ARGS__)
@@ -112,7 +113,7 @@ void log_msg(const char* msg, FILE* f,...)
 #ifdef deb
 #define debug(msg,...) log_msg("3" msg,NULL,##__VA_ARGS__)
 #else
-#define debug(...) 
+#define debug(...)
 #endif
 
 /**
@@ -143,8 +144,8 @@ int open_port(char* dev)
 {
     int fd;
 
-    info("open Port %s...",dev);
-	
+    info("open Port %s...", dev);
+
 
     fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
 
@@ -217,7 +218,7 @@ void do_log(int devp)
 
     for (;;) { //endless
         int c = read(devp, &buf, 1);
-		//printf("char %c\n",buf);
+        //printf("char %c\n",buf);
 
         // maxline = 1024 chars
         if (buf == 0x0a || lineptr == 1024) {
@@ -297,17 +298,17 @@ int do_program(int devp)
     write_uart(devp, "x", 1);
 
     info("sleep");
-	// we have to sleep, that is ensured that the controller has resetet USART
-	// so that there is no trailing x in TX
+    // we have to sleep, that is ensured that the controller has resetet USART
+    // so that there is no trailing x in TX
 
-	// TODO: alles ziemlich ekelig, gute lösung gefragt, wie man das x in jeder situation wegbekommt
+    // TODO: alles ziemlich ekelig, gute lösung gefragt, wie man das x in jeder situation wegbekommt
     sleep(1);
     info("and go...");
 
-	info("Write magic ...");
+    info("Write magic ...");
     write_uart(devp, "BOOTLOADER_START", 16);
 
-	info("Write Pagecount %d ... ",pagescount);
+    info("Write Pagecount %d ... ", pagescount);
     write_uart(devp, (unsigned char*)&pagescount, 2);
 
     page_t* p = start;
@@ -317,15 +318,15 @@ int do_program(int devp)
 
         info("Write page %d ...", p->no);
         // page nr
-		debug("Write page no %d ..", p->no);
+        debug("Write page no %d ..", p->no);
         write_uart(devp, (unsigned char*)&p->no, 2);
 
         // page size
-		debug("Write page size %d ..",p->size);
+        debug("Write page size %d ..", p->size);
         write_uart(devp, (unsigned char*)&p->size, 2);
 
         // crc
-		debug("Write page crc %d ..",p->crc);
+        debug("Write page crc %d ..", p->crc);
         write_uart(devp, (unsigned char*)&p->crc, 2);
 
         // payload

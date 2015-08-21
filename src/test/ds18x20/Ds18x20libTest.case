@@ -3,9 +3,12 @@
 #include "Ds18x20libTest.h"
 #include <avr/interrupt.h>
 
+#define DEBUG
+
 extern "C" {
 #include "../../main/ds18x20lib.h"
 #include "../../main/delay.h"
+#include "../../main/debug.h"
 }
 
 CASE(Ds18x20LibTest, TestBase)
@@ -56,7 +59,7 @@ TEST(search_test)
     uint8_t romptr = 0;
 
     while (search_slaves(&ow, &sensor)) {
-        debugn("ROM: ");
+        debugc("ROM: ");
 
         for (int i = 0; i < 8; i++) {
             debugc("%02X ", sensor.rom[i]);
@@ -72,8 +75,7 @@ TEST(search_test)
         debugnl();
     }
 
-    char r[] =  {0x7e, 0x94, 0xd4, 0xbe, 0xba, 0xc8, 0x89, 0x45, 0x98, 0x6f, 0x1b, 0xdf, 0x72, 0xf7, 0x59, 0x96, 0xe4, 0x8, 0xa6, 0x48};
-    return cmpMock(r);
+    return cmpMock(23776);
 }
 
 TEST(readTemp)

@@ -2,10 +2,7 @@
 # * AVRSTUDIO (ASM Projects, ASM Includes, Upload)
 # * ARDUINO
 # * Macros for assertions / Testcases
-# * Bauen des Bootloaders
-# * Bootloader damit ich nur noch Seriell brauche
-# * Upload Application with Uart (wie macht der Arduino Bootloader das, das das Programm läuft, und immer ein Upload möglich ist)
-
+# * Coverage / Tests
 
 # Serial speed in Baud
 BAUD = 38400
@@ -19,8 +16,7 @@ FUSES = -U lfuse:w:0xcf:m -U hfuse:w:0xc0:m
 NAME = homeserver
 
 # explizit List objects and bootobjects here
-SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o nip.o
-
+SRC = $(NAME).o ds18x20lib.o debug.o enc28j60.o nip.o arp.o
 
 # Achtung, die Bootstart Adresse ist häufig in Words angegeben
 BOOTSRC = boot/bootloader.o 
@@ -28,11 +24,18 @@ BOOTSTART = 0x7000
 
 TRANSFER = atool
 
-# linkage allows multiple definitions for functions in test s -> first wins
-TESTOBJ = $(addprefix src/test/,TestBase.o mock.o) src/main/sha1-asm.o
-TEST1_OBJ = $(addprefix ds18x20/,Ds18x20libTest.o ds18x20lib_hw.o)
+# Base Objects for every Test
+TESTOBJ = src/main/debug.o $(addprefix src/test/,TestBase.o mock.o) 
 
-ALLTESTS = TEST1 
+# linkage allows multiple definitions for functions in test s -> first wins
+
+# TEST1
+TEST1_OBJ = $(addprefix src/test/ds18x20/,Ds18x20libTest.o ds18x20lib_hw.o) src/main/ds18x20lib.o
+
+# TEST2
+TEST2_OBJ = $(addprefix src/test/nip/,NipTest.o) src/main/arp.o 
+
+ALLTESTS = TEST1 TEST2
 
 # If you do Debugging its better to run with -O0
 OPTIMIZE=-Os
@@ -181,13 +184,14 @@ testenv:
 	$(eval TESTBUILD=-D_TESTBUILD_)
 	
 define TEST_template 
-CASEOBJ=$(addprefix src/test/,$($(1)_OBJ))
+CASEOBJ=$($(1)_OBJ)
 TESTCLEAN += $$(CASEOBJ)
-$(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) $(OBJ)
+$(BUILD)/$(1).elf: $$(CASEOBJ) $(TESTOBJ) 
 	@echo Building for Test: $(1).elf ... 
-	$(CC) -o $(BUILD)/$(1).elf $$^ $(TESTOBJ) $(OBJ) $(LDFLAGS)
+	@echo CASEOBJ $$(TESTOBJ)
+	$(CC) -o $(BUILD)/$(1).elf $$^ $(LDFLAGS)
 
-$(1): testenv $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
+$(1): clean testenv $(BUILD)/$(1).elf $(BUILD)/$(1).lss 
 	@echo .
 	@$(SIZE) -C $(BUILD)/$(1).elf --mcu=${MCU}
 	@echo .

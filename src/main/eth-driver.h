@@ -16,7 +16,7 @@ uint8_t write_packet(uint8_t* dst, uint16_t type, uint8_t* data,
 /**
  * read a Packet from wire
  */
-int16_t read_packet(uint8_t* data);
+int16_t read_packet(uint8_t* data, uint16_t buflen);
 
 
 /**
@@ -26,6 +26,6 @@ void eth_handle_intr();
 
 /**
  * register a listener, who handles packets signalized via irq
- */ 
+ */
 void eth_register_listener(void* listener);
 

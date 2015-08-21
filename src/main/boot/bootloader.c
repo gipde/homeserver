@@ -49,7 +49,7 @@ int _log(const char* s, ...)
     va_start(args, s);
 
     retval = vprintf(s, args);
-	printf("\n");
+    printf("\n");
     va_end(args);
     return retval;
 }
@@ -74,7 +74,7 @@ void usart_init()
     // BAUD RATE
     UBRRH = UBRRH_VALUE;
     UBRRL = UBRRL_VALUE;
-	debug("USART inited :)");
+    debug("USART inited :)");
 }
 
 /**
@@ -131,17 +131,18 @@ int8_t read_uart( uint8_t* buf, uint8_t len)
 
         if (timeout < 1) {
             retval = TIMEOUT;
-            debug("returning timeout exeeds %d -> %d", timeout,retval);
+            debug("returning timeout exeeds %d -> %d", timeout, retval);
             break;
         }
     }
 
-	// check length
+    // check length
     if (retval == OK) {
-		debug("check length %d-%d (%d)",ptr,len,retval);
+        debug("check length %d-%d (%d)", ptr, len, retval);
+
         if ( ptr != len) {
             retval = ERROR;
-		}
+        }
     }
 
     sei();
@@ -172,24 +173,27 @@ int8_t read_uart( uint8_t* buf, uint8_t len)
 int8_t check_magic( uint8_t* bytes, uint8_t len)
 {
     uint8_t buf[len];
-	for(int i=0;i<len;i++)
-			buf[i]=0x0;
 
-	// read the magic string
+    for (int i = 0; i < len; i++)
+        buf[i] = 0x0;
+
+    // read the magic string
     int8_t retval = read_uart(buf, len);
 
 
     if (retval > 0) {
 
-		debug("buf[0]=0x%x",buf[0]);
-		if (buf[0]=='x') {
-			// prefixed with x - we have to read one more
-			memcpy(buf,buf+1,len-1);
-			retval=read_uart(buf+len-1,1);
-		}
+        debug("buf[0]=0x%x", buf[0]);
 
-		// compare		
-		debug("%d bytes : <<%16s>> <> <<%16s>>",len,buf,bytes);
+        if (buf[0] == 'x') {
+            // prefixed with x - we have to read one more
+            memcpy(buf, buf + 1, len - 1);
+            retval = read_uart(buf + len - 1, 1);
+        }
+
+        // compare
+        debug("%d bytes : <<%16s>> <> <<%16s>>", len, buf, bytes);
+
         if (strncmp((char*)buf, (char*)bytes, len) != 0)
             retval = ERROR;
     }
@@ -278,7 +282,7 @@ int8_t receive_flash()
     check(check_magic((uint8_t*)magic, 16), ERR "No Begin found")
     check(read_uart((uint8_t*)&pages_all, 2),
           ERR "No Page count")
-	_log(INFO "Pages: %d",pages_all);
+    _log(INFO "Pages: %d", pages_all);
 
     while (page_count < pages_all) {
 
@@ -288,14 +292,14 @@ int8_t receive_flash()
 
         // receive page
         check(read_uart((uint8_t*)&page_num, 2), ERR "No Page num");
-		debug( "Page num: %d",page_num);
+        debug( "Page num: %d", page_num);
 
         check(read_uart((uint8_t*)&page_size, 2),
               ERR "No Page size for Page %d", page_num);
-		debug( "Page size: %d", page_size);
+        debug( "Page size: %d", page_size);
 
         check(read_uart((uint8_t*)&crc16, 2), ERR "Incomplete SHA");
-		debug( "Page CRC16: %d",crc16);
+        debug( "Page CRC16: %d", crc16);
 
         check(read_uart(page, page_size), ERR "Incomplete Page");
 
@@ -323,8 +327,9 @@ int main(void)
     _log(INFO "BOOTLOADER");
 
     int8_t ret;
+
     while ((ret = receive_flash()) == ERROR) {
-		usart_init();
+        usart_init();
         _log(ERR "Error during receive, starting again ...");
     }
 

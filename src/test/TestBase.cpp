@@ -20,7 +20,7 @@ static void delim()
 }
 int TestBase::run(int num, ...)
 {
-    debug("Running Tests");
+    debug("Running Tests ...");
     this->beforeClass();
 
     va_list ap;
@@ -33,6 +33,8 @@ int TestBase::run(int num, ...)
     int test_failed = 0;
 
     for (int i = 0; i < num; i++) {
+        // TODO: insert Testname
+        debug("Running Test %d ...", i);
         this->setup();
 
         // call test

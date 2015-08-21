@@ -58,10 +58,13 @@ void write_test_packet()
 
 inline void deb_c(uint8_t c)
 {
-	while ( !( UCSRA & (1<<UDRE)));
-	UDR = c;
-	while ( !( UCSRA & (1<<UDRE)));
-	UDR = 0x0a;
+    while ( !( UCSRA & (1 << UDRE)));
+
+    UDR = c;
+
+    while ( !( UCSRA & (1 << UDRE)));
+
+    UDR = 0x0a;
 }
 
 int main(void)
@@ -82,13 +85,14 @@ int main(void)
     GICR |= (1 << INTF2);
     MCUCSR &= ~(1 << ISC2); //activate on falling edge
 
-	// Initialize ETH Hardware + IP-Stack
-	eth_init_drv();
-	ip_init();
+    // Initialize ETH Hardware + IP-Stack
+    eth_init_drv();
+    ip_init();
 
 
-	debug("Entering Endless While");
-    while (1) {	}
+    debug("Entering Endless While");
+
+    while (1) { }
 
 
     /*
@@ -151,7 +155,7 @@ ISR(TIMER0_OVF_vect)
         debug("--MARK--");
 
         // check missed Interrupts
-		eth_handle_intr();
+        eth_handle_intr();
 
     }
 
@@ -160,7 +164,7 @@ ISR(TIMER0_OVF_vect)
 ISR(USART_RXC_vect)
 {
     do {
-		debug("Entered USART_RXC");
+        debug("Entered USART_RXC");
         wdt_enable(WDTO_15MS);
 
         for (;;) { }

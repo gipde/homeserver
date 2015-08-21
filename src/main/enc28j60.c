@@ -22,7 +22,7 @@
 //      Powersave geht nicht
 //      WAKEONLAN
 
-// * Partielles lesen eines Paketes 
+// * Partielles lesen eines Paketes
 // * Partielles schreiben eines Paketes
 
 // LOW Level SPI cmds
@@ -42,7 +42,7 @@ uint8_t spi_read()
 }
 
 
-// * Partielles lesen eines Paketes 
+// * Partielles lesen eines Paketes
 // * Partielles schreiben eines Paketes
 void cs_low()
 {
@@ -201,18 +201,18 @@ static enc28j60_info_t controller_state;
 static uint16_t next_packet = RX_START;
 //static uint8_t last_read_partial;
 
-static uint8_t inited=FALSE;
+static uint8_t inited = FALSE;
 
 static void check_init()
 {
-		if (!inited) {
-				error("Driver not initialized");
-		}
+    if (!inited) {
+        error("Driver not initialized");
+    }
 }
 
 uint8_t get_eir()
 {
-	check_init();
+    check_init();
 
     uint8_t retval = read_control_register(EIR);
 
@@ -248,7 +248,7 @@ void print_phy()
 
 enc28j60_info_t* enc28j60_get_status()
 {
-	check_init();
+    check_init();
 
     uint8_t estat, econ1, econ2;
     uint16_t phstat2;
@@ -296,7 +296,7 @@ enc28j60_info_t* enc28j60_get_status()
 
 void set_mac_address(uint8_t* addr)
 {
-	check_init();
+    check_init();
 
     debugn("MAC Address: ");
 
@@ -313,7 +313,7 @@ void set_mac_address(uint8_t* addr)
 uint8_t write_packet(uint8_t* dst, uint16_t type, uint8_t* data,
                      uint16_t len)
 {
-	check_init();
+    check_init();
 
     // Packet Start / Writeptr Start
     write_word_register(EWRPTL, EWRPTH, TX_START);
@@ -364,15 +364,13 @@ uint8_t write_packet(uint8_t* dst, uint16_t type, uint8_t* data,
 }
 
 /**
- * wir lesen soviel von einem paket in den buffer, bis dieser voll
- * ist. wenn er voll ist, geben wir die gelesenen bytes zurück, daran erkennt
- * der caller, dass noch etwas zu lesen ist.
+ * an der stelle lesen wir den paket kopf
+ * return:
+ * > 0   Anzahl der zu lesenden Bytes
+ * 0     Fehler beim Lesen
  */
-
-/**
- * an der stelle lesen wir den paket kopf 
- */
-static uint16_t read_packet_hdr() {
+static uint16_t read_packet_hdr()
+{
 
     //check if packet received
     if (!(read_control_register(EIR) & (1 << PKTIF))) {
@@ -393,61 +391,75 @@ static uint16_t read_packet_hdr() {
     read_buffer_memory(rsv, 4);
     debug("rsv: 0x%x, 0x%x, 0x%x, 0x%x", rsv[0], rsv[1], rsv[2], rsv[3]);
 
-    uint8_t err = rsv[2] & 0x30;
+    uint8_t err = rsv[2] & 0x70;
 
     if (err) {
         debug("ERR RD PKT: %d", err);
-        return err * -1;
+        bitfield_set(ECON2, (1 << PKTDEC)); //notify packet read
+        return 0;
     }
 
     uint16_t len = rsv[0] | (rsv[1] << 8);
     len -= 4; // CRC is not relevant
 
     debug("pkt has %d bytes", len);
-	
-	return len;
+
+    return len;
 }
 
-/*
- * liest ein Paket, oder teile in den Buffer
- */
 
 static uint8_t unread_packet_size; // bytes to read for actual packet
-int16_t read_packet(uint8_t* data)
+/**
+ * liest ein Paket, oder teile in den Buffer
+ * returns:
+ * >0 Anzahl der Bytes des Paketes
+ * 0 Fehler
+ * <0 Puffer voll, Bytes noch zu lesen * -1
+ *
+ * wir lesen soviel von einem paket in den buffer, bis dieser voll
+ * ist. wenn er voll ist, geben wir die noch zu lesenen bytes *-1 zurück, daran erkennt
+ * der caller, dass noch etwas zu lesen ist.
+ */
+
+int16_t read_packet(uint8_t* data, uint16_t buflen)
 {
-	check_init();
+    check_init();
 
-	uint16_t len;
-	if (!unread_packet_size) {
-		len=read_packet_hdr();
+    uint16_t len;
 
-		if (len<=0)			// Error occured
-			return len;
+    if (!unread_packet_size) {
+        len = read_packet_hdr();
+        debug("rd pkg hdr:  %d bytes", len);
 
-	    if (len > MAX_FRAMELEN) {
-    	    debug("len %d > %d maxlen", len, MAX_FRAMELEN);
-        	len = MAX_FRAMELEN;
-    	}
+        if (len == 0)       // Error occured
+            return len;
 
 
-	} else {
-		len=unread_packet_size;
-	}
 
-	// read next part
+    } else {
+        len = unread_packet_size;
+    }
+
+    // read next part
     read_buffer_memory(data, len);
 
-	if (len > sizeof(data)) {
-			debug("pkt buf to small");
-			unread_packet_size=len-sizeof(data);
-	} else {
-			unread_packet_size=0;
-		    // Border to maxium write to
-		    write_word_register(ERXRDPTL, ERXRDPTH, next_packet);
+    if (len > MAX_FRAMELEN) {
+        debug("len %d > %d maxlen", len, MAX_FRAMELEN);
+        len = MAX_FRAMELEN;
+    }
 
-		    controller_state.rx_bytes += 1;
-		    bitfield_set(ECON2, (1 << PKTDEC));
-	}
+    if (len > buflen) {
+        debug("pkt buf to small %d <> %d", len, buflen);
+        unread_packet_size = -len + buflen;
+        len = buflen;
+    } else {
+        unread_packet_size = 0;
+        // Border to maxium write to
+        write_word_register(ERXRDPTL, ERXRDPTH, next_packet);
+        bitfield_set(ECON2, (1 << PKTDEC)); // info paket read
+    }
+
+    controller_state.rx_bytes += len;
 
     return len;
 }
@@ -455,7 +467,7 @@ int16_t read_packet(uint8_t* data)
 
 void enc28j60_power_save(uint8_t sleep)
 {
-	check_init();
+    check_init();
 
     if (sleep) {
         debug("Power down ...");
@@ -481,7 +493,7 @@ void eth_init_drv()
 {
     debug("Initiating enc28j60...");
 
-	inited=TRUE;
+    inited = TRUE;
 
     init_spi();
 
@@ -553,18 +565,18 @@ void eth_init_drv()
 
 }
 
-static void (*paket_hdlr)(void)=0x0;
+static void (*paket_hdlr)(void) = 0x0;
 void eth_register_listener(void* listener)
 {
-	paket_hdlr=listener;
+    paket_hdlr = listener;
 }
 
 // IRQ Handler für Interrupts vom controller (INTR2)
-// 
+//
 
 void eth_handle_intr()
 {
-	check_init();
+    check_init();
 
     uint8_t eir = get_eir();
 
@@ -577,15 +589,16 @@ void eth_handle_intr()
     bitfield_clear(EIE, INTIE);
 
 
-	// Ein Paket ist wg. Interrupt zu lesen -> passt hier die Struktur zum IPStack
+    // Ein Paket ist wg. Interrupt zu lesen -> passt hier die Struktur zum IPStack
     if (eir & (1 << PKTIF)) {
 
-	// handle alle packets in Buffer
-	uint8_t c;
-	do {
-		paket_hdlr();
-		c = read_control_register(EPKTCNT);
-	} while (c);
+        // handle alle packets in Buffer
+        uint8_t c;
+
+        do {
+            paket_hdlr();
+            c = read_control_register(EPKTCNT);
+        } while (c);
 
 
     } else if (eir & (1 << DMAIF)) {

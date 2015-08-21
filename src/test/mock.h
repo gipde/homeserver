@@ -23,7 +23,7 @@ extern "C" {
 #endif
 void initMock();
 void event(event_t*);
-int cmpMock(char*);
+int cmpMock(uint16_t);
 #ifdef __cplusplus
 }
 #endif

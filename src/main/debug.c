@@ -66,9 +66,10 @@ int debug_printf (char const* s, ...)
     return retval;
 }
 
-inline void debug_c(unsigned char str) {
-		uart_putc(str);
-		uart_putc(0x0a);
+inline void debug_c(unsigned char str)
+{
+    uart_putc(str);
+    uart_putc(0x0a);
 }
 
 
